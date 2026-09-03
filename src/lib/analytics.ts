@@ -7,8 +7,17 @@
  * veio o visitante e o tipo de dispositivo.
  */
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+/**
+ * Chaves públicas do projeto. Ficam como padrão para que qualquer build
+ * funcione sem configuração extra; as variáveis de ambiente têm prioridade.
+ * Não é segredo: a chave publishable é embutida no bundle e só permite INSERT
+ * em public.link_clicks.
+ */
+const URL_PADRAO = 'https://xiskevunqbvmoclygppc.supabase.co'
+const CHAVE_PADRAO = 'sb_publishable_aDaa3WVZP7siuPw8IbK_Wg_Y68x-MHH'
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || URL_PADRAO
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || CHAVE_PADRAO
 
 type Dispositivo = 'mobile' | 'tablet' | 'desktop'
 
