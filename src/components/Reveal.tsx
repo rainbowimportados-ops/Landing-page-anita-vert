@@ -2,14 +2,14 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 type Props = {
   children: ReactNode
-  /** Atraso em ms, para escalonar itens de uma mesma grade. */
+  /** Atraso em ms. Use passos de ~45ms para escalonar itens de uma grade (§7). */
   delay?: number
   className?: string
 }
 
 /**
  * Revela o conteúdo quando ele entra na viewport.
- * Respeita `prefers-reduced-motion`: nesse caso aparece já visível.
+ * Respeita `prefers-reduced-motion`: nesse caso aparece já visível, sem atraso.
  */
 export function Reveal({ children, delay = 0, className = '' }: Props) {
   const ref = useRef<HTMLDivElement>(null)

@@ -3,16 +3,17 @@ import { clinica } from '../config/site'
 import { BotaoWhatsApp } from './CTA'
 
 const navegacao = [
-  { href: '#tratamentos', rotulo: 'Tratamentos' },
-  { href: '#como-funciona', rotulo: 'Como funciona' },
-  { href: '#unidades', rotulo: 'Unidades' },
-  { href: '#dentistas', rotulo: 'Para dentistas' },
-  { href: '#duvidas', rotulo: 'Dúvidas' },
+  { id: 'tratamentos', rotulo: 'Tratamentos' },
+  { id: 'como-funciona', rotulo: 'Como funciona' },
+  { id: 'unidades', rotulo: 'Unidades' },
+  { id: 'dentistas', rotulo: 'Para dentistas' },
+  { id: 'duvidas', rotulo: 'Dúvidas' },
 ]
 
 export function Header() {
   const [rolou, setRolou] = useState(false)
   const [menuAberto, setMenuAberto] = useState(false)
+  const [secaoAtiva, setSecaoAtiva] = useState<string | null>(null)
 
   useEffect(() => {
     const aoRolar = () => setRolou(window.scrollY > 24)
@@ -21,42 +22,75 @@ export function Header() {
     return () => window.removeEventListener('scroll', aoRolar)
   }, [])
 
+  /* §9 nav-state-active: o item da seção visível fica destacado. */
+  useEffect(() => {
+    const secoes = navegacao
+      .map((item) => document.getElementById(item.id))
+      .filter((elemento): elemento is HTMLElement => elemento !== null)
+
+    if (secoes.length === 0 || typeof IntersectionObserver === 'undefined') return
+
+    const observador = new IntersectionObserver(
+      (entradas) => {
+        const visiveis = entradas
+          .filter((entrada) => entrada.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+
+        if (visiveis[0]) setSecaoAtiva(visiveis[0].target.id)
+      },
+      { rootMargin: '-45% 0px -50% 0px' },
+    )
+
+    secoes.forEach((secao) => observador.observe(secao))
+    return () => observador.disconnect()
+  }, [])
+
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        rolou || menuAberto
-          ? 'border-b border-forest-100 bg-sand-50/90 backdrop-blur'
-          : 'border-b border-transparent'
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-padrao ease-saida ${
+        rolou || menuAberto ? 'border-b border-borda bg-fundo/90 backdrop-blur' : 'border-b border-transparent'
       }`}
     >
       <div className="container-vert flex h-16 items-center justify-between gap-4">
-        <a href="#topo" className="flex items-center gap-2" aria-label={`${clinica.nome} — início`}>
+        <a
+          href="#topo"
+          className="-ml-1 inline-flex min-h-[44px] items-center gap-2 rounded-lg px-1"
+          aria-label={`${clinica.nome} — início`}
+        >
           <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden="true">
-            <rect width="32" height="32" rx="8" className="fill-forest-800" />
+            <rect width="32" height="32" rx="8" fill="var(--cor-superficie-inversa)" />
             <path
               d="M9 11 L16 24 L23 11"
               fill="none"
-              className="stroke-forest-100"
+              stroke="var(--cor-marca-tenue)"
               strokeWidth="3.4"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           </svg>
-          <span className="font-display text-lg tracking-tight text-forest-800">
-            Instituto <span className="text-forest-500">Vert</span>
+          <span className="font-display text-lg tracking-tight text-conteudo">
+            Instituto <span className="text-marca">Vert</span>
           </span>
         </a>
 
-        <nav className="hidden items-center gap-7 lg:flex" aria-label="Seções da página">
-          {navegacao.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="text-sm text-forest-700 transition-colors hover:text-forest-900"
-            >
-              {item.rotulo}
-            </a>
-          ))}
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Seções da página">
+          {navegacao.map((item) => {
+            const ativo = secaoAtiva === item.id
+            return (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                aria-current={ativo ? 'true' : undefined}
+                className={`rounded-full px-3 py-2 text-sm transition-colors duration-rapido ${
+                  ativo
+                    ? 'bg-marca-tenue font-medium text-conteudo'
+                    : 'text-conteudo-suave hover-fino:hover:text-conteudo'
+                }`}
+              >
+                {item.rotulo}
+              </a>
+            )
+          })}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -64,7 +98,7 @@ export function Header() {
             rastreio="header_agendar"
             numero={clinica.whatsappComercial}
             mensagem="Olá! Vim pelo site e gostaria de agendar uma avaliação."
-            className="hidden px-5 py-2.5 sm:inline-flex"
+            className="hidden px-5 sm:inline-flex"
           >
             Agendar avaliação
           </BotaoWhatsApp>
@@ -75,7 +109,7 @@ export function Header() {
             aria-expanded={menuAberto}
             aria-controls="menu-mobile"
             aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
-            className="rounded-full border border-forest-200 p-2 text-forest-800 lg:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-borda-forte text-conteudo transition duration-rapido active:scale-95 lg:hidden"
           >
             <svg
               viewBox="0 0 24 24"
@@ -95,16 +129,19 @@ export function Header() {
       {menuAberto && (
         <nav
           id="menu-mobile"
-          className="border-t border-forest-100 bg-sand-50 lg:hidden"
+          className="border-t border-borda bg-fundo lg:hidden"
           aria-label="Seções da página"
         >
-          <div className="container-vert flex flex-col py-2">
+          <div className="container-vert flex flex-col py-1">
             {navegacao.map((item) => (
               <a
-                key={item.href}
-                href={item.href}
+                key={item.id}
+                href={`#${item.id}`}
                 onClick={() => setMenuAberto(false)}
-                className="border-b border-forest-100/70 py-3 text-sm text-forest-800 last:border-b-0"
+                aria-current={secaoAtiva === item.id ? 'true' : undefined}
+                className={`flex min-h-[48px] items-center border-b border-borda/70 text-sm last:border-b-0 ${
+                  secaoAtiva === item.id ? 'font-medium text-conteudo' : 'text-conteudo-suave'
+                }`}
               >
                 {item.rotulo}
               </a>

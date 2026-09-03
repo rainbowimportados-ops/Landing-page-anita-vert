@@ -1,31 +1,36 @@
 import { clinica, unidades } from '../config/site'
-import { BotaoWhatsApp } from './CTA'
+import { BotaoAncora, BotaoWhatsApp } from './CTA'
 import { IconSeta } from './Icon'
+
+const promessas = [
+  'Exame clínico e registro fotográfico do seu caso',
+  'Explicação das opções reais, com prós e limites de cada uma',
+  'Plano de tratamento por escrito, com etapas e valores',
+]
 
 export function Hero() {
   return (
-    <section id="topo" className="relative overflow-hidden bg-forest-800 pt-16 text-sand-50">
-      {/* Halo suave atrás do texto, puramente decorativo. */}
+    <section id="topo" className="relative overflow-hidden bg-superficie-inversa pt-16 text-conteudo-inverso">
+      {/* Halos decorativos: dão profundidade sem pedir uma foto de banco de imagem. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-32 -top-24 h-[28rem] w-[28rem] rounded-full bg-forest-600/40 blur-3xl"
+        className="pointer-events-none absolute -right-32 -top-24 h-[28rem] w-[28rem] rounded-full bg-marca/50 blur-3xl"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-40 -left-24 h-[24rem] w-[24rem] rounded-full bg-forest-700/60 blur-3xl"
+        className="pointer-events-none absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-superficie-inversa-suave/70 blur-3xl"
       />
 
-      <div className="container-vert relative grid gap-12 py-20 sm:py-24 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-28">
+      <div className="container-vert relative grid gap-12 py-16 sm:py-24 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-32">
         <div className="animate-fade-up">
-          <p className="olho text-forest-200">{clinica.tagline}</p>
+          <p className="olho text-conteudo-inverso-tenue">{clinica.tagline}</p>
 
-          <h1 className="mt-4 font-display text-4xl leading-[1.08] sm:text-5xl lg:text-6xl">
-            Um sorriso planejado
-            <br />
-            <span className="text-forest-200">para o seu rosto.</span>
+          <h1 className="mt-4 font-display text-display-lg">
+            Um sorriso planejado{' '}
+            <span className="block text-realce">para o seu rosto.</span>
           </h1>
 
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-forest-100/90 sm:text-lg">
+          <p className="mt-6 max-w-texto text-base leading-relaxed text-conteudo-inverso-suave sm:text-lg">
             {clinica.descricao}
           </p>
 
@@ -40,30 +45,23 @@ export function Hero() {
               Agendar avaliação
             </BotaoWhatsApp>
 
-            <a
-              href="#tratamentos"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-forest-500 px-6 py-3 text-sm font-semibold text-sand-50 transition-colors hover:border-forest-300 hover:bg-forest-700 sm:w-auto"
-            >
+            <BotaoAncora href="#tratamentos" className="w-full sm:w-auto">
               Ver tratamentos
               <IconSeta />
-            </a>
+            </BotaoAncora>
           </div>
 
-          <p className="mt-6 text-sm text-forest-200/80">
+          <p className="mt-6 text-sm text-conteudo-inverso-tenue">
             Atendimento em {unidades.map((unidade) => unidade.cidade.split(' /')[0]).join(' e ')}.
           </p>
         </div>
 
-        {/* Cartão de credibilidade — substitui o "banco de imagem" por informação útil. */}
-        <div className="animate-fade-up rounded-2xl border border-forest-600/60 bg-forest-700/40 p-6 backdrop-blur-sm sm:p-8 [animation-delay:120ms]">
-          <p className="olho text-forest-200">O que esperar da avaliação</p>
+        {/* Em vez de uma imagem genérica, o que o visitante ganha ao agendar. */}
+        <div className="animate-fade-up rounded-painel border border-borda-inversa bg-superficie-inversa-suave/50 p-6 backdrop-blur-sm [animation-delay:120ms] sm:p-8">
+          <p className="olho text-conteudo-inverso-tenue">O que esperar da avaliação</p>
           <ul className="mt-5 space-y-4">
-            {[
-              'Exame clínico e registro fotográfico do seu caso',
-              'Explicação das opções reais, com prós e limites de cada uma',
-              'Plano de tratamento por escrito, com etapas e valores',
-            ].map((item) => (
-              <li key={item} className="flex gap-3 text-sm leading-relaxed text-forest-50">
+            {promessas.map((item) => (
+              <li key={item} className="flex gap-3 text-sm leading-relaxed text-conteudo-inverso">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -71,7 +69,7 @@ export function Hero() {
                   strokeWidth={2}
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="mt-0.5 h-5 w-5 shrink-0 text-forest-300"
+                  className="mt-0.5 h-5 w-5 shrink-0 text-realce"
                   aria-hidden="true"
                 >
                   <path d="M20 6L9 17l-5-5" />

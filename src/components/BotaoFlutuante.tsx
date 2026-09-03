@@ -5,7 +5,10 @@ import { IconWhatsApp } from './Icon'
 
 const MENSAGEM = 'Olá! Vim pelo site e gostaria de agendar uma avaliação.'
 
-/** Atalho fixo para o WhatsApp, exibido depois que o visitante rola a dobra. */
+/**
+ * Atalho fixo para o WhatsApp, exibido depois que o visitante rola a dobra.
+ * Fica acima da safe area para não colidir com a barra de gestos (§5).
+ */
 export function BotaoFlutuante() {
   const [visivel, setVisivel] = useState(false)
 
@@ -22,13 +25,15 @@ export function BotaoFlutuante() {
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => registrarClique('flutuante_whatsapp')}
-      aria-label="Falar no WhatsApp"
-      className={`fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-forest-700 px-5 py-3.5 text-sm font-semibold text-sand-50 shadow-lg shadow-forest-900/25 transition-all duration-300 hover:bg-forest-800 ${
+      aria-hidden={!visivel}
+      tabIndex={visivel ? undefined : -1}
+      className={`fixed right-5 z-40 inline-flex min-h-[52px] items-center gap-2 rounded-full bg-marca-forte px-5 py-3.5 text-sm font-semibold text-conteudo-inverso shadow-3 transition duration-padrao ease-saida active:scale-95 hover-fino:hover:bg-conteudo ${
         visivel ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'
       }`}
+      style={{ bottom: 'calc(1.25rem + env(safe-area-inset-bottom))' }}
     >
       <IconWhatsApp />
-      <span className="hidden sm:inline">Falar no WhatsApp</span>
+      Falar no WhatsApp
     </a>
   )
 }

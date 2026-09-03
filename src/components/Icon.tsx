@@ -97,3 +97,41 @@ export function IconRelogio({ className = 'h-5 w-5' }: { className?: string }) {
     </svg>
   )
 }
+
+export function IconPrancheta({ className = 'h-5 w-5' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M9 4h6v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V4z" />
+      <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+      <path d="M9 12h6M9 16h4" />
+    </svg>
+  )
+}
+
+export function IconEquipe({ className = 'h-5 w-5' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="9" cy="8" r="3.2" />
+      <path d="M3 20a6 6 0 0112 0" />
+      <path d="M16.5 5.6a3.2 3.2 0 010 4.8M17.5 14.4A6 6 0 0121 20" />
+    </svg>
+  )
+}

@@ -2,15 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Tokens em três camadas: primitivas (a paleta crua, no tailwind.config.js),
+ * semânticas (o que a cor significa, abaixo) e de componente (nas classes).
+ * Os componentes usam só as semânticas — trocar a marca é mexer aqui.
+ */
 @layer base {
   :root {
     color-scheme: light;
+
+    /* Superfícies, do fundo da página para a frente */
+    --cor-fundo: #FBF9F5;
+    --cor-superficie: #FFFFFF;
+    --cor-superficie-suave: #F1F6F2;
+    --cor-superficie-inversa: #163A2C;
+    --cor-superficie-inversa-suave: #1F4C39;
+    --cor-superficie-rodape: #0E2820;
+
+    /* Conteúdo sobre superfícies claras (contraste verificado ≥ 4.5:1) */
+    --cor-conteudo: #163A2C;
+    --cor-conteudo-suave: #2F5245;
+    --cor-conteudo-tenue: #47695C;
+
+    /* Conteúdo sobre superfícies escuras */
+    --cor-conteudo-inverso: #FBF9F5;
+    --cor-conteudo-inverso-suave: #D3E4D8;
+    --cor-conteudo-inverso-tenue: #A9C6B4;
+
+    /* Marca e ações */
+    --cor-marca: #2A6148;
+    --cor-marca-forte: #1F4C39;
+    --cor-marca-tenue: #DDEBE1;
+    --cor-realce: #8FBBA0; /* só sobre superfícies escuras */
+    --cor-realce-escuro: #4E8A6B; /* o par do realce, para superfícies claras */
+
+    /* Traços */
+    --cor-borda: #DDEBE1;
+    --cor-borda-forte: #BBD7C4;
+    --cor-borda-inversa: rgb(255 255 255 / 0.14);
+
+    /* Elevação: três degraus, nada além disso */
+    --sombra-1: 0 1px 2px rgb(14 40 32 / 0.04);
+    --sombra-2: 0 4px 16px -4px rgb(14 40 32 / 0.10);
+    --sombra-3: 0 16px 40px -12px rgb(14 40 32 / 0.18);
+
+    /* Movimento: uma única cadência para a página inteira */
+    --tempo-rapido: 160ms;
+    --tempo-padrao: 240ms;
+    --tempo-entrada: 420ms;
+    --curva-saida: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
 
+  /* §7 reduced-motion: nada se move para quem pediu para não mover. */
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
@@ -22,11 +70,12 @@
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 
   body {
-    @apply bg-sand-50 font-sans text-forest-900 antialiased;
+    @apply bg-fundo font-sans text-conteudo antialiased;
   }
 
   /* Compensa o cabeçalho fixo ao pular por âncora. */
@@ -35,7 +84,7 @@
   }
 
   :focus-visible {
-    @apply outline-none ring-2 ring-forest-500 ring-offset-2 ring-offset-sand-50;
+    @apply outline-none ring-2 ring-marca ring-offset-2 ring-offset-fundo;
   }
 }
 
@@ -44,11 +93,30 @@
     @apply mx-auto w-full max-w-content px-5 sm:px-8;
   }
 
+  /* Ritmo vertical único: todas as seções respiram igual. */
+  .secao {
+    @apply py-16 sm:py-20 lg:py-28;
+  }
+
   .titulo-secao {
-    @apply font-display text-3xl leading-tight text-forest-800 sm:text-4xl;
+    @apply font-display text-display-sm text-conteudo;
   }
 
   .olho {
-    @apply text-xs font-semibold uppercase tracking-[0.18em] text-forest-500;
+    @apply text-xs font-semibold uppercase tracking-[0.18em] text-marca;
+  }
+
+  .lead {
+    @apply text-base leading-relaxed text-conteudo-suave;
+  }
+
+  /* Alvo de toque de 44px mesmo quando o desenho pede algo menor (§2). */
+  .alvo-toque {
+    @apply relative;
+  }
+
+  .alvo-toque::after {
+    content: '';
+    @apply absolute left-1/2 top-1/2 h-11 min-h-full w-11 min-w-full -translate-x-1/2 -translate-y-1/2;
   }
 }
