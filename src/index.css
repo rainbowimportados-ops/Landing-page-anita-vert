@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    @apply bg-sand-50 font-sans text-forest-900 antialiased;
+  }
+
+  /* Compensa o cabeçalho fixo ao pular por âncora. */
+  section[id] {
+    scroll-margin-top: 5rem;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-forest-500 ring-offset-2 ring-offset-sand-50;
+  }
+}
+
+@layer components {
+  .container-vert {
+    @apply mx-auto w-full max-w-content px-5 sm:px-8;
+  }
+
+  .titulo-secao {
+    @apply font-display text-3xl leading-tight text-forest-800 sm:text-4xl;
+  }
+
+  .olho {
+    @apply text-xs font-semibold uppercase tracking-[0.18em] text-forest-500;
+  }
+}
