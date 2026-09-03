@@ -20,8 +20,8 @@ export function Servicos() {
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {servicos.map((servico, indice) => (
             <Reveal key={servico.titulo} delay={indice * 70}>
-              <article className="group h-full rounded-2xl border border-forest-100 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-forest-200 hover:shadow-lg hover:shadow-forest-900/5">
-                <span className="inline-flex rounded-xl bg-forest-50 p-3 text-forest-600 transition-colors group-hover:bg-forest-100">
+              <article className="group h-full rounded-2xl border border-forest-100 bg-white p-6 transition-[transform,border-color,box-shadow] duration-300 hover-fino:hover:-translate-y-1 hover-fino:hover:border-forest-200 hover-fino:hover:shadow-lg hover-fino:hover:shadow-forest-900/5">
+                <span className="inline-flex rounded-xl bg-forest-50 p-3 text-forest-600 transition-colors hover-fino:group-hover:bg-forest-100">
                   <Icon nome={servico.icone} />
                 </span>
                 <h3 className="mt-5 font-display text-xl text-forest-800">{servico.titulo}</h3>

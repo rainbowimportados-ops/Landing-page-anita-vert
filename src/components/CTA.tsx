@@ -43,6 +43,7 @@ export function BotaoWhatsApp({
     >
       <IconWhatsApp className="h-[18px] w-[18px] shrink-0" />
       {children}
+      <span className="sr-only"> (abre o WhatsApp em uma nova aba)</span>
     </a>
   )
 }

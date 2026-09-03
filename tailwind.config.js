@@ -45,5 +45,12 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // `hover-fino:` aplica o estilo apenas onde existe um ponteiro de verdade.
+    // No toque o hover fica "grudado" depois do tap, então esses efeitos não
+    // devem valer ali.
+    ({ addVariant }) => {
+      addVariant('hover-fino', '@media (hover: hover) and (pointer: fine)')
+    },
+  ],
 }
