@@ -23,8 +23,46 @@ const blankItems = {
   links: () => ({ id: crypto.randomUUID(), title: 'Novo link', url: '', preMessage: '', collectLead: true, active: true }),
   campaigns: () => ({ id: crypto.randomUUID(), title: 'Nova campanha', description: '', url: '', buttonLabel: 'Saiba mais', active: true }),
   testimonials: () => ({ id: crypto.randomUUID(), author: 'Paciente', text: '', active: true }),
-  portfolio: () => ({ id: crypto.randomUUID(), title: 'Novo resultado', procedure: '', description: '', details: '', mediaUrl: '', posterUrl: '', mediaType: 'image', active: true }),
+  portfolio: () => ({ id: crypto.randomUUID(), title: 'Novo resultado', procedure: '', description: '', details: '', mediaUrl: '', fileName: '', posterUrl: '', mediaType: 'image', active: true }),
 };
+
+const PORTFOLIO_ACCEPT = [
+  'image/*',
+  'video/mp4',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/vnd.oasis.opendocument.text',
+  'application/vnd.oasis.opendocument.spreadsheet',
+  'application/vnd.oasis.opendocument.presentation',
+  'text/plain',
+  'text/csv',
+].join(',');
+
+const DOCUMENT_EXTENSIONS = new Set(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'txt', 'csv']);
+
+function detectMediaType(file) {
+  const extension = file.name.split('.').pop()?.toLowerCase() || '';
+  if (file.type.startsWith('image/')) return 'image';
+  if (file.type.startsWith('video/')) return 'video';
+  if (DOCUMENT_EXTENSIONS.has(extension)) return 'document';
+  return '';
+}
+
+function mediaPreview(item) {
+  const url = escapeHtml(item.mediaUrl || '');
+  if (item.mediaType === 'document') {
+    return `<a class="document-preview" href="${url || '#'}" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">DOC</span><strong>${escapeHtml(item.fileName || 'Abrir documento')}</strong><small>Visualizar arquivo</small></a>`;
+  }
+  const fallback = '/assets/video-poster.webp';
+  const tag = item.mediaType === 'video' ? 'video' : 'img';
+  const attributes = item.mediaType === 'video' ? 'muted controls playsinline' : 'alt="Prévia da mídia"';
+  return `<${tag} class="media-thumb" src="${url || fallback}" ${attributes}></${tag}>`;
+}
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
@@ -214,10 +252,10 @@ function renderList(type) {
     if (type === 'links') fields = field('Texto do botão', 'title', item.title) + field('Link', 'url', item.url, { type: 'url' }) + field('Mensagem pré-preenchida (para link do WhatsApp)', 'preMessage', item.preMessage || '', { wide: true, placeholder: 'Olá! Meu nome é {nome}…' }) + `<div class="field wide">${leadToggle(item.collectLead)}</div>`;
     if (type === 'campaigns') fields = field('Título', 'title', item.title) + field('Texto', 'description', item.description, { wide: true }) + field('Texto do botão', 'buttonLabel', item.buttonLabel) + field('Link', 'url', item.url, { type: 'url' });
     if (type === 'testimonials') fields = field('Nome', 'author', item.author) + field('Depoimento', 'text', item.text, { wide: true });
-    if (type === 'portfolio') fields = field('Título do resultado', 'title', item.title) + field('Procedimento ou trabalho', 'procedure', item.procedure || '') + field('Descrição do resultado', 'description', item.description || '', { wide: true, placeholder: 'Conte o que foi realizado e o objetivo do caso.' }) + field('Informações complementares', 'details', item.details || '', { wide: true, placeholder: 'Ex.: planejamento individualizado, período ou técnica.' }) + field('URL da mídia', 'mediaUrl', item.mediaUrl, { wide: true, type: 'url' }) + `<label class="field">Tipo<select data-key="mediaType"><option value="image" ${item.mediaType !== 'video' ? 'selected' : ''}>Imagem</option><option value="video" ${item.mediaType === 'video' ? 'selected' : ''}>Vídeo</option></select></label>` + field('Capa do vídeo', 'posterUrl', item.posterUrl || '', { type: 'url' });
+    if (type === 'portfolio') fields = field('Título do resultado', 'title', item.title) + field('Procedimento ou trabalho', 'procedure', item.procedure || '') + field('Descrição do resultado', 'description', item.description || '', { wide: true, placeholder: 'Conte o que foi realizado e o objetivo do caso.' }) + field('Informações complementares', 'details', item.details || '', { wide: true, placeholder: 'Ex.: planejamento individualizado, período ou técnica.' }) + field('URL da mídia ou documento', 'mediaUrl', item.mediaUrl, { wide: true, type: 'url' }) + `<label class="field">Tipo<select data-key="mediaType"><option value="image" ${item.mediaType === 'image' || !item.mediaType ? 'selected' : ''}>Imagem</option><option value="video" ${item.mediaType === 'video' ? 'selected' : ''}>Vídeo</option><option value="document" ${item.mediaType === 'document' ? 'selected' : ''}>Documento</option></select></label>` + field('Capa do vídeo', 'posterUrl', item.posterUrl || '', { type: 'url' });
 
     const media = type === 'portfolio'
-      ? `<div class="media-preview"><${item.mediaType === 'video' ? 'video' : 'img'} class="media-thumb" src="${escapeHtml(item.mediaUrl || '/assets/video-poster.webp')}" ${item.mediaType === 'video' ? 'muted controls playsinline' : 'alt="Prévia da mídia"'}></${item.mediaType === 'video' ? 'video' : 'img'}><span>Prévia da mídia</span><label class="upload">Enviar ou trocar mídia<input type="file" data-upload accept="image/jpeg,image/png,image/webp,video/mp4" /></label></div>`
+      ? `<div class="media-preview">${mediaPreview(item)}<span>${item.mediaType === 'document' ? 'Documento anexado' : 'Prévia da mídia'}</span><label class="upload">Anexar ou trocar arquivo<input type="file" data-upload accept="${PORTFOLIO_ACCEPT}" /></label></div>`
       : '';
 
     return `<article class="repeat-card" data-type="${type}" data-index="${index}">${media}<div><div class="repeat-card__top"><strong>${escapeHtml(title)}</strong><button class="remove" type="button" data-remove>Remover</button></div><div class="fields">${fields}<div class="field wide">${toggle(item.active !== false)}</div></div></div></article>`;
@@ -333,6 +371,17 @@ contentForm.addEventListener('change', async (event) => {
   const file = event.target.files[0];
   const card = event.target.closest('.repeat-card');
   const item = content.portfolio[Number(card.dataset.index)];
+  const mediaType = detectMediaType(file);
+  if (!mediaType) {
+    setStatus('Formato não aceito. Selecione uma imagem, MP4 ou documento compatível.', 'error');
+    event.target.value = '';
+    return;
+  }
+  if (file.size > 20 * 1024 * 1024) {
+    setStatus('O arquivo ultrapassa o limite de 20 MB.', 'error');
+    event.target.value = '';
+    return;
+  }
   const extension = file.name.split('.').pop().toLowerCase();
   const path = `${Date.now()}-${crypto.randomUUID()}.${extension}`;
   event.target.disabled = true;
@@ -345,7 +394,8 @@ contentForm.addEventListener('change', async (event) => {
   }
   const { data } = supabase.storage.from('digital-card-media').getPublicUrl(path);
   item.mediaUrl = data.publicUrl;
-  item.mediaType = file.type.startsWith('video/') ? 'video' : 'image';
+  item.mediaType = mediaType;
+  item.fileName = file.name;
   renderList('portfolio');
   setDirty();
 });

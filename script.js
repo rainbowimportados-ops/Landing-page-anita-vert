@@ -96,6 +96,17 @@ function renderPortfolio(items) {
   active.forEach((item) => {
     const figure = document.createElement('figure'); let media;
     if (item.mediaType === 'video') { media = document.createElement('video'); media.controls = true; media.playsInline = true; media.preload = 'metadata'; if (item.posterUrl) media.poster = safeUrl(item.posterUrl, ''); const source = document.createElement('source'); source.src = safeUrl(item.mediaUrl); source.type = 'video/mp4'; media.append(source); }
+    else if (item.mediaType === 'document') {
+      media = trackableLink(item.mediaUrl, 'documento_resultado');
+      media.className = 'document-card';
+      const icon = document.createElement('span'); icon.setAttribute('aria-hidden', 'true'); icon.textContent = 'DOC';
+      const copy = document.createElement('span');
+      const label = document.createElement('small'); label.textContent = 'Documento';
+      const name = document.createElement('strong'); name.textContent = item.fileName || item.title || 'Abrir documento';
+      copy.append(label, name);
+      const arrow = document.createElement('span'); arrow.setAttribute('aria-hidden', 'true'); arrow.textContent = '↗';
+      media.append(icon, copy, arrow);
+    }
     else { media = document.createElement('img'); media.src = safeUrl(item.mediaUrl); media.alt = item.title || 'Resultado real'; media.loading = 'lazy'; }
     const caption = document.createElement('figcaption');
     const title = document.createElement('strong'); title.textContent = item.title || 'Resultado real'; caption.append(title);

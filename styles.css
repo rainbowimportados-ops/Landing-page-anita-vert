@@ -44,6 +44,12 @@ h2 { font-size:clamp(2.3rem,6vw,3.7rem); }
 .media-strip { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; overflow:hidden; }
 .media-strip figure { position:relative; aspect-ratio:4/4.6; margin:0; overflow:hidden; border:1px solid var(--line); border-radius:14px; background:var(--chocolate); }
 .media-strip img,.media-strip video { width:100%; height:100%; object-fit:cover; }
+.document-card { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center; width:100%; height:100%; padding:22px; background:linear-gradient(145deg,#4a2f1f,#2b1b14); color:var(--ivory); text-decoration:none; }
+.document-card>span:first-child { display:grid; width:52px; height:52px; place-items:center; border:1px solid rgba(234,218,198,.3); border-radius:12px; color:var(--rose); font-size:.62rem; font-weight:600; letter-spacing:.08em; }
+.document-card>span:nth-child(2) { display:grid; gap:4px; min-width:0; }
+.document-card small { color:var(--nude); font-size:.56rem; letter-spacing:.12em; text-transform:uppercase; }
+.document-card strong { overflow-wrap:anywhere; font-family:var(--serif); font-size:1rem; font-weight:400; line-height:1.2; }
+.document-card>span:last-child { color:var(--rose); font-size:1.1rem; }
 .media-strip figcaption { position:absolute; right:0; bottom:0; left:0; display:grid; gap:3px; padding:64px 14px 13px; background:linear-gradient(transparent,rgba(20,11,8,.93)); pointer-events:none; }
 .media-strip figcaption strong { font-size:.7rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; }
 .media-strip figcaption span { color:var(--rose); font-size:.58rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase; }
