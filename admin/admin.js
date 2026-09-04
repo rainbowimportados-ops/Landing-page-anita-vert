@@ -1,4 +1,4 @@
-import { ADMIN_EMAIL, loadCardContent, supabase } from '../lib/supabase.js';
+import { ADMIN_EMAIL, ADMIN_REDIRECT_URL, loadCardContent, supabase } from '../lib/supabase.js';
 
 const loginScreen = document.querySelector('#login-screen');
 const adminApp = document.querySelector('#admin-app');
@@ -54,7 +54,7 @@ loginForm.addEventListener('submit', async (event) => {
   loginFeedback.textContent = 'Enviando link seguro…';
   const { data, error } = await supabase.auth.signInWithOtp({
     email: ADMIN_EMAIL,
-    options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/admin/` },
+    options: { shouldCreateUser: false, emailRedirectTo: ADMIN_REDIRECT_URL },
   });
   if (error) {
     loginFeedback.textContent = `Não foi possível acessar: ${error.message}`;
