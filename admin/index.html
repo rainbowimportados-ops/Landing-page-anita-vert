@@ -18,14 +18,35 @@
         <img src="/assets/logo-principal-marrom.jpeg" alt="Instituto Vert" width="180" height="180" />
         <p class="eyebrow">Área restrita</p>
         <h1>Gerencie seu cartão digital</h1>
-        <p>Receba um link seguro no e-mail da diretoria. Não é necessário criar senha.</p>
+        <p>Entre com a senha cadastrada para administrar o cartão digital.</p>
         <form id="login-form">
           <label for="email">E-mail autorizado</label>
           <input id="email" name="email" type="email" value="diretoria@institutovert.com.br" readonly />
-          <button type="submit">Enviar link de acesso</button>
+          <label for="password">Senha</label>
+          <input id="password" name="password" type="password" minlength="8" autocomplete="current-password" required />
+          <button type="submit">Entrar no painel</button>
+          <button class="login-secondary" id="first-access" type="button">Primeiro acesso por e-mail</button>
         </form>
         <p class="feedback" id="login-feedback" role="status"></p>
         <a class="back-link" href="/">← Voltar ao cartão</a>
+      </section>
+    </main>
+
+    <main class="login-screen" id="password-setup-screen" hidden>
+      <section class="login-card">
+        <img src="/assets/logo-principal-marrom.jpeg" alt="Instituto Vert" width="180" height="180" />
+        <p class="eyebrow">Primeiro acesso validado</p>
+        <h1>Cadastre sua senha</h1>
+        <p>Crie a senha que será usada nos próximos acessos ao painel do cartão.</p>
+        <form id="password-setup-form">
+          <label for="new-password">Nova senha</label>
+          <input id="new-password" name="new-password" type="password" minlength="8" autocomplete="new-password" required />
+          <label for="confirm-password">Confirme a nova senha</label>
+          <input id="confirm-password" name="confirm-password" type="password" minlength="8" autocomplete="new-password" required />
+          <p class="password-hint">Use pelo menos 8 caracteres.</p>
+          <button type="submit">Cadastrar senha e continuar</button>
+        </form>
+        <p class="feedback" id="password-setup-feedback" role="status"></p>
       </section>
     </main>
 

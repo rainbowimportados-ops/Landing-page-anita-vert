@@ -1,9 +1,13 @@
 import { ADMIN_EMAIL, ADMIN_REDIRECT_URL, loadCardContent, supabase } from '../lib/supabase.js';
 
 const loginScreen = document.querySelector('#login-screen');
+const passwordSetupScreen = document.querySelector('#password-setup-screen');
 const adminApp = document.querySelector('#admin-app');
 const loginForm = document.querySelector('#login-form');
+const firstAccessButton = document.querySelector('#first-access');
 const loginFeedback = document.querySelector('#login-feedback');
+const passwordSetupForm = document.querySelector('#password-setup-form');
+const passwordSetupFeedback = document.querySelector('#password-setup-feedback');
 const contentForm = document.querySelector('#content-form');
 const saveButton = document.querySelector('#save');
 const saveStatus = document.querySelector('#save-status');
@@ -39,32 +43,88 @@ function setDirty(value = true) {
 
 function showLogin() {
   loginScreen.hidden = false;
+  passwordSetupScreen.hidden = true;
   adminApp.hidden = true;
 }
 
 function showAdmin() {
   loginScreen.hidden = true;
+  passwordSetupScreen.hidden = true;
   adminApp.hidden = false;
+}
+
+function showPasswordSetup() {
+  loginScreen.hidden = true;
+  passwordSetupScreen.hidden = false;
+  adminApp.hidden = true;
+  document.querySelector('#new-password').focus();
 }
 
 loginForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   const button = loginForm.querySelector('button');
   button.disabled = true;
-  loginFeedback.textContent = 'Enviando link seguro…';
-  const { data, error } = await supabase.auth.signInWithOtp({
+  loginFeedback.textContent = 'Validando acesso…';
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: ADMIN_EMAIL,
+    password: loginForm.querySelector('#password').value,
+  });
+  if (error) {
+    loginFeedback.textContent = 'E-mail ou senha incorretos.';
+  } else {
+    loginFeedback.textContent = 'Acesso confirmado. Abrindo o painel…';
+    await openAdmin(data.session);
+  }
+  button.disabled = false;
+});
+
+firstAccessButton.addEventListener('click', async () => {
+  firstAccessButton.disabled = true;
+  loginFeedback.textContent = 'Enviando validação por e-mail…';
+  const { error } = await supabase.auth.signInWithOtp({
     email: ADMIN_EMAIL,
     options: { shouldCreateUser: false, emailRedirectTo: ADMIN_REDIRECT_URL },
   });
-  if (error) {
-    loginFeedback.textContent = `Não foi possível acessar: ${error.message}`;
-  } else if (data.session) {
-    loginFeedback.textContent = 'Acesso confirmado. Abrindo o painel…';
-    await openAdmin(data.session);
-  } else {
-    loginFeedback.textContent = 'Link enviado. Verifique a caixa de entrada e o spam.';
+  loginFeedback.textContent = error
+    ? `Não foi possível enviar: ${error.message}`
+    : 'E-mail enviado. Abra o link para cadastrar sua senha.';
+  firstAccessButton.disabled = false;
+});
+
+passwordSetupForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const password = passwordSetupForm['new-password'].value;
+  const confirmation = passwordSetupForm['confirm-password'].value;
+  const button = passwordSetupForm.querySelector('button');
+
+  if (password.length < 8) {
+    passwordSetupFeedback.textContent = 'A senha precisa ter pelo menos 8 caracteres.';
+    return;
   }
+  if (password !== confirmation) {
+    passwordSetupFeedback.textContent = 'As senhas digitadas não são iguais.';
+    return;
+  }
+
+  button.disabled = true;
+  passwordSetupFeedback.textContent = 'Cadastrando sua senha…';
+  const currentMetadata = session?.user?.user_metadata || {};
+  const { data, error } = await supabase.auth.updateUser({
+    password,
+    data: { ...currentMetadata, card_password_configured: true },
+  });
+
+  if (error) {
+    passwordSetupFeedback.textContent = `Não foi possível cadastrar: ${error.message}`;
+    button.disabled = false;
+    return;
+  }
+
+  session = { ...session, user: data.user };
+  passwordSetupForm.reset();
+  passwordSetupFeedback.textContent = 'Senha cadastrada com sucesso.';
   button.disabled = false;
+  await openAdmin(session, true);
 });
 
 document.querySelector('#logout').addEventListener('click', async () => {
@@ -230,7 +290,7 @@ window.addEventListener('beforeunload', (event) => {
   event.preventDefault();
 });
 
-async function openAdmin(nextSession) {
+async function openAdmin(nextSession, passwordJustConfigured = false) {
   if (loadingAdmin) return;
   loadingAdmin = true;
   session = nextSession;
@@ -238,6 +298,11 @@ async function openAdmin(nextSession) {
     await supabase.auth.signOut();
     loginFeedback.textContent = 'Este e-mail não possui autorização.';
     showLogin();
+    loadingAdmin = false;
+    return;
+  }
+  if (!passwordJustConfigured && session.user.user_metadata?.card_password_configured !== true) {
+    showPasswordSetup();
     loadingAdmin = false;
     return;
   }
