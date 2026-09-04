@@ -100,7 +100,7 @@ function detectarOrigem() {
 
 function registrarClique(botao, unidade = null) {
   const payload = { botao: String(botao).slice(0, 40), unidade: unidade ? String(unidade).slice(0, 40) : null, origem: detectarOrigem(), dispositivo: detectarDispositivo() };
-  void fetch(`${SUPABASE_URL}/rest/v1/link_clicks`, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`, Prefer: 'return=minimal' }, body: JSON.stringify(payload) }).catch(() => {});
+  void fetch(`${SUPABASE_URL}/rest/v1/digital_card_clicks`, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`, Prefer: 'return=minimal' }, body: JSON.stringify(payload) }).catch(() => {});
 }
 
 function bindTracking() {

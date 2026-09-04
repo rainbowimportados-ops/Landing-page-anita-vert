@@ -197,7 +197,7 @@ function sendPreview() {
 
 async function loadMetrics() {
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const { data, error } = await supabase.from('link_clicks').select('botao').gte('created_at', since);
+  const { data, error } = await supabase.from('digital_card_clicks').select('botao').gte('created_at', since);
   if (error) return;
   const views = data.filter((row) => row.botao === 'visualizacao_pagina').length;
   const clicks = data.length - views;
