@@ -19,11 +19,11 @@ let dirty = false;
 let loadingAdmin = false;
 
 const blankItems = {
-  units: () => ({ id: crypto.randomUUID(), name: 'Nova unidade', city: '', address: '', phone: '', mapsUrl: '', mapsQuery: '', website: '', active: true }),
-  links: () => ({ id: crypto.randomUUID(), title: 'Novo link', url: '', active: true }),
+  units: () => ({ id: crypto.randomUUID(), name: 'Nova unidade', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', address: '', phone: '', whatsappMessage: '', collectLead: true, mapsUrl: '', mapsQuery: '', website: '', active: true }),
+  links: () => ({ id: crypto.randomUUID(), title: 'Novo link', url: '', preMessage: '', collectLead: true, active: true }),
   campaigns: () => ({ id: crypto.randomUUID(), title: 'Nova campanha', description: '', url: '', buttonLabel: 'Saiba mais', active: true }),
   testimonials: () => ({ id: crypto.randomUUID(), author: 'Paciente', text: '', active: true }),
-  portfolio: () => ({ id: crypto.randomUUID(), title: 'Novo resultado', mediaUrl: '', posterUrl: '', mediaType: 'image', active: true }),
+  portfolio: () => ({ id: crypto.randomUUID(), title: 'Novo resultado', procedure: '', description: '', details: '', mediaUrl: '', posterUrl: '', mediaType: 'image', active: true }),
 };
 
 function escapeHtml(value = '') {
@@ -157,6 +157,10 @@ function toggle(value) {
   return `<label class="toggle"><input data-key="active" type="checkbox" ${value ? 'checked' : ''} /> Mostrar no cartão</label>`;
 }
 
+function leadToggle(value) {
+  return `<label class="toggle toggle--lead"><input data-key="collectLead" type="checkbox" ${value !== false ? 'checked' : ''} /> Pedir nome e telefone antes de abrir</label>`;
+}
+
 function renderList(type) {
   const list = document.querySelector(`#${type}-list`);
   const items = content[type] || [];
@@ -169,18 +173,24 @@ function renderList(type) {
     const title = item.name || item.title || item.author || `Item ${index + 1}`;
     let fields = '';
     if (type === 'units') fields = [
-      field('Nome da unidade', 'name', item.name), field('Cidade', 'city', item.city),
-      field('Endereço completo', 'address', item.address, { wide: true }), field('WhatsApp', 'phone', item.phone),
+      field('Nome da unidade', 'name', item.name),
+      `<label class="field">CEP<input data-key="cep" value="${escapeHtml(item.cep || '')}" inputmode="numeric" maxlength="9" placeholder="00000-000" /><small class="cep-status" aria-live="polite"></small></label>`,
+      field('Rua', 'street', item.street || ''), field('Número', 'number', item.number || ''),
+      field('Complemento', 'complement', item.complement || ''), field('Bairro', 'neighborhood', item.neighborhood || ''),
+      field('Cidade', 'city', item.city), field('Estado', 'state', item.state || '', { placeholder: 'SP' }),
+      field('Endereço exibido no cartão', 'address', item.address, { wide: true }), field('WhatsApp', 'phone', item.phone),
+      field('Mensagem pré-preenchida do WhatsApp', 'whatsappMessage', item.whatsappMessage || '', { wide: true, placeholder: 'Olá! Meu nome é {nome}…' }),
       field('Busca do mapa', 'mapsQuery', item.mapsQuery), field('Link do Google', 'mapsUrl', item.mapsUrl, { type: 'url' }),
       field('Site da unidade', 'website', item.website, { type: 'url' }),
+      `<div class="field wide">${leadToggle(item.collectLead)}</div>`,
     ].join('');
-    if (type === 'links') fields = field('Título', 'title', item.title) + field('Link', 'url', item.url, { type: 'url' });
+    if (type === 'links') fields = field('Texto do botão', 'title', item.title) + field('Link', 'url', item.url, { type: 'url' }) + field('Mensagem pré-preenchida (para link do WhatsApp)', 'preMessage', item.preMessage || '', { wide: true, placeholder: 'Olá! Meu nome é {nome}…' }) + `<div class="field wide">${leadToggle(item.collectLead)}</div>`;
     if (type === 'campaigns') fields = field('Título', 'title', item.title) + field('Texto', 'description', item.description, { wide: true }) + field('Texto do botão', 'buttonLabel', item.buttonLabel) + field('Link', 'url', item.url, { type: 'url' });
     if (type === 'testimonials') fields = field('Nome', 'author', item.author) + field('Depoimento', 'text', item.text, { wide: true });
-    if (type === 'portfolio') fields = field('Título', 'title', item.title) + field('URL da mídia', 'mediaUrl', item.mediaUrl, { wide: true, type: 'url' }) + `<label class="field">Tipo<select data-key="mediaType"><option value="image" ${item.mediaType !== 'video' ? 'selected' : ''}>Imagem</option><option value="video" ${item.mediaType === 'video' ? 'selected' : ''}>Vídeo</option></select></label>` + field('Capa do vídeo', 'posterUrl', item.posterUrl || '', { type: 'url' });
+    if (type === 'portfolio') fields = field('Título do resultado', 'title', item.title) + field('Procedimento ou trabalho', 'procedure', item.procedure || '') + field('Descrição do resultado', 'description', item.description || '', { wide: true, placeholder: 'Conte o que foi realizado e o objetivo do caso.' }) + field('Informações complementares', 'details', item.details || '', { wide: true, placeholder: 'Ex.: planejamento individualizado, período ou técnica.' }) + field('URL da mídia', 'mediaUrl', item.mediaUrl, { wide: true, type: 'url' }) + `<label class="field">Tipo<select data-key="mediaType"><option value="image" ${item.mediaType !== 'video' ? 'selected' : ''}>Imagem</option><option value="video" ${item.mediaType === 'video' ? 'selected' : ''}>Vídeo</option></select></label>` + field('Capa do vídeo', 'posterUrl', item.posterUrl || '', { type: 'url' });
 
     const media = type === 'portfolio'
-      ? `<div><${item.mediaType === 'video' ? 'video' : 'img'} class="media-thumb" src="${escapeHtml(item.mediaUrl || '/assets/video-poster.webp')}" ${item.mediaType === 'video' ? 'muted playsinline' : 'alt="Prévia da mídia"'}></${item.mediaType === 'video' ? 'video' : 'img'}><label class="upload">Enviar mídia<input type="file" data-upload accept="image/jpeg,image/png,image/webp,video/mp4" /></label></div>`
+      ? `<div class="media-preview"><${item.mediaType === 'video' ? 'video' : 'img'} class="media-thumb" src="${escapeHtml(item.mediaUrl || '/assets/video-poster.webp')}" ${item.mediaType === 'video' ? 'muted controls playsinline' : 'alt="Prévia da mídia"'}></${item.mediaType === 'video' ? 'video' : 'img'}><span>Prévia da mídia</span><label class="upload">Enviar ou trocar mídia<input type="file" data-upload accept="image/jpeg,image/png,image/webp,video/mp4" /></label></div>`
       : '';
 
     return `<article class="repeat-card" data-type="${type}" data-index="${index}">${media}<div><div class="repeat-card__top"><strong>${escapeHtml(title)}</strong><button class="remove" type="button" data-remove>Remover</button></div><div class="fields">${fields}<div class="field wide">${toggle(item.active !== false)}</div></div></div></article>`;
@@ -214,9 +224,49 @@ contentForm.addEventListener('input', (event) => {
   if (!card || !event.target.dataset.key) return;
   const item = content[card.dataset.type][Number(card.dataset.index)];
   item[event.target.dataset.key] = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+  if (card.dataset.type === 'units' && ['street', 'number', 'complement', 'neighborhood', 'city', 'state'].includes(event.target.dataset.key)) syncUnitAddress(item, card);
   const heading = card.querySelector('.repeat-card__top strong');
   heading.textContent = item.name || item.title || item.author || 'Item';
   setDirty();
+});
+
+function syncUnitAddress(item, card) {
+  const locality = [item.city, item.state].filter(Boolean).join(' - ');
+  item.address = [item.street, item.number, item.complement, item.neighborhood, locality].filter(Boolean).join(', ');
+  const addressField = card?.querySelector('[data-key="address"]');
+  if (addressField) addressField.value = item.address;
+}
+
+contentForm.addEventListener('focusout', async (event) => {
+  if (event.target.dataset.key !== 'cep') return;
+  const card = event.target.closest('.repeat-card');
+  const item = content.units[Number(card.dataset.index)];
+  const status = event.target.parentElement.querySelector('.cep-status');
+  const digits = event.target.value.replace(/\D/g, '');
+  if (digits.length !== 8) {
+    status.textContent = digits ? 'Digite os 8 números do CEP.' : '';
+    status.dataset.state = 'error';
+    return;
+  }
+  event.target.value = `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  item.cep = event.target.value;
+  status.textContent = 'Pesquisando endereço…';
+  status.dataset.state = '';
+  try {
+    const response = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+    const data = await response.json();
+    if (!response.ok || data.erro) throw new Error('CEP não encontrado');
+    Object.assign(item, { street: data.logradouro || '', neighborhood: data.bairro || '', city: data.localidade || '', state: data.uf || '' });
+    syncUnitAddress(item);
+    renderList('units');
+    const refreshed = document.querySelector(`#units-list .repeat-card[data-index="${card.dataset.index}"]`);
+    const refreshedStatus = refreshed?.querySelector('.cep-status');
+    if (refreshedStatus) { refreshedStatus.textContent = 'Endereço encontrado. Complete o número.'; refreshedStatus.dataset.state = 'success'; }
+    setDirty();
+  } catch {
+    status.textContent = 'CEP não encontrado. Confira e tente novamente.';
+    status.dataset.state = 'error';
+  }
 });
 
 contentForm.addEventListener('click', (event) => {
@@ -267,6 +317,28 @@ async function loadMetrics() {
   document.querySelector('#metric-whatsapp').textContent = whatsapp.toLocaleString('pt-BR');
 }
 
+async function loadLeads() {
+  const list = document.querySelector('#leads-list');
+  list.innerHTML = '<div class="empty-state"><strong>Carregando contatos…</strong></div>';
+  const { data, error } = await supabase.from('digital_card_leads').select('name,phone,profession,button,unit,created_at').order('created_at', { ascending: false }).limit(200);
+  if (error) {
+    list.innerHTML = `<div class="empty-state"><strong>Não foi possível carregar</strong><p>${escapeHtml(error.message)}</p></div>`;
+    return;
+  }
+  document.querySelector('#metric-leads').textContent = data.length.toLocaleString('pt-BR');
+  if (!data.length) {
+    list.innerHTML = '<div class="empty-state"><strong>Nenhum contato recebido ainda</strong><p>Os novos contatos aparecerão aqui.</p></div>';
+    return;
+  }
+  list.innerHTML = data.map((lead) => {
+    const digits = String(lead.phone).replace(/\D/g, '');
+    const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lead.created_at));
+    return `<article class="lead-card"><div><small>${escapeHtml(date)}</small><strong>${escapeHtml(lead.name)}</strong><span>${escapeHtml(lead.profession || 'Profissão não informada')}</span></div><div><small>${escapeHtml(lead.button)}${lead.unit ? ` · ${escapeHtml(lead.unit)}` : ''}</small><a href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.phone)} <span>→</span></a></div></article>`;
+  }).join('');
+}
+
+document.querySelector('#refresh-leads').addEventListener('click', () => void loadLeads());
+
 preview.addEventListener('load', sendPreview);
 
 saveButton.addEventListener('click', async () => {
@@ -308,6 +380,7 @@ async function openAdmin(nextSession, passwordJustConfigured = false) {
   }
   showAdmin();
   void loadMetrics();
+  void loadLeads();
   setStatus('Carregando…');
   try {
     const data = await loadCardContent();

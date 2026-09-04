@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/admin/admin.css" />
     <link rel="stylesheet" href="/admin/metrics.css" />
+    <link rel="stylesheet" href="/admin/enhancements.css" />
   </head>
   <body>
     <main class="login-screen" id="login-screen">
@@ -60,6 +61,7 @@
           <button class="nav-link" data-section="empresa">Dados da empresa</button>
           <button class="nav-link" data-section="unidades">Unidades</button>
           <button class="nav-link" data-section="links">Links e contatos</button>
+          <button class="nav-link" data-section="contatos">Contatos recebidos</button>
           <button class="nav-link" data-section="campanhas">Campanhas e promoções</button>
           <button class="nav-link" data-section="depoimentos">Depoimentos</button>
           <button class="nav-link" data-section="resultados">Resultados e trabalhos</button>
@@ -85,8 +87,9 @@
                 <article><small>Visualizações</small><strong id="metric-views">—</strong></article>
                 <article><small>Cliques de contato</small><strong id="metric-clicks">—</strong></article>
                 <article><small>WhatsApp</small><strong id="metric-whatsapp">—</strong></article>
+                <article><small>Contatos recebidos</small><strong id="metric-leads">—</strong></article>
               </div>
-              <div class="analytics-note"><strong>Privacidade preservada</strong><p>O painel mostra volume, origem, aparelho e botão acessado. Nome, telefone e dados pessoais dos visitantes não são coletados.</p></div>
+              <div class="analytics-note"><strong>Privacidade e consentimento</strong><p>Nome, telefone e profissão opcional são coletados somente quando o visitante autoriza antes de abrir um botão configurado.</p></div>
             </section>
 
             <section class="panel" data-panel="empresa">
@@ -113,9 +116,19 @@
                 <label>Site<input name="company.website" type="url" placeholder="https://" /></label>
                 <label>Instagram<input name="company.instagram" type="url" /></label>
                 <label>Nome no Instagram<input name="company.instagramLabel" /></label>
+                <label class="wide">Mensagem padrão do WhatsApp<textarea name="company.whatsappMessage" rows="3" placeholder="Olá! Meu nome é {nome} e quero agendar uma avaliação."></textarea></label>
+                <label>Título do formulário<input name="company.leadFormTitle" placeholder="Antes de continuar" /></label>
+                <label>Texto do formulário<input name="company.leadFormDescription" placeholder="Informe seus dados para receber atendimento." /></label>
               </div>
+              <p class="helper">Use <strong>{nome}</strong>, <strong>{telefone}</strong> ou <strong>{profissao}</strong> nas mensagens para personalizá-las automaticamente.</p>
               <div class="subheading"><h3>Links extras</h3><button type="button" class="small-action" data-add="links">+ Novo link</button></div>
               <div class="repeat-list" id="links-list"></div>
+            </section>
+
+            <section class="panel" data-panel="contatos">
+              <div class="panel__heading"><div><p class="eyebrow">Atendimento</p><h2>Contatos recebidos</h2></div><button type="button" class="small-action" id="refresh-leads">Atualizar</button></div>
+              <p class="helper">Pessoas que autorizaram o contato antes de abrir um dos links configurados.</p>
+              <div class="leads-list" id="leads-list"><div class="empty-state"><strong>Carregando contatos…</strong></div></div>
             </section>
 
             <section class="panel" data-panel="campanhas">
@@ -131,7 +144,7 @@
 
             <section class="panel" data-panel="resultados">
               <div class="panel__heading"><div><p class="eyebrow">Portfólio</p><h2>Resultados e trabalhos</h2></div><button type="button" class="small-action" data-add="portfolio">+ Novo resultado</button></div>
-              <p class="helper">Envie imagens JPG, PNG ou WebP e vídeos MP4 de até 20 MB.</p>
+              <p class="helper">Envie imagens JPG, PNG ou WebP e vídeos MP4 de até 20 MB. A prévia abaixo mostra a mídia em tamanho maior.</p>
               <div class="repeat-list media-list" id="portfolio-list"></div>
             </section>
           </form>

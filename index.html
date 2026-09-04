@@ -134,6 +134,21 @@
       <span>Falar no WhatsApp</span>
     </a>
 
+    <dialog class="lead-dialog" id="lead-dialog" aria-labelledby="lead-dialog-title">
+      <form class="lead-form" id="lead-form">
+        <button class="lead-dialog__close" type="button" data-close-lead aria-label="Fechar">×</button>
+        <p class="eyebrow">Contato rápido</p>
+        <h2 id="lead-dialog-title">Antes de continuar</h2>
+        <p id="lead-dialog-description">Informe seus dados para receber atendimento personalizado.</p>
+        <label>Nome<input id="lead-name" name="name" autocomplete="name" maxlength="100" required /></label>
+        <label>Telefone com DDD<input id="lead-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="(16) 99999-9999" required /></label>
+        <label>Profissão <small>opcional</small><input id="lead-profession" name="profession" autocomplete="organization-title" maxlength="100" /></label>
+        <label class="lead-consent"><input name="consent" type="checkbox" required /><span>Autorizo o Instituto Vert a usar estes dados para responder ao meu contato.</span></label>
+        <p class="lead-form__feedback" id="lead-feedback" role="status"></p>
+        <button class="lead-form__submit" type="submit">Continuar para o atendimento</button>
+      </form>
+    </dialog>
+
     <script type="module" src="/script.js"></script>
   </body>
 </html>
