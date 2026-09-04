@@ -40,6 +40,14 @@
 .identity-upload > div { display: grid; grid-template-columns: 150px 1fr; gap: 16px; align-items: center; }
 .identity-upload img { width: 150px; height: 180px; border-radius: 12px; object-fit: cover; background: #eadfd3; }
 .identity-upload span { display: grid; gap: 8px; }
+.brand-assets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.brand-asset { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: white; }
+.brand-asset--dark { background: var(--chocolate); color: white; }
+.brand-asset img { display: block; width: 100%; height: 160px; border-radius: 10px; background: #eadfd3; object-fit: contain; }
+.brand-asset > div { display: grid; gap: 8px; }
+.brand-asset strong { font-family: "Cormorant Garamond", serif; font-size: 1.05rem; }
+.brand-asset input { width: 100%; padding: 10px 11px; border: 1px solid var(--border); border-radius: 8px; background: white; color: var(--chocolate); font-size: .68rem; }
+.brand-asset .upload { margin-top: 0; justify-content: center; }
 .leads-list { display: grid; gap: 10px; margin-top: 18px; }
 .lead-card {
   display: grid;
@@ -77,4 +85,5 @@
   .lead-card a { min-width: 0; }
   .leads-list { margin-top: 14px; }
   .identity-upload > div { grid-template-columns: 1fr; }
+  .brand-assets { grid-template-columns: 1fr; }
 }

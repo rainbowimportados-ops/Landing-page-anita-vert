@@ -13,6 +13,20 @@ const saveButton = document.querySelector('#save');
 const saveStatus = document.querySelector('#save-status');
 const preview = document.querySelector('#card-preview');
 
+const DEFAULT_IDENTITY_ASSETS = {
+  heroImage: new URL('../assets/hero.webp', import.meta.url).href,
+  logoPrimaryDark: new URL('../assets/logo-principal-marrom.jpeg', import.meta.url).href,
+  logoPrimaryLight: new URL('../assets/logo-principal-clara.jpeg', import.meta.url).href,
+  logoHorizontal: new URL('../assets/logo-secundaria-marrom.jpeg', import.meta.url).href,
+};
+
+const IDENTITY_PREVIEW_IDS = {
+  heroImage: 'hero-preview',
+  logoPrimaryDark: 'logo-primary-dark-preview',
+  logoPrimaryLight: 'logo-primary-light-preview',
+  logoHorizontal: 'logo-horizontal-preview',
+};
+
 let session = null;
 let content = null;
 let dirty = false;
@@ -188,10 +202,18 @@ document.querySelectorAll('.nav-link').forEach((button) => {
 function fillCompany() {
   contentForm.querySelectorAll('[name^="company."]').forEach((field) => {
     const key = field.name.split('.')[1];
-    field.value = content.company?.[key] ?? (key === 'logoAsset' ? '/assets/logo-principal-marrom.jpeg' : '');
+    field.value = content.company?.[key] ?? (key === 'logoVariant' ? 'primaryDark' : '');
   });
-  const heroPreview = document.querySelector('#hero-preview');
-  if (heroPreview) heroPreview.src = content.company?.heroImage || '/assets/hero.webp';
+  const previews = {
+    'hero-preview': content.company?.heroImage || DEFAULT_IDENTITY_ASSETS.heroImage,
+    'logo-primary-dark-preview': content.company?.logoPrimaryDark || DEFAULT_IDENTITY_ASSETS.logoPrimaryDark,
+    'logo-primary-light-preview': content.company?.logoPrimaryLight || DEFAULT_IDENTITY_ASSETS.logoPrimaryLight,
+    'logo-horizontal-preview': content.company?.logoHorizontal || DEFAULT_IDENTITY_ASSETS.logoHorizontal,
+  };
+  Object.entries(previews).forEach(([id, source]) => {
+    const image = document.getElementById(id);
+    if (image) image.src = source;
+  });
 }
 
 function field(label, key, value, options = {}) {
@@ -289,7 +311,8 @@ contentForm.addEventListener('input', (event) => {
   if (companyName?.startsWith('company.')) {
     const key = companyName.split('.')[1];
     content.company[key] = event.target.value;
-    if (key === 'heroImage') document.querySelector('#hero-preview').src = event.target.value || '/assets/hero.webp';
+    const previewId = IDENTITY_PREVIEW_IDS[key];
+    if (previewId) document.getElementById(previewId).src = event.target.value || DEFAULT_IDENTITY_ASSETS[key];
     setDirty();
     return;
   }
@@ -352,12 +375,18 @@ contentForm.addEventListener('click', (event) => {
 });
 
 contentForm.addEventListener('change', async (event) => {
-  if (event.target.matches('[data-company-upload]') && event.target.files?.[0]) {
+  if (event.target.matches('[data-identity-upload]') && event.target.files?.[0]) {
     const file = event.target.files[0];
+    const key = event.target.dataset.identityUpload;
+    if (!file.type.startsWith('image/') || file.size > 20 * 1024 * 1024) {
+      setStatus(file.size > 20 * 1024 * 1024 ? 'A imagem ultrapassa o limite de 20 MB.' : 'Selecione um arquivo de imagem compatível.', 'error');
+      event.target.value = '';
+      return;
+    }
     const extension = file.name.split('.').pop().toLowerCase();
-    const path = `identity-${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    const path = `identity-${key}-${Date.now()}-${crypto.randomUUID()}.${extension}`;
     event.target.disabled = true;
-    setStatus('Enviando foto principal…');
+    setStatus('Enviando imagem da identidade…');
     const { error } = await supabase.storage.from('digital-card-media').upload(path, file, { cacheControl: '3600', upsert: false });
     event.target.disabled = false;
     if (error) {
@@ -365,10 +394,11 @@ contentForm.addEventListener('change', async (event) => {
       return;
     }
     const { data } = supabase.storage.from('digital-card-media').getPublicUrl(path);
-    content.company.heroImage = data.publicUrl;
-    const input = contentForm.querySelector('[name="company.heroImage"]');
-    input.value = data.publicUrl;
-    document.querySelector('#hero-preview').src = data.publicUrl;
+    content.company[key] = data.publicUrl;
+    const input = contentForm.querySelector(`[name="company.${key}"]`);
+    if (input) input.value = data.publicUrl;
+    const image = document.getElementById(event.target.dataset.preview);
+    if (image) image.src = data.publicUrl;
     setDirty();
     return;
   }

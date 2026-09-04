@@ -8,6 +8,12 @@ const leadFeedback = document.querySelector('#lead-feedback');
 let pendingLead = null;
 let currentCompany = {};
 
+const DEFAULT_LOGOS = {
+  primaryDark: new URL('./assets/logo-principal-marrom.jpeg', import.meta.url).href,
+  primaryLight: new URL('./assets/logo-principal-clara.jpeg', import.meta.url).href,
+  horizontal: new URL('./assets/logo-secundaria-marrom.jpeg', import.meta.url).href,
+};
+
 function safeUrl(value, fallback = '#') {
   if (!value) return fallback;
   try {
@@ -144,7 +150,14 @@ function renderContent(content) {
   if (!content) return; const company = content.company || {}; const units = content.units || []; currentCompany = company;
   setText('.profile__identity p', company.category); setText('#titulo', company.name); setText('.intro .eyebrow', company.ctaLabel); setText('#cms-headline', company.headline); setText('#cms-description', company.description); setText('footer p', company.tagline);
   const hero = document.querySelector('.profile__photo > img'); if (hero && company.heroImage) hero.src = safeUrl(company.heroImage, hero.src);
-  const logo = document.querySelector('.brand img'); if (logo && company.logoAsset) logo.src = safeUrl(company.logoAsset, logo.src);
+  const logoSources = {
+    primaryDark: company.logoPrimaryDark || DEFAULT_LOGOS.primaryDark,
+    primaryLight: company.logoPrimaryLight || DEFAULT_LOGOS.primaryLight,
+    horizontal: company.logoHorizontal || DEFAULT_LOGOS.horizontal,
+  };
+  const logo = document.querySelector('.brand img');
+  const selectedLogo = logoSources[company.logoVariant] || company.logoAsset || logoSources.primaryDark;
+  if (logo) logo.src = safeUrl(selectedLogo, logo.src);
   const cities = units.filter((unit) => unit.active !== false).map((unit) => unit.city).filter(Boolean); setText('.profile__identity span', company.identityLine || cities.join(' • '));
   renderWhatsApp(units, company); renderUnits(units); renderPortfolio(content.portfolio); renderCards('campanhas', 'campaign-list', content.campaigns, 'campaign'); renderCards('depoimentos', 'testimonial-list', content.testimonials, 'testimonial'); renderExtraLinks(content.links);
   const instagram = document.querySelector('.quick-links a[data-track="instagram"]'); if (instagram && company.instagram) { instagram.href = safeUrl(company.instagram); const label = instagram.querySelector('small'); if (label) label.textContent = company.instagramLabel || 'Instagram'; }

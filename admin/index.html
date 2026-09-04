@@ -102,18 +102,34 @@
                 <label class="wide">Frase principal<input name="company.headline" /></label>
                 <label class="wide">Descrição<textarea name="company.description" rows="3"></textarea></label>
                 <label class="wide">Slogan<input name="company.tagline" /></label>
-                <label>Versão oficial da logo
-                  <select name="company.logoAsset">
-                    <option value="/assets/logo-principal-marrom.jpeg">Principal marrom</option>
-                    <option value="/assets/logo-principal-clara.jpeg">Principal clara</option>
-                    <option value="/assets/logo-secundaria-marrom.jpeg">Horizontal marrom</option>
+                <label>Logo usada no cartão
+                  <select name="company.logoVariant">
+                    <option value="primaryDark">Principal marrom</option>
+                    <option value="primaryLight">Principal clara</option>
+                    <option value="horizontal">Horizontal</option>
                   </select>
                 </label>
                 <label class="wide identity-upload">Foto principal do cartão
-                  <div><img id="hero-preview" src="/assets/hero.webp" alt="Prévia da foto principal" /><span><input name="company.heroImage" type="url" placeholder="https://" /><label class="upload">Enviar foto<input type="file" data-company-upload accept="image/jpeg,image/png,image/webp" /></label></span></div>
+                  <div><img id="hero-preview" src="/assets/hero.webp" alt="Prévia da foto principal" /><span><input name="company.heroImage" type="url" placeholder="https://" /><label class="upload">Trocar foto principal<input type="file" data-identity-upload="heroImage" data-preview="hero-preview" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" /></label></span></div>
                 </label>
               </div>
-              <div class="brand-note"><img src="/assets/logo-principal-clara.jpeg" alt="Logo oficial Instituto Vert" /><div><strong>Identidade oficial protegida</strong><p>A logo é aplicada como arquivo original, sem alterações, filtros ou reconstrução.</p></div></div>
+              <div class="subheading"><h3>Arquivos da identidade visual</h3></div>
+              <p class="helper">Troque cada versão separadamente. O arquivo é exibido inteiro, sem recorte, filtro ou alteração automática.</p>
+              <div class="brand-assets">
+                <article class="brand-asset">
+                  <img id="logo-primary-dark-preview" src="/assets/logo-principal-marrom.jpeg" alt="Prévia da logo principal marrom" />
+                  <div><strong>Principal marrom</strong><input name="company.logoPrimaryDark" type="url" placeholder="URL da logo" /><label class="upload">Trocar arquivo<input type="file" data-identity-upload="logoPrimaryDark" data-preview="logo-primary-dark-preview" accept="image/jpeg,image/png,image/webp,image/svg+xml" /></label></div>
+                </article>
+                <article class="brand-asset brand-asset--dark">
+                  <img id="logo-primary-light-preview" src="/assets/logo-principal-clara.jpeg" alt="Prévia da logo principal clara" />
+                  <div><strong>Principal clara</strong><input name="company.logoPrimaryLight" type="url" placeholder="URL da logo" /><label class="upload">Trocar arquivo<input type="file" data-identity-upload="logoPrimaryLight" data-preview="logo-primary-light-preview" accept="image/jpeg,image/png,image/webp,image/svg+xml" /></label></div>
+                </article>
+                <article class="brand-asset">
+                  <img id="logo-horizontal-preview" src="/assets/logo-secundaria-marrom.jpeg" alt="Prévia da logo horizontal" />
+                  <div><strong>Logo horizontal</strong><input name="company.logoHorizontal" type="url" placeholder="URL da logo" /><label class="upload">Trocar arquivo<input type="file" data-identity-upload="logoHorizontal" data-preview="logo-horizontal-preview" accept="image/jpeg,image/png,image/webp,image/svg+xml" /></label></div>
+                </article>
+              </div>
+              <div class="brand-note"><img src="/assets/logo-principal-clara.jpeg" alt="Logo Instituto Vert" /><div><strong>Todas as imagens são editáveis</strong><p>A foto principal e as três versões da logo ficam aqui. Fotos, vídeos e documentos dos trabalhos continuam em “Resultados e trabalhos”.</p></div></div>
             </section>
 
             <section class="panel" data-panel="unidades">
