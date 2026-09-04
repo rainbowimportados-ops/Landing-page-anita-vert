@@ -48,10 +48,15 @@ h2 { font-size:clamp(2.3rem,6vw,3.7rem); }
 .clinical-note { max-width:720px; margin:16px 0 0; color:#9e8271; font-size:.65rem; }
 .units { padding-block:68px; border-block:1px solid var(--line); background:#302019; }
 .unit-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.unit-grid>a { display:flex; min-height:104px; align-items:center; justify-content:space-between; gap:18px; padding:20px 22px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.035); }
-.unit-grid small { display:block; color:var(--nude); font-size:.58rem; letter-spacing:.18em; text-transform:uppercase; }
-.unit-grid strong { display:block; font-family:var(--serif); font-size:1.8rem; font-weight:300; }
-.unit-grid a>span:last-child { color:var(--champagne); font-size:.65rem; font-weight:500; letter-spacing:.11em; text-transform:uppercase; }
+.google-card { overflow:hidden; border:1px solid var(--line); border-radius:16px; background:rgba(255,255,255,.035); }
+.google-card__preview { position:relative; aspect-ratio:16/9; overflow:hidden; background:#e8e3df; }
+.google-card__preview iframe { width:100%; height:100%; border:0; }
+.google-card__content { position:relative; padding:18px 20px 20px; }
+.google-card__google { position:absolute; top:18px; right:18px; display:flex; align-items:center; gap:6px; color:var(--nude); font-size:.58rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase; }
+.google-card__google i { width:8px; height:8px; border-radius:50%; background:conic-gradient(#4285f4 0 25%,#34a853 0 50%,#fbbc05 0 75%,#ea4335 0); }
+.google-card__content small { display:block; color:var(--nude); font-size:.57rem; letter-spacing:.18em; text-transform:uppercase; }
+.google-card__content strong { display:block; max-width:75%; margin-top:3px; font-family:var(--serif); font-size:1.7rem; font-weight:300; line-height:1.05; }
+.google-card__content>a { display:flex; min-height:48px; align-items:center; justify-content:space-between; margin-top:18px; padding:0 14px; border-radius:9px; background:var(--champagne); color:var(--deep); font-size:.63rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
 .dentist-link { display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:50px; padding-block:68px; }
 .dentist-link>div:last-child { display:grid; gap:8px; }
 .dentist-link>div:last-child a { display:flex; min-height:58px; align-items:center; justify-content:space-between; padding:0 18px; border:1px solid var(--line); border-radius:10px; font-size:.72rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase; }
@@ -83,7 +88,7 @@ footer strong { color:var(--rose); font-family:var(--serif); font-size:1.35rem; 
   .media-strip figure { scroll-snap-align:start; }
   .units { padding-block:54px; }
   .unit-grid { grid-template-columns:1fr; }
-  .unit-grid>a { min-height:88px; padding:15px 17px; }
+  .google-card__content { padding:16px; }
   .dentist-link { grid-template-columns:1fr; gap:25px; padding-block:54px; }
   footer { padding-bottom:104px; }
   footer>div { align-items:flex-start; flex-direction:column; gap:8px; }
