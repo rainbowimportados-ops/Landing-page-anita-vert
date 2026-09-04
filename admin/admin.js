@@ -27,7 +27,12 @@ const blankItems = {
 };
 
 const PORTFOLIO_ACCEPT = [
-  'image/*',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/svg+xml',
+  'image/avif',
   'video/mp4',
   'application/pdf',
   'application/msword',
