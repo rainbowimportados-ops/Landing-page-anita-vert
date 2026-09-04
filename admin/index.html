@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2b1b14" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Painel administrativo — Instituto Vert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/admin/admin.css" />
+    <link rel="stylesheet" href="/admin/metrics.css" />
+  </head>
+  <body>
+    <main class="login-screen" id="login-screen">
+      <section class="login-card">
+        <img src="/assets/logo-principal-marrom.jpeg" alt="Instituto Vert" width="180" height="180" />
+        <p class="eyebrow">Área restrita</p>
+        <h1>Gerencie seu cartão digital</h1>
+        <p>Receba um link seguro no e-mail da diretoria. Não é necessário criar senha.</p>
+        <form id="login-form">
+          <label for="email">E-mail autorizado</label>
+          <input id="email" name="email" type="email" value="diretoria@institutovert.com.br" readonly />
+          <button type="submit">Enviar link de acesso</button>
+        </form>
+        <p class="feedback" id="login-feedback" role="status"></p>
+        <a class="back-link" href="/">← Voltar ao cartão</a>
+      </section>
+    </main>
+
+    <div class="app" id="admin-app" hidden>
+      <aside class="sidebar">
+        <a class="sidebar__brand" href="/" aria-label="Abrir cartão digital">
+          <img src="/assets/logo-secundaria-marrom.jpeg" alt="Instituto Vert" width="220" height="180" />
+        </a>
+        <nav aria-label="Seções do painel">
+          <button class="nav-link is-active" data-section="visao-geral">Visão geral</button>
+          <button class="nav-link" data-section="empresa">Dados da empresa</button>
+          <button class="nav-link" data-section="unidades">Unidades</button>
+          <button class="nav-link" data-section="links">Links e contatos</button>
+          <button class="nav-link" data-section="campanhas">Campanhas e promoções</button>
+          <button class="nav-link" data-section="depoimentos">Depoimentos</button>
+          <button class="nav-link" data-section="resultados">Resultados e trabalhos</button>
+        </nav>
+        <button class="logout" id="logout">Sair</button>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div><p class="eyebrow">Painel administrativo</p><h1>Conteúdo do cartão</h1></div>
+          <div class="topbar__actions">
+            <span class="save-status" id="save-status">Tudo salvo</span>
+            <a class="button button--ghost" href="/" target="_blank" rel="noopener">Ver cartão</a>
+            <button class="button" id="save">Salvar alterações</button>
+          </div>
+        </header>
+
+        <div class="editor-grid">
+          <form class="editor" id="content-form">
+            <section class="panel is-active" data-panel="visao-geral">
+              <div class="panel__heading"><div><p class="eyebrow">Últimos 30 dias</p><h2>Visão geral</h2></div><span>Medição anônima de acessos</span></div>
+              <div class="metric-grid">
+                <article><small>Visualizações</small><strong id="metric-views">—</strong></article>
+                <article><small>Cliques de contato</small><strong id="metric-clicks">—</strong></article>
+                <article><small>WhatsApp</small><strong id="metric-whatsapp">—</strong></article>
+              </div>
+              <div class="analytics-note"><strong>Privacidade preservada</strong><p>O painel mostra volume, origem, aparelho e botão acessado. Nome, telefone e dados pessoais dos visitantes não são coletados.</p></div>
+            </section>
+
+            <section class="panel" data-panel="empresa">
+              <div class="panel__heading"><div><p class="eyebrow">Identidade</p><h2>Dados da empresa</h2></div><span>Texto principal do cartão</span></div>
+              <div class="form-grid">
+                <label>Nome da empresa<input name="company.name" /></label>
+                <label>Categoria<input name="company.category" /></label>
+                <label class="wide">Frase principal<input name="company.headline" /></label>
+                <label class="wide">Descrição<textarea name="company.description" rows="3"></textarea></label>
+                <label class="wide">Slogan<input name="company.tagline" /></label>
+              </div>
+              <div class="brand-note"><img src="/assets/logo-principal-clara.jpeg" alt="Logo oficial Instituto Vert" /><div><strong>Identidade oficial protegida</strong><p>A logo é aplicada como arquivo original, sem alterações, filtros ou reconstrução.</p></div></div>
+            </section>
+
+            <section class="panel" data-panel="unidades">
+              <div class="panel__heading"><div><p class="eyebrow">Atendimento</p><h2>Unidades</h2></div><button type="button" class="small-action" data-add="units">+ Nova unidade</button></div>
+              <div class="repeat-list" id="units-list"></div>
+            </section>
+
+            <section class="panel" data-panel="links">
+              <div class="panel__heading"><div><p class="eyebrow">Contato</p><h2>Links e contatos</h2></div></div>
+              <div class="form-grid">
+                <label>WhatsApp principal<input name="company.phone" inputmode="tel" placeholder="5516999999999" /></label>
+                <label>Site<input name="company.website" type="url" placeholder="https://" /></label>
+                <label>Instagram<input name="company.instagram" type="url" /></label>
+                <label>Nome no Instagram<input name="company.instagramLabel" /></label>
+              </div>
+              <div class="subheading"><h3>Links extras</h3><button type="button" class="small-action" data-add="links">+ Novo link</button></div>
+              <div class="repeat-list" id="links-list"></div>
+            </section>
+
+            <section class="panel" data-panel="campanhas">
+              <div class="panel__heading"><div><p class="eyebrow">Novidades</p><h2>Campanhas e promoções</h2></div><button type="button" class="small-action" data-add="campaigns">+ Nova campanha</button></div>
+              <p class="helper">Campanhas ativas aparecem em destaque logo após os botões de contato.</p>
+              <div class="repeat-list" id="campaigns-list"></div>
+            </section>
+
+            <section class="panel" data-panel="depoimentos">
+              <div class="panel__heading"><div><p class="eyebrow">Confiança</p><h2>Depoimentos</h2></div><button type="button" class="small-action" data-add="testimonials">+ Novo depoimento</button></div>
+              <div class="repeat-list" id="testimonials-list"></div>
+            </section>
+
+            <section class="panel" data-panel="resultados">
+              <div class="panel__heading"><div><p class="eyebrow">Portfólio</p><h2>Resultados e trabalhos</h2></div><button type="button" class="small-action" data-add="portfolio">+ Novo resultado</button></div>
+              <p class="helper">Envie imagens JPG, PNG ou WebP e vídeos MP4 de até 20 MB.</p>
+              <div class="repeat-list media-list" id="portfolio-list"></div>
+            </section>
+          </form>
+
+          <aside class="preview-pane">
+            <div class="preview-pane__heading"><span>Prévia ao vivo</span><i id="preview-dot"></i></div>
+            <div class="phone-frame"><iframe id="card-preview" src="/?preview=admin" title="Prévia do cartão digital"></iframe></div>
+          </aside>
+        </div>
+      </main>
+    </div>
+
+    <template id="empty-template"><div class="empty-state"><strong>Nenhum item cadastrado</strong><p>Use o botão acima para adicionar.</p></div></template>
+    <script type="module" src="/admin/admin.js"></script>
+  </body>
+</html>

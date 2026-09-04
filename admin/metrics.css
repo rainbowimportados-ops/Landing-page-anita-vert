@@ -1,0 +1,7 @@
+.metric-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.metric-grid article { padding:22px; border:1px solid var(--border); border-radius:15px; background:white; }
+.metric-grid small { display:block; color:#806a5e; font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; }
+.metric-grid strong { display:block; margin-top:12px; font-family:"Cormorant Garamond",serif; font-size:2.8rem; font-weight:500; }
+.analytics-note { margin-top:18px; padding:18px; border-radius:14px; background:#e9ded1; }
+.analytics-note p { margin:5px 0 0; color:#6e5548; font-size:.74rem; line-height:1.55; }
+@media (max-width:760px) { .metric-grid { grid-template-columns:1fr; } }
