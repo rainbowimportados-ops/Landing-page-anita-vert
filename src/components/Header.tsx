@@ -45,10 +45,17 @@ export function Header() {
     return () => observador.disconnect()
   }, [])
 
+  /*
+   * No topo o cabeçalho é transparente sobre o hero escuro, então tudo dentro
+   * dele precisa das cores inversas. Com a barra clara (rolado ou menu aberto)
+   * volta ao par escuro sobre claro.
+   */
+  const sobreHero = !rolou && !menuAberto
+
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-colors duration-padrao ease-saida ${
-        rolou || menuAberto ? 'border-b border-borda bg-fundo/90 backdrop-blur' : 'border-b border-transparent'
+        sobreHero ? 'border-b border-transparent' : 'border-b border-borda bg-fundo/90 backdrop-blur'
       }`}
     >
       <div className="container-vert flex h-16 items-center justify-between gap-4">
@@ -58,18 +65,27 @@ export function Header() {
           aria-label={`${clinica.nome} — início`}
         >
           <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden="true">
-            <rect width="32" height="32" rx="8" fill="var(--cor-superficie-inversa)" />
+            <rect
+              width="32"
+              height="32"
+              rx="8"
+              fill={sobreHero ? 'rgb(var(--cor-conteudo-inverso))' : 'rgb(var(--cor-superficie-inversa))'}
+            />
             <path
               d="M9 11 L16 24 L23 11"
               fill="none"
-              stroke="var(--cor-marca-tenue)"
+              stroke={sobreHero ? 'rgb(var(--cor-superficie-inversa))' : 'rgb(var(--cor-marca-tenue))'}
               strokeWidth="3.4"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           </svg>
-          <span className="font-display text-lg tracking-tight text-conteudo">
-            Instituto <span className="text-marca">Vert</span>
+          <span
+            className={`font-display text-lg tracking-tight transition-colors duration-padrao ${
+              sobreHero ? 'text-conteudo-inverso' : 'text-conteudo'
+            }`}
+          >
+            Instituto <span className={sobreHero ? 'text-realce' : 'text-marca'}>Vert</span>
           </span>
         </a>
 
@@ -83,8 +99,12 @@ export function Header() {
                 aria-current={ativo ? 'true' : undefined}
                 className={`rounded-full px-3 py-2 text-sm transition-colors duration-rapido ${
                   ativo
-                    ? 'bg-marca-tenue font-medium text-conteudo'
-                    : 'text-conteudo-suave hover-fino:hover:text-conteudo'
+                    ? sobreHero
+                      ? 'bg-superficie-inversa-suave font-medium text-conteudo-inverso'
+                      : 'bg-marca-tenue font-medium text-conteudo'
+                    : sobreHero
+                      ? 'text-conteudo-inverso-suave hover-fino:hover:text-conteudo-inverso'
+                      : 'text-conteudo-suave hover-fino:hover:text-conteudo'
                 }`}
               >
                 {item.rotulo}
@@ -98,6 +118,7 @@ export function Header() {
             rastreio="header_agendar"
             numero={clinica.whatsappComercial}
             mensagem="Olá! Vim pelo site e gostaria de agendar uma avaliação."
+            variante={sobreHero ? 'clara' : 'primaria'}
             className="hidden px-5 sm:inline-flex"
           >
             Agendar avaliação
@@ -109,7 +130,11 @@ export function Header() {
             aria-expanded={menuAberto}
             aria-controls="menu-mobile"
             aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-borda-forte text-conteudo transition duration-rapido active:scale-95 lg:hidden"
+            className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition duration-rapido active:scale-95 lg:hidden ${
+              sobreHero
+                ? 'border-borda-inversa text-conteudo-inverso'
+                : 'border-borda-forte text-conteudo'
+            }`}
           >
             <svg
               viewBox="0 0 24 24"
