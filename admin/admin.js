@@ -72,6 +72,23 @@ function detectMediaType(file) {
   return '';
 }
 
+async function canDecodeImage(file) {
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    await new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = resolve;
+      image.onerror = () => reject(new Error('A imagem não pôde ser decodificada'));
+      image.src = objectUrl;
+    });
+    return true;
+  } catch {
+    return false;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 function mediaPreview(item) {
   const url = escapeHtml(item.mediaUrl || '');
   if (item.mediaType === 'document') {
@@ -380,6 +397,12 @@ contentForm.addEventListener('change', async (event) => {
     const key = event.target.dataset.identityUpload;
     if (!file.type.startsWith('image/') || file.size > 20 * 1024 * 1024) {
       setStatus(file.size > 20 * 1024 * 1024 ? 'A imagem ultrapassa o limite de 20 MB.' : 'Selecione um arquivo de imagem compatível.', 'error');
+      event.target.value = '';
+      return;
+    }
+    setStatus('Validando a imagem…');
+    if (!await canDecodeImage(file)) {
+      setStatus('Esta imagem parece estar danificada ou não é compatível com o navegador.', 'error');
       event.target.value = '';
       return;
     }
