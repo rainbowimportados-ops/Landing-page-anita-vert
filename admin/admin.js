@@ -187,6 +187,18 @@ function sendPreview() {
   preview.contentWindow.postMessage({ type: 'vert-card-preview', content }, window.location.origin);
 }
 
+async function loadMetrics() {
+  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const { data, error } = await supabase.from('link_clicks').select('botao').gte('created_at', since);
+  if (error) return;
+  const views = data.filter((row) => row.botao === 'visualizacao_pagina').length;
+  const clicks = data.length - views;
+  const whatsapp = data.filter((row) => row.botao.startsWith('whatsapp')).length;
+  document.querySelector('#metric-views').textContent = views.toLocaleString('pt-BR');
+  document.querySelector('#metric-clicks').textContent = clicks.toLocaleString('pt-BR');
+  document.querySelector('#metric-whatsapp').textContent = whatsapp.toLocaleString('pt-BR');
+}
+
 preview.addEventListener('load', sendPreview);
 
 saveButton.addEventListener('click', async () => {
@@ -220,6 +232,7 @@ async function start() {
     return showLogin();
   }
   showAdmin();
+  loadMetrics();
   setStatus('Carregando…');
   try {
     const data = await loadCardContent();

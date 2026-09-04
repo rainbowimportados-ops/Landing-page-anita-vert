@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/admin/admin.css" />
+    <link rel="stylesheet" href="/admin/metrics.css" />
   </head>
   <body>
     <main class="login-screen" id="login-screen">
@@ -34,7 +35,8 @@
           <img src="/assets/logo-secundaria-marrom.jpeg" alt="Instituto Vert" width="220" height="180" />
         </a>
         <nav aria-label="Seções do painel">
-          <button class="nav-link is-active" data-section="empresa">Dados da empresa</button>
+          <button class="nav-link is-active" data-section="visao-geral">Visão geral</button>
+          <button class="nav-link" data-section="empresa">Dados da empresa</button>
           <button class="nav-link" data-section="unidades">Unidades</button>
           <button class="nav-link" data-section="links">Links e contatos</button>
           <button class="nav-link" data-section="campanhas">Campanhas e promoções</button>
@@ -56,7 +58,17 @@
 
         <div class="editor-grid">
           <form class="editor" id="content-form">
-            <section class="panel is-active" data-panel="empresa">
+            <section class="panel is-active" data-panel="visao-geral">
+              <div class="panel__heading"><div><p class="eyebrow">Últimos 30 dias</p><h2>Visão geral</h2></div><span>Medição anônima de acessos</span></div>
+              <div class="metric-grid">
+                <article><small>Visualizações</small><strong id="metric-views">—</strong></article>
+                <article><small>Cliques de contato</small><strong id="metric-clicks">—</strong></article>
+                <article><small>WhatsApp</small><strong id="metric-whatsapp">—</strong></article>
+              </div>
+              <div class="analytics-note"><strong>Privacidade preservada</strong><p>O painel mostra volume, origem, aparelho e botão acessado. Nome, telefone e dados pessoais dos visitantes não são coletados.</p></div>
+            </section>
+
+            <section class="panel" data-panel="empresa">
               <div class="panel__heading"><div><p class="eyebrow">Identidade</p><h2>Dados da empresa</h2></div><span>Texto principal do cartão</span></div>
               <div class="form-grid">
                 <label>Nome da empresa<input name="company.name" /></label>
