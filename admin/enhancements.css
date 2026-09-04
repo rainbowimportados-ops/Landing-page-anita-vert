@@ -15,6 +15,14 @@
 .cep-status[data-state="error"] { color: var(--danger); }
 .cep-status[data-state="success"] { color: var(--green); }
 .toggle--lead { padding: 12px; border-radius: 10px; background: #f5eee6; }
+.unit-contact-list { margin-top: 12px; }
+.unit-contact-card { border-left: 4px solid var(--cacao); }
+.unit-contact-card .repeat-card__top > div { display: grid; gap: 3px; }
+.unit-contact-card .repeat-card__top small { color: #806a5e; font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; }
+.unit-contact-card__badge { padding: 6px 9px; border-radius: 999px; background: #f2e6d7; color: var(--cacao); font-size: .58rem; font-weight: 600; }
+.identity-upload > div { display: grid; grid-template-columns: 150px 1fr; gap: 16px; align-items: center; }
+.identity-upload img { width: 150px; height: 180px; border-radius: 12px; object-fit: cover; background: #eadfd3; }
+.identity-upload span { display: grid; gap: 8px; }
 .leads-list { display: grid; gap: 10px; margin-top: 18px; }
 .lead-card {
   display: grid;
@@ -50,4 +58,5 @@
   .lead-card { grid-template-columns: 1fr; }
   .lead-card a { min-width: 0; }
   .leads-list { margin-top: 14px; }
+  .identity-upload > div { grid-template-columns: 1fr; }
 }

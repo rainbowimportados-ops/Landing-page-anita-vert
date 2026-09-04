@@ -19,7 +19,7 @@ let dirty = false;
 let loadingAdmin = false;
 
 const blankItems = {
-  units: () => ({ id: crypto.randomUUID(), name: 'Nova unidade', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', address: '', phone: '', whatsappMessage: '', collectLead: true, mapsUrl: '', mapsQuery: '', website: '', active: true }),
+  units: () => ({ id: crypto.randomUUID(), name: 'Nova unidade', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', address: '', phone: '', contactUrl: '', contactButtonLabel: '', whatsappMessage: '', collectLead: true, mapsUrl: '', mapsQuery: '', website: '', active: true }),
   links: () => ({ id: crypto.randomUUID(), title: 'Novo link', url: '', preMessage: '', collectLead: true, active: true }),
   campaigns: () => ({ id: crypto.randomUUID(), title: 'Nova campanha', description: '', url: '', buttonLabel: 'Saiba mais', active: true }),
   testimonials: () => ({ id: crypto.randomUUID(), author: 'Paciente', text: '', active: true }),
@@ -138,14 +138,17 @@ document.querySelectorAll('.nav-link').forEach((button) => {
     document.querySelectorAll('.nav-link, .panel').forEach((element) => element.classList.remove('is-active'));
     button.classList.add('is-active');
     document.querySelector(`[data-panel="${button.dataset.section}"]`).classList.add('is-active');
+    if (button.dataset.section === 'links' && content) renderUnitContacts();
   });
 });
 
 function fillCompany() {
   contentForm.querySelectorAll('[name^="company."]').forEach((field) => {
     const key = field.name.split('.')[1];
-    field.value = content.company?.[key] ?? '';
+    field.value = content.company?.[key] ?? (key === 'logoAsset' ? '/assets/logo-principal-marrom.jpeg' : '');
   });
+  const heroPreview = document.querySelector('#hero-preview');
+  if (heroPreview) heroPreview.src = content.company?.heroImage || '/assets/hero.webp';
 }
 
 function field(label, key, value, options = {}) {
@@ -159,6 +162,30 @@ function toggle(value) {
 
 function leadToggle(value) {
   return `<label class="toggle toggle--lead"><input data-key="collectLead" type="checkbox" ${value !== false ? 'checked' : ''} /> Pedir nome e telefone antes de abrir</label>`;
+}
+
+function renderUnitContacts() {
+  const list = document.querySelector('#unit-contacts-list');
+  const units = content.units || [];
+  if (!units.length) {
+    list.innerHTML = '<div class="empty-state"><strong>Nenhuma unidade cadastrada</strong><p>Cadastre uma unidade primeiro.</p></div>';
+    return;
+  }
+  list.innerHTML = units.map((unit, index) => `
+    <article class="repeat-card unit-contact-card" data-type="units" data-index="${index}">
+      <div class="repeat-card__top">
+        <div><small>Unidade</small><strong>${escapeHtml(unit.name || unit.city || `Unidade ${index + 1}`)}</strong></div>
+        <span class="unit-contact-card__badge">Direcionamento separado</span>
+      </div>
+      <div class="fields">
+        ${field('Texto do botão', 'contactButtonLabel', unit.contactButtonLabel || '', { placeholder: `Agendar em ${unit.city || unit.name || 'esta unidade'}` })}
+        ${field('WhatsApp desta unidade', 'phone', unit.phone || '', { placeholder: '5516999999999' })}
+        ${field('Destino do botão (opcional)', 'contactUrl', unit.contactUrl || '', { wide: true, type: 'url', placeholder: 'Deixe vazio para abrir o WhatsApp acima' })}
+        ${field('Mensagem pré-preenchida desta unidade', 'whatsappMessage', unit.whatsappMessage || '', { wide: true, placeholder: 'Olá! Meu nome é {nome} e quero atendimento nesta unidade.' })}
+        <div class="field wide">${leadToggle(unit.collectLead)}</div>
+      </div>
+    </article>
+  `).join('');
 }
 
 function renderList(type) {
@@ -200,6 +227,7 @@ function renderList(type) {
 function renderAll() {
   fillCompany();
   ['units', 'links', 'campaigns', 'testimonials', 'portfolio'].forEach(renderList);
+  renderUnitContacts();
   sendPreview();
 }
 
@@ -216,7 +244,9 @@ document.querySelectorAll('[data-add]').forEach((button) => {
 contentForm.addEventListener('input', (event) => {
   const companyName = event.target.name;
   if (companyName?.startsWith('company.')) {
-    content.company[companyName.split('.')[1]] = event.target.value;
+    const key = companyName.split('.')[1];
+    content.company[key] = event.target.value;
+    if (key === 'heroImage') document.querySelector('#hero-preview').src = event.target.value || '/assets/hero.webp';
     setDirty();
     return;
   }
@@ -279,6 +309,26 @@ contentForm.addEventListener('click', (event) => {
 });
 
 contentForm.addEventListener('change', async (event) => {
+  if (event.target.matches('[data-company-upload]') && event.target.files?.[0]) {
+    const file = event.target.files[0];
+    const extension = file.name.split('.').pop().toLowerCase();
+    const path = `identity-${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    event.target.disabled = true;
+    setStatus('Enviando foto principal…');
+    const { error } = await supabase.storage.from('digital-card-media').upload(path, file, { cacheControl: '3600', upsert: false });
+    event.target.disabled = false;
+    if (error) {
+      setStatus(`Falha no envio: ${error.message}`, 'error');
+      return;
+    }
+    const { data } = supabase.storage.from('digital-card-media').getPublicUrl(path);
+    content.company.heroImage = data.publicUrl;
+    const input = contentForm.querySelector('[name="company.heroImage"]');
+    input.value = data.publicUrl;
+    document.querySelector('#hero-preview').src = data.publicUrl;
+    setDirty();
+    return;
+  }
   if (!event.target.matches('[data-upload]') || !event.target.files?.[0]) return;
   const file = event.target.files[0];
   const card = event.target.closest('.repeat-card');

@@ -66,12 +66,13 @@ function renderWhatsApp(units, company) {
   container.replaceChildren();
   units.filter((unit) => unit.active !== false).forEach((unit) => {
     const message = unit.whatsappMessage || company.whatsappMessage || `Olá! Meu nome é {nome}. Vim pelo cartão do Instituto Vert e quero agendar uma avaliação na unidade de ${String(unit.city || unit.name).toUpperCase()}.`;
-    const link = trackableLink(whatsappUrl(unit.phone || company.phone, personalizeMessage(message)), 'whatsapp_agendar', unit.id);
+    const destination = unit.contactUrl || whatsappUrl(unit.phone || company.phone, personalizeMessage(message));
+    const link = trackableLink(applyPreMessage(destination, message), 'whatsapp_agendar', unit.id);
     prepareLeadLink(link, { collectLead: unit.collectLead !== false, message, label: `WhatsApp — ${unit.city || unit.name}`, unit: unit.name || unit.city });
     link.className = 'contact-button contact-button--primary';
     link.innerHTML = '<span class="contact-button__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.3-4.7a8.5 8.5 0 1 1 16.2-4.1Z"/><path d="M8.2 7.7c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.5l.8 1.8c.1.3.1.5-.1.7l-.6.8c-.2.2-.1.4 0 .6.5 1 1.3 1.8 2.3 2.3.2.1.4.2.6 0l.8-1c.2-.2.4-.3.7-.2l1.9.9c.3.1.5.3.5.5 0 .3-.1 1.4-.7 2-.6.7-1.5.9-2.4.7-1-.2-2.3-.7-3.9-2.1-1.3-1.2-2.2-2.6-2.5-3.6-.3-.9 0-2.1.9-3.5Z"/></svg></span>';
     const copy = document.createElement('span'); copy.innerHTML = '<small>WhatsApp</small>';
-    const strong = document.createElement('strong'); strong.textContent = `Agendar em ${unit.city || unit.name}`; copy.append(strong); link.append(copy);
+    const strong = document.createElement('strong'); strong.textContent = unit.contactButtonLabel || `Agendar em ${unit.city || unit.name}`; copy.append(strong); link.append(copy);
     const arrow = document.createElement('span'); arrow.className = 'contact-button__arrow'; arrow.setAttribute('aria-hidden', 'true'); arrow.textContent = '→'; link.append(arrow); container.append(link);
   });
 }
@@ -130,8 +131,10 @@ function renderExtraLinks(items) {
 
 function renderContent(content) {
   if (!content) return; const company = content.company || {}; const units = content.units || []; currentCompany = company;
-  setText('.profile__identity p', company.category); setText('#cms-headline', company.headline); setText('#cms-description', company.description); setText('footer p', company.tagline);
-  const cities = units.filter((unit) => unit.active !== false).map((unit) => unit.city).filter(Boolean); if (cities.length) setText('.profile__identity span', cities.join(' • '));
+  setText('.profile__identity p', company.category); setText('#titulo', company.name); setText('.intro .eyebrow', company.ctaLabel); setText('#cms-headline', company.headline); setText('#cms-description', company.description); setText('footer p', company.tagline);
+  const hero = document.querySelector('.profile__photo > img'); if (hero && company.heroImage) hero.src = safeUrl(company.heroImage, hero.src);
+  const logo = document.querySelector('.brand img'); if (logo && company.logoAsset) logo.src = safeUrl(company.logoAsset, logo.src);
+  const cities = units.filter((unit) => unit.active !== false).map((unit) => unit.city).filter(Boolean); setText('.profile__identity span', company.identityLine || cities.join(' • '));
   renderWhatsApp(units, company); renderUnits(units); renderPortfolio(content.portfolio); renderCards('campanhas', 'campaign-list', content.campaigns, 'campaign'); renderCards('depoimentos', 'testimonial-list', content.testimonials, 'testimonial'); renderExtraLinks(content.links);
   const instagram = document.querySelector('.quick-links a[data-track="instagram"]'); if (instagram && company.instagram) { instagram.href = safeUrl(company.instagram); const label = instagram.querySelector('small'); if (label) label.textContent = company.instagramLabel || 'Instagram'; }
   const floating = document.querySelector('.floating-whatsapp');

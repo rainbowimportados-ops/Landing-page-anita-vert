@@ -97,9 +97,21 @@
               <div class="form-grid">
                 <label>Nome da empresa<input name="company.name" /></label>
                 <label>Categoria<input name="company.category" /></label>
+                <label>Linha de localização<input name="company.identityLine" placeholder="Franca • Ribeirão Preto" /></label>
+                <label>Chamada acima do título<input name="company.ctaLabel" placeholder="Agende sua avaliação" /></label>
                 <label class="wide">Frase principal<input name="company.headline" /></label>
                 <label class="wide">Descrição<textarea name="company.description" rows="3"></textarea></label>
                 <label class="wide">Slogan<input name="company.tagline" /></label>
+                <label>Versão oficial da logo
+                  <select name="company.logoAsset">
+                    <option value="/assets/logo-principal-marrom.jpeg">Principal marrom</option>
+                    <option value="/assets/logo-principal-clara.jpeg">Principal clara</option>
+                    <option value="/assets/logo-secundaria-marrom.jpeg">Horizontal marrom</option>
+                  </select>
+                </label>
+                <label class="wide identity-upload">Foto principal do cartão
+                  <div><img id="hero-preview" src="/assets/hero.webp" alt="Prévia da foto principal" /><span><input name="company.heroImage" type="url" placeholder="https://" /><label class="upload">Enviar foto<input type="file" data-company-upload accept="image/jpeg,image/png,image/webp" /></label></span></div>
+                </label>
               </div>
               <div class="brand-note"><img src="/assets/logo-principal-clara.jpeg" alt="Logo oficial Instituto Vert" /><div><strong>Identidade oficial protegida</strong><p>A logo é aplicada como arquivo original, sem alterações, filtros ou reconstrução.</p></div></div>
             </section>
@@ -121,7 +133,10 @@
                 <label>Texto do formulário<input name="company.leadFormDescription" placeholder="Informe seus dados para receber atendimento." /></label>
               </div>
               <p class="helper">Use <strong>{nome}</strong>, <strong>{telefone}</strong> ou <strong>{profissao}</strong> nas mensagens para personalizá-las automaticamente.</p>
-              <div class="subheading"><h3>Links extras</h3><button type="button" class="small-action" data-add="links">+ Novo link</button></div>
+              <div class="subheading"><h3>Botões de contato por unidade</h3></div>
+              <p class="helper">Cada unidade possui destino, mensagem e captação próprios. O WhatsApp principal acima funciona apenas como reserva quando a unidade não tiver um número.</p>
+              <div class="repeat-list unit-contact-list" id="unit-contacts-list"></div>
+              <div class="subheading"><h3>Links adicionais</h3><button type="button" class="small-action" data-add="links">+ Novo link</button></div>
               <div class="repeat-list" id="links-list"></div>
             </section>
 
