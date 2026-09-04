@@ -1,64 +1,112 @@
-const SUPABASE_URL = 'https://xiskevunqbvmoclygppc.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_aDaa3WVZP7siuPw8IbK_Wg_Y68x-MHH';
+import { loadCardContent, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from './lib/supabase.js';
 
 document.getElementById('year').textContent = new Date().getFullYear();
 
-document.querySelectorAll('a[target="_blank"]').forEach((link) => {
-  link.setAttribute('aria-label', `${link.textContent.trim()} — abre em uma nova aba`);
-});
-
-function detectarDispositivo() {
-  return window.matchMedia('(max-width: 760px)').matches ? 'celular' : 'computador';
+function safeUrl(value, fallback = '#') {
+  if (!value) return fallback;
+  try {
+    const url = new URL(value, window.location.origin);
+    return ['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol) ? url.href : fallback;
+  } catch { return fallback; }
 }
 
+function whatsappUrl(phone, message) {
+  const digits = String(phone || '').replace(/\D/g, '');
+  return digits ? `https://wa.me/${digits}?text=${encodeURIComponent(message)}` : '#';
+}
+
+function setText(selector, value) {
+  const element = document.querySelector(selector);
+  if (element && value) element.textContent = value;
+}
+
+function trackableLink(url, track, unit) {
+  const link = document.createElement('a');
+  link.href = safeUrl(url); link.target = '_blank'; link.rel = 'noopener noreferrer'; link.dataset.track = track;
+  if (unit) link.dataset.unit = unit;
+  return link;
+}
+
+function renderWhatsApp(units, company) {
+  const container = document.querySelector('.whatsapp-actions');
+  container.replaceChildren();
+  units.filter((unit) => unit.active !== false).forEach((unit) => {
+    const link = trackableLink(whatsappUrl(unit.phone || company.phone, `Olá! Vim pelo link do Instituto Vert e quero agendar uma avaliação na unidade de ${String(unit.city || unit.name).toUpperCase()}.`), 'whatsapp_agendar', unit.id);
+    link.className = 'contact-button contact-button--primary';
+    link.innerHTML = '<span class="contact-button__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.3-4.7a8.5 8.5 0 1 1 16.2-4.1Z"/><path d="M8.2 7.7c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.5l.8 1.8c.1.3.1.5-.1.7l-.6.8c-.2.2-.1.4 0 .6.5 1 1.3 1.8 2.3 2.3.2.1.4.2.6 0l.8-1c.2-.2.4-.3.7-.2l1.9.9c.3.1.5.3.5.5 0 .3-.1 1.4-.7 2-.6.7-1.5.9-2.4.7-1-.2-2.3-.7-3.9-2.1-1.3-1.2-2.2-2.6-2.5-3.6-.3-.9 0-2.1.9-3.5Z"/></svg></span>';
+    const copy = document.createElement('span'); copy.innerHTML = '<small>WhatsApp</small>';
+    const strong = document.createElement('strong'); strong.textContent = `Agendar em ${unit.city || unit.name}`; copy.append(strong); link.append(copy);
+    const arrow = document.createElement('span'); arrow.className = 'contact-button__arrow'; arrow.setAttribute('aria-hidden', 'true'); arrow.textContent = '→'; link.append(arrow); container.append(link);
+  });
+}
+
+function renderUnits(units) {
+  const grid = document.querySelector('.unit-grid'); grid.replaceChildren();
+  units.filter((unit) => unit.active !== false).forEach((unit) => {
+    const card = document.createElement('article'); card.className = 'google-card';
+    const map = document.createElement('div'); map.className = 'google-card__preview';
+    const iframe = document.createElement('iframe'); iframe.src = `https://www.google.com/maps?q=${encodeURIComponent(unit.mapsQuery || `${unit.name}, ${unit.city}`)}&output=embed`; iframe.title = `Prévia de ${unit.name} no Google Maps`; iframe.loading = 'lazy'; iframe.referrerPolicy = 'no-referrer-when-downgrade'; map.append(iframe);
+    const body = document.createElement('div'); body.className = 'google-card__content'; body.innerHTML = '<span class="google-card__google" aria-label="Google"><i></i> Google</span>';
+    const name = document.createElement('div'); name.innerHTML = '<small>Instituto Vert</small>'; const strong = document.createElement('strong'); strong.textContent = unit.name; name.append(strong); body.append(name);
+    if (unit.address) { const address = document.createElement('small'); address.textContent = unit.address; address.style.marginTop = '8px'; body.append(address); }
+    const link = trackableLink(unit.mapsUrl, 'google_perfil', unit.id); link.innerHTML = 'Ver perfil no Google <span aria-hidden="true">→</span>'; body.append(link); card.append(map, body); grid.append(card);
+  });
+}
+
+function renderPortfolio(items) {
+  const strip = document.querySelector('.media-strip'); const active = (items || []).filter((item) => item.active !== false && item.mediaUrl);
+  if (!active.length) return; strip.replaceChildren();
+  active.forEach((item) => {
+    const figure = document.createElement('figure'); let media;
+    if (item.mediaType === 'video') { media = document.createElement('video'); media.controls = true; media.playsInline = true; media.preload = 'metadata'; if (item.posterUrl) media.poster = safeUrl(item.posterUrl, ''); const source = document.createElement('source'); source.src = safeUrl(item.mediaUrl); source.type = 'video/mp4'; media.append(source); }
+    else { media = document.createElement('img'); media.src = safeUrl(item.mediaUrl); media.alt = item.title || 'Resultado real'; media.loading = 'lazy'; }
+    const caption = document.createElement('figcaption'); caption.textContent = item.title || 'Resultado real'; figure.append(media, caption); strip.append(figure);
+  });
+}
+
+function renderCards(sectionId, listId, items, kind) {
+  const active = (items || []).filter((item) => item.active !== false && (item.title || item.text)); const section = document.getElementById(sectionId);
+  if (!active.length) { section.hidden = true; return; }
+  section.hidden = false; const list = document.getElementById(listId); list.replaceChildren();
+  active.forEach((item) => {
+    const card = document.createElement('article'); card.className = kind === 'campaign' ? 'campaign-card' : 'testimonial-card';
+    if (kind === 'campaign') { const title = document.createElement('h3'); title.textContent = item.title; const copy = document.createElement('p'); copy.textContent = item.description || ''; card.append(title, copy); if (item.url) { const link = trackableLink(item.url, 'campanha'); link.textContent = item.buttonLabel || 'Saiba mais'; card.append(link); } }
+    else { const quote = document.createElement('blockquote'); quote.textContent = `“${item.text}”`; const author = document.createElement('cite'); author.textContent = item.author || 'Paciente'; card.append(quote, author); }
+    list.append(card);
+  });
+}
+
+function renderExtraLinks(items) {
+  const section = document.querySelector('.dentist-link'); const container = section.querySelector('div:last-child'); const active = (items || []).filter((item) => item.active !== false && item.url);
+  if (!active.length) { section.hidden = true; return; } section.hidden = false; container.replaceChildren();
+  active.forEach((item) => { const link = trackableLink(item.url, item.id || 'link_extra'); link.textContent = item.title || 'Acessar'; const arrow = document.createElement('span'); arrow.textContent = '→'; link.append(arrow); container.append(link); });
+}
+
+function renderContent(content) {
+  if (!content) return; const company = content.company || {}; const units = content.units || [];
+  setText('.profile__identity p', company.category); setText('#cms-headline', company.headline); setText('#cms-description', company.description); setText('footer p', company.tagline);
+  const cities = units.filter((unit) => unit.active !== false).map((unit) => unit.city).filter(Boolean); if (cities.length) setText('.profile__identity span', cities.join(' • '));
+  renderWhatsApp(units, company); renderUnits(units); renderPortfolio(content.portfolio); renderCards('campanhas', 'campaign-list', content.campaigns, 'campaign'); renderCards('depoimentos', 'testimonial-list', content.testimonials, 'testimonial'); renderExtraLinks(content.links);
+  const instagram = document.querySelector('.quick-links a[data-track="instagram"]'); if (instagram && company.instagram) { instagram.href = safeUrl(company.instagram); const label = instagram.querySelector('small'); if (label) label.textContent = company.instagramLabel || 'Instagram'; }
+  document.querySelector('.floating-whatsapp').href = whatsappUrl(company.phone || units[0]?.phone, 'Olá! Vim pelo link do Instituto Vert e quero agendar uma avaliação.'); bindTracking();
+}
+
+function detectarDispositivo() { return window.matchMedia('(max-width: 760px)').matches ? 'celular' : 'computador'; }
 function detectarOrigem() {
-  const params = new URLSearchParams(window.location.search);
-  const campanha = ['utm_source', 'utm_medium', 'utm_campaign']
-    .map((chave) => {
-      const valor = params.get(chave);
-      return valor ? `${chave.replace('utm_', '')}=${valor}` : '';
-    })
-    .filter(Boolean)
-    .join(';');
-
-  if (campanha) return campanha.slice(0, 120);
-  if (!document.referrer) return 'direto';
-
-  try {
-    const origem = new URL(document.referrer).hostname.replace(/^www\./, '');
-    return origem === window.location.hostname ? 'direto' : origem.slice(0, 120);
-  } catch {
-    return 'direto';
-  }
+  const params = new URLSearchParams(window.location.search); const campanha = ['utm_source', 'utm_medium', 'utm_campaign'].map((chave) => { const valor = params.get(chave); return valor ? `${chave.replace('utm_', '')}=${valor}` : ''; }).filter(Boolean).join(';');
+  if (campanha) return campanha.slice(0, 120); if (!document.referrer) return 'direto';
+  try { const origem = new URL(document.referrer).hostname.replace(/^www\./, ''); return origem === window.location.hostname ? 'direto' : origem.slice(0, 120); } catch { return 'direto'; }
 }
 
 function registrarClique(botao, unidade = null) {
-  const payload = {
-    botao: String(botao).slice(0, 40),
-    unidade: unidade ? String(unidade).slice(0, 40) : null,
-    origem: detectarOrigem(),
-    dispositivo: detectarDispositivo(),
-  };
-
-  void fetch(`${SUPABASE_URL}/rest/v1/link_clicks`, {
-    method: 'POST',
-    keepalive: true,
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: SUPABASE_PUBLISHABLE_KEY,
-      Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
-      Prefer: 'return=minimal',
-    },
-    body: JSON.stringify(payload),
-  }).catch(() => {
-    // A medição nunca deve impedir o visitante de acessar o link.
-  });
+  const payload = { botao: String(botao).slice(0, 40), unidade: unidade ? String(unidade).slice(0, 40) : null, origem: detectarOrigem(), dispositivo: detectarDispositivo() };
+  void fetch(`${SUPABASE_URL}/rest/v1/link_clicks`, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`, Prefer: 'return=minimal' }, body: JSON.stringify(payload) }).catch(() => {});
 }
 
-document.querySelectorAll('[data-track]').forEach((link) => {
-  link.addEventListener('click', () => {
-    registrarClique(link.dataset.track, link.dataset.unit || null);
-  });
-});
+function bindTracking() {
+  document.querySelectorAll('[data-track]:not([data-tracking-bound])').forEach((link) => { link.dataset.trackingBound = 'true'; link.addEventListener('click', () => registrarClique(link.dataset.track, link.dataset.unit || null)); });
+  document.querySelectorAll('a[target="_blank"]').forEach((link) => link.setAttribute('aria-label', `${link.textContent.trim()} — abre em uma nova aba`));
+}
 
-registrarClique('visualizacao_pagina');
+window.addEventListener('message', (event) => { if (event.origin === window.location.origin && event.data?.type === 'vert-card-preview') renderContent(event.data.content); });
+bindTracking(); registrarClique('visualizacao_pagina'); loadCardContent().then(({ content }) => renderContent(content)).catch(() => {});

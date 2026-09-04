@@ -38,8 +38,8 @@
         <div class="profile__content" id="contato">
           <div class="intro">
             <p class="eyebrow">Agende sua avaliação</p>
-            <h2>Como podemos cuidar do seu sorriso?</h2>
-            <p>Escolha a unidade e fale agora com nossa equipe.</p>
+            <h2 id="cms-headline">Como podemos cuidar do seu sorriso?</h2>
+            <p id="cms-description">Escolha a unidade e fale agora com nossa equipe.</p>
           </div>
 
           <div class="whatsapp-actions" aria-label="Agendamento pelo WhatsApp">
@@ -64,6 +64,11 @@
         </div>
       </section>
 
+      <section class="campaigns shell" id="campanhas" aria-labelledby="campanhas-titulo" hidden>
+        <div class="section-title"><div><p class="eyebrow">Novidades</p><h2 id="campanhas-titulo">Campanhas e promoções</h2></div></div>
+        <div class="campaign-grid" id="campaign-list"></div>
+      </section>
+
       <section class="proof shell" id="resultados" aria-labelledby="resultados-titulo">
         <div class="section-title">
           <div><p class="eyebrow">Resultados reais</p><h2 id="resultados-titulo">Naturalidade em cada detalhe.</h2></div>
@@ -77,6 +82,11 @@
           <figure><video controls playsinline preload="metadata" poster="/assets/video-poster.webp" aria-label="Vídeo de resultado real"><source src="/assets/resultado.mp4" type="video/mp4" />Seu navegador não suporta vídeo.</video><figcaption>Resultado em vídeo</figcaption></figure>
         </div>
         <p class="clinical-note">Cada caso é único. Os resultados podem variar de acordo com as características e necessidades de cada paciente.</p>
+      </section>
+
+      <section class="testimonials shell" id="depoimentos" aria-labelledby="depoimentos-titulo" hidden>
+        <div class="section-title"><div><p class="eyebrow">Experiências</p><h2 id="depoimentos-titulo">O que nossos pacientes dizem.</h2></div></div>
+        <div class="testimonial-grid" id="testimonial-list"></div>
       </section>
 
       <section class="units" id="unidades" aria-labelledby="unidades-titulo">
