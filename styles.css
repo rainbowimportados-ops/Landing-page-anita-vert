@@ -15,12 +15,8 @@ h2 { font-size:clamp(2.3rem,6vw,3.7rem); }
 .profile__photo { position:relative; min-height:680px; overflow:hidden; }
 .profile__photo>img { width:100%; height:100%; object-fit:cover; object-position:50% 36%; }
 .profile__gradient { position:absolute; inset:0; background:linear-gradient(180deg,rgba(31,18,13,.2),rgba(31,18,13,.02) 45%,rgba(31,18,13,.92)); }
-.brand { position:absolute; top:24px; left:24px; width:105px; color:var(--rose); }
-.brand path { fill:none; }
-.brand .brand__ring { stroke:currentColor; stroke-width:1.7; }
-.brand text { fill:currentColor; font-weight:300; }
-.brand .brand__name { font-family:var(--serif); font-size:38px; letter-spacing:3px; }
-.brand .brand__institute text { font-family:var(--sans); font-size:8px; letter-spacing:0; text-anchor:middle; }
+.brand { position:absolute; top:20px; left:20px; width:116px; overflow:hidden; border-radius:12px; box-shadow:0 8px 24px rgba(24,13,9,.18); }
+.brand img { width:100%; height:auto; }
 .profile__identity { position:absolute; right:28px; bottom:30px; left:28px; }
 .profile__identity p { margin:0 0 2px; color:var(--nude); font-size:.64rem; letter-spacing:.2em; text-transform:uppercase; }
 .profile__identity h1 { font-size:clamp(3.5rem,7vw,5.6rem); }
@@ -70,7 +66,7 @@ footer strong { color:var(--rose); font-family:var(--serif); font-size:1.35rem; 
   .profile { display:block; min-height:0; margin-top:10px; border-radius:22px; }
   .profile__photo { min-height:390px; }
   .profile__photo>img { object-position:50% 30%; }
-  .brand { top:15px; left:15px; width:84px; }
+  .brand { top:14px; left:14px; width:104px; border-radius:10px; }
   .profile__identity { right:18px; bottom:20px; left:18px; }
   .profile__identity h1 { font-size:3.7rem; }
   .profile__content { padding:28px 16px 18px; }
