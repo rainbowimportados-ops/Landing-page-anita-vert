@@ -12,6 +12,7 @@ const preview = document.querySelector('#card-preview');
 let session = null;
 let content = null;
 let dirty = false;
+let loadingAdmin = false;
 
 const blankItems = {
   units: () => ({ id: crypto.randomUUID(), name: 'Nova unidade', city: '', address: '', phone: '', mapsUrl: '', mapsQuery: '', website: '', active: true }),
@@ -51,11 +52,18 @@ loginForm.addEventListener('submit', async (event) => {
   const button = loginForm.querySelector('button');
   button.disabled = true;
   loginFeedback.textContent = 'Enviando link seguro…';
-  const { error } = await supabase.auth.signInWithOtp({
+  const { data, error } = await supabase.auth.signInWithOtp({
     email: ADMIN_EMAIL,
     options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/admin/` },
   });
-  loginFeedback.textContent = error ? `Não foi possível enviar: ${error.message}` : 'Link enviado. Verifique a caixa de entrada e o spam.';
+  if (error) {
+    loginFeedback.textContent = `Não foi possível acessar: ${error.message}`;
+  } else if (data.session) {
+    loginFeedback.textContent = 'Acesso confirmado. Abrindo o painel…';
+    await openAdmin(data.session);
+  } else {
+    loginFeedback.textContent = 'Link enviado. Verifique a caixa de entrada e o spam.';
+  }
   button.disabled = false;
 });
 
@@ -222,17 +230,19 @@ window.addEventListener('beforeunload', (event) => {
   event.preventDefault();
 });
 
-async function start() {
-  const { data } = await supabase.auth.getSession();
-  session = data.session;
-  if (!session) return showLogin();
+async function openAdmin(nextSession) {
+  if (loadingAdmin) return;
+  loadingAdmin = true;
+  session = nextSession;
   if (session.user.email?.toLowerCase() !== ADMIN_EMAIL) {
     await supabase.auth.signOut();
     loginFeedback.textContent = 'Este e-mail não possui autorização.';
-    return showLogin();
+    showLogin();
+    loadingAdmin = false;
+    return;
   }
   showAdmin();
-  loadMetrics();
+  void loadMetrics();
   setStatus('Carregando…');
   try {
     const data = await loadCardContent();
@@ -242,10 +252,18 @@ async function start() {
   } catch (error) {
     setStatus(`Erro ao carregar: ${error.message}`, 'error');
   }
+  loadingAdmin = false;
+}
+
+async function start() {
+  const { data } = await supabase.auth.getSession();
+  if (!data.session) return showLogin();
+  await openAdmin(data.session);
 }
 
 supabase.auth.onAuthStateChange((_event, nextSession) => {
   session = nextSession;
+  if (nextSession && adminApp.hidden) setTimeout(() => void openAdmin(nextSession), 0);
 });
 
 start();
