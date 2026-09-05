@@ -52,15 +52,17 @@ export function Rodape() {
                 <span className="sr-only"> (abre em uma nova aba)</span>
               </a>
             </li>
-            <li>
-              <a
-                href={`mailto:${clinica.email}`}
-                onClick={() => registrarClique('rodape_email')}
-                className={classeLink}
-              >
-                {clinica.email}
-              </a>
-            </li>
+            {clinica.email && (
+              <li>
+                <a
+                  href={`mailto:${clinica.email}`}
+                  onClick={() => registrarClique('rodape_email')}
+                  className={classeLink}
+                >
+                  {clinica.email}
+                </a>
+              </li>
+            )}
           </ul>
         </div>
       </div>

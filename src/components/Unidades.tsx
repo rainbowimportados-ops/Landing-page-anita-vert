@@ -29,16 +29,18 @@ export function Unidades() {
                     <IconLocal className="mt-0.5 h-5 w-5 shrink-0 text-conteudo-tenue" />
                     <span>{unidade.endereco}</span>
                   </p>
-                  <p className="flex gap-3">
-                    <IconRelogio className="mt-0.5 h-5 w-5 shrink-0 text-conteudo-tenue" />
-                    <span>
-                      {unidade.horarios.map((horario) => (
-                        <span key={horario} className="block">
-                          {horario}
-                        </span>
-                      ))}
-                    </span>
-                  </p>
+                  {unidade.horarios.length > 0 && (
+                    <p className="flex gap-3">
+                      <IconRelogio className="mt-0.5 h-5 w-5 shrink-0 text-conteudo-tenue" />
+                      <span>
+                        {unidade.horarios.map((horario) => (
+                          <span key={horario} className="block">
+                            {horario}
+                          </span>
+                        ))}
+                      </span>
+                    </p>
+                  )}
                 </div>
 
                 <div className="mt-7 flex flex-wrap gap-3">

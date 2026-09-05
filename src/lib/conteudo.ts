@@ -46,7 +46,7 @@ export type Conteudo = {
 export const conteudoPadrao: Conteudo = {
   clinica: clinicaPadrao,
   unidades: unidadesPadrao,
-  faq: faqPadrao,
+  faq: faqPadrao.filter((item) => item.resposta.trim() !== ''),
   depoimentos: depoimentosPadrao,
   rodapeLegal: rodapeLegalPadrao,
 }
@@ -63,10 +63,14 @@ export function aplicar(ajustes: Ajustes | null | undefined): Conteudo {
       ...(ajustes.unidades?.[unidade.slug] ?? {}),
     })),
 
-    faq: faqPadrao.map((item) => ({
-      ...item,
-      resposta: ajustes.faq?.[item.pergunta]?.trim() || item.resposta,
-    })),
+    // Pergunta ainda sem resposta não vai para a página: melhor um FAQ curto
+    // e verdadeiro do que um item vazio.
+    faq: faqPadrao
+      .map((item) => ({
+        ...item,
+        resposta: ajustes.faq?.[item.pergunta]?.trim() || item.resposta,
+      }))
+      .filter((item) => item.resposta.trim() !== ''),
 
     depoimentos: ajustes.depoimentos ?? depoimentosPadrao,
 

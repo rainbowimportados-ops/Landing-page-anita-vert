@@ -11,13 +11,12 @@ export type Unidade = {
   slug: string
   nome: string
   cidade: string
-  /** TODO: confirmar endereço completo. */
   endereco: string
   /** Telefone no formato internacional, só dígitos: 55 + DDD + número. */
   whatsapp: string
   /** Texto pré-preenchido na conversa do WhatsApp. */
   mensagem: string
-  /** TODO: confirmar horários de atendimento. */
+  /** Vazio esconde a linha de horários. Preenchível pelo painel. */
   horarios: string[]
   /** TODO: colar o link "Compartilhar › Copiar link" do Google Maps. */
   mapsUrl: string
@@ -49,12 +48,10 @@ export const clinica = {
   tagline: 'Odontologia estética e clínica',
   descricao:
     'Planejamento individual, materiais de alto padrão e uma equipe que acompanha você do primeiro diagnóstico ao resultado final.',
-  /** TODO: confirmar perfil oficial. */
-  instagram: 'https://instagram.com/institutovert',
-  /** TODO: confirmar e-mail de contato. */
-  email: 'contato@institutovert.com.br',
-  /** TODO: trocar pelo domínio definitivo antes de publicar. */
-  siteUrl: 'https://institutovert.com.br',
+  instagram: 'https://www.instagram.com/institutovert.br',
+  /** Vazio esconde o link no rodapé — a clínica atende por WhatsApp. */
+  email: '',
+  siteUrl: 'https://institutovert.app',
   /** Número comercial, usado quando o visitante ainda não escolheu unidade. */
   whatsappComercial: '5516988094942',
   /** Número do atendimento, para quem já é paciente. */
@@ -75,21 +72,21 @@ export const unidades: Unidade[] = [
     slug: 'franca',
     nome: 'Vert Franca',
     cidade: 'Franca / SP',
-    endereco: 'TODO: endereço completo da unidade de Franca',
+    endereco: 'Rua Capitão Urias Batista de Avelar, 3736 — Vila Chico Júlio, Franca/SP, CEP 14405-217',
     whatsapp: '5516988094942',
     mensagem: 'Olá! Vim pelo site e gostaria de agendar uma avaliação na unidade de Franca.',
-    horarios: ['Segunda a sexta: TODO', 'Sábado: TODO'],
+    horarios: [],
     mapsUrl: '',
   },
   {
     slug: 'ribeirao-preto',
     nome: 'Vert Ribeirão Preto',
     cidade: 'Ribeirão Preto / SP',
-    endereco: 'TODO: endereço completo da unidade de Ribeirão Preto',
+    endereco: 'Av. Presidente Vargas, 2001, Sala 98 — Jardim Santa Ângela, Ribeirão Preto/SP, CEP 14020-525',
     whatsapp: '5516988094942',
     mensagem:
       'Olá! Vim pelo site e gostaria de agendar uma avaliação na unidade de Ribeirão Preto.',
-    horarios: ['Segunda a sexta: TODO', 'Sábado: TODO'],
+    horarios: [],
     mapsUrl: '',
   },
 ]
@@ -182,11 +179,12 @@ export const etapas = [
  */
 export const depoimentos: Depoimento[] = []
 
-export const faq = [
+/** `pendente` esconde a pergunta até o painel dar uma resposta de verdade. */
+export const faq: Array<{ pergunta: string; resposta: string; pendente?: boolean }> = [
   {
     pergunta: 'Quanto custa a primeira avaliação?',
-    resposta:
-      'TODO: confirmar o valor (ou a gratuidade) da primeira avaliação antes de publicar a página.',
+    resposta: '',
+    pendente: true,
   },
   {
     pergunta: 'Lentes em resina duram quanto tempo?',
@@ -195,11 +193,13 @@ export const faq = [
   },
   {
     pergunta: 'Vocês atendem por convênio?',
-    resposta: 'TODO: confirmar quais convênios são aceitos, se houver.',
+    resposta: '',
+    pendente: true,
   },
   {
     pergunta: 'Quais são as formas de pagamento?',
-    resposta: 'TODO: confirmar formas de pagamento e parcelamento oferecidos pela clínica.',
+    resposta: '',
+    pendente: true,
   },
   {
     pergunta: 'Preciso trocar de dentista para fazer só a parte estética?',
@@ -217,14 +217,14 @@ export const profissionais = {
     {
       titulo: 'Cursos e imersões',
       texto:
-        'Formações práticas em estética e reabilitação, com turmas reduzidas. TODO: confirmar calendário e formato antes de divulgar.',
+        'Formações práticas em estética e reabilitação, com turmas reduzidas. Fale com a equipe para saber das próximas turmas.',
       botao: 'Quero saber dos cursos',
       mensagem: 'Olá! Vim pelo site e gostaria de informações sobre os cursos do Instituto Vert.',
     },
     {
       titulo: 'Locação de consultório',
       texto:
-        'Salas equipadas para atendimento por período, dentro da estrutura da clínica. TODO: confirmar unidades e valores disponíveis.',
+        'Salas equipadas para atendimento por período, dentro da estrutura da clínica. Consulte disponibilidade e condições.',
       botao: 'Quero alugar uma sala',
       mensagem: 'Olá! Vim pelo site e gostaria de informações sobre a locação de consultório.',
     },
