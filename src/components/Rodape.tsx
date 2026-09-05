@@ -1,5 +1,6 @@
 import { registrarClique } from '../lib/analytics'
 import { useConteudo } from '../lib/ConteudoContexto'
+import { MarcaVert } from './MarcaVert'
 
 /** Links do rodapé com altura de toque de 44px (§2 touch-target-size). */
 const classeLink =
@@ -12,9 +13,7 @@ export function Rodape() {
     <footer className="bg-superficie-rodape py-12 text-conteudo-inverso-suave">
       <div className="container-vert grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2 lg:col-span-1">
-          <span className="font-display text-lg text-conteudo-inverso">
-            Instituto <span className="text-realce">Vert</span>
-          </span>
+          <MarcaVert className="h-6 text-conteudo-inverso" />
           <p className="mt-3 max-w-xs text-sm leading-relaxed">
             {clinica.tagline} em Franca e Ribeirão Preto.
           </p>

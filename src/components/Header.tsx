@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useConteudo } from '../lib/ConteudoContexto'
+import { MarcaVert } from './MarcaVert'
 import { BotaoWhatsApp } from './CTA'
 
 const navegacao = [
@@ -66,32 +67,25 @@ export function Header() {
           aria-label={`${clinica.nome} — início`}
         >
           {marca.logo ? (
-            <img src={marca.logo} alt="" className="h-8 w-8 rounded-lg object-contain" />
+            <>
+              <img src={marca.logo} alt="" className="h-8 w-8 rounded-lg object-contain" />
+              {/* Um logotipo enviado pelo painel pode não trazer o nome, então
+                  o texto continua ao lado dele. O lockup oficial já traz. */}
+              <span
+                className={`font-display text-lg tracking-tight transition-colors duration-padrao ${
+                  sobreHero ? 'text-conteudo-inverso' : 'text-conteudo'
+                }`}
+              >
+                Instituto <span className={sobreHero ? 'text-realce' : 'text-marca'}>Vert</span>
+              </span>
+            </>
           ) : (
-          <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden="true">
-            <rect
-              width="32"
-              height="32"
-              rx="8"
-              fill={sobreHero ? 'rgb(var(--cor-conteudo-inverso))' : 'rgb(var(--cor-superficie-inversa))'}
+            <MarcaVert
+              className={`h-6 transition-colors duration-padrao sm:h-7 ${
+                sobreHero ? 'text-conteudo-inverso' : 'text-conteudo'
+              }`}
             />
-            <path
-              d="M9 11 L16 24 L23 11"
-              fill="none"
-              stroke={sobreHero ? 'rgb(var(--cor-superficie-inversa))' : 'rgb(var(--cor-marca-tenue))'}
-              strokeWidth="3.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
           )}
-          <span
-            className={`font-display text-lg tracking-tight transition-colors duration-padrao ${
-              sobreHero ? 'text-conteudo-inverso' : 'text-conteudo'
-            }`}
-          >
-            Instituto <span className={sobreHero ? 'text-realce' : 'text-marca'}>Vert</span>
-          </span>
         </a>
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Seções da página">
