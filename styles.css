@@ -1,5 +1,6 @@
 :root { --deep:#21140f; --chocolate:#4a2f1f; --cacao:#6a452e; --nude:#cbb6a5; --champagne:#eadac6; --ivory:#f7f3ef; --rose:#efd7d2; --whatsapp:#1f9d60; --line:rgba(234,218,198,.2); --serif:"Cormorant Garamond",Georgia,serif; --sans:"Montserrat",system-ui,sans-serif; }
 * { box-sizing:border-box; }
+[hidden] { display:none!important; }
 html { scroll-behavior:smooth; background:var(--deep); }
 body { margin:0; background:var(--deep); color:var(--ivory); font-family:var(--sans); font-weight:300; line-height:1.5; -webkit-font-smoothing:antialiased; }
 img,video,svg { display:block; max-width:100%; }
