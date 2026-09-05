@@ -209,6 +209,62 @@ function renderExtraLinks(items) {
   });
 }
 
+function isCloseFriendsFormation(item = {}) {
+  return item.category === 'close_friends' || /close\s*friends/i.test(item.title || '');
+}
+
+function renderFormationPreviews(item) {
+  const previews = (item.previews || []).filter((preview) => preview.mediaUrl).slice(0, 4);
+  if (!previews.length) return null;
+  const gallery = document.createElement('div');
+  gallery.className = 'formation-card__previews';
+  gallery.setAttribute('aria-label', 'Prévia do conteúdo do Close Friends');
+  previews.forEach((preview) => {
+    const figure = document.createElement('figure');
+    let media;
+    if (preview.mediaType === 'video') {
+      media = document.createElement('video');
+      media.src = safeUrl(preview.mediaUrl);
+      media.controls = true;
+      media.playsInline = true;
+      media.preload = 'metadata';
+    } else {
+      media = document.createElement('img');
+      media.src = safeUrl(preview.mediaUrl);
+      media.alt = preview.title || 'Prévia do Close Friends Vert';
+      media.loading = 'lazy';
+    }
+    const caption = document.createElement('figcaption');
+    const badge = document.createElement('small'); badge.textContent = 'Prévia';
+    const title = document.createElement('strong'); title.textContent = preview.title || 'Conteúdo exclusivo';
+    caption.append(badge, title);
+    if (preview.description) { const copy = document.createElement('span'); copy.textContent = preview.description; caption.append(copy); }
+    figure.append(media, caption);
+    gallery.append(figure);
+  });
+  return gallery;
+}
+
+function renderInstagramMetrics(item) {
+  const metrics = item.instagramMetrics || {};
+  const entries = [
+    [metrics.followers, 'seguidores'],
+    [metrics.reach30d, 'alcance em 30 dias'],
+    [metrics.contentCount, 'conteúdos'],
+  ].filter(([value]) => value !== undefined && value !== null && value !== '');
+  if (!entries.length) return null;
+  const list = document.createElement('div');
+  list.className = 'formation-card__metrics';
+  list.setAttribute('aria-label', 'Dados recentes do Instagram');
+  entries.forEach(([value, label]) => {
+    const metric = document.createElement('span');
+    const strong = document.createElement('strong'); strong.textContent = Number(value).toLocaleString('pt-BR');
+    const small = document.createElement('small'); small.textContent = label;
+    metric.append(strong, small); list.append(metric);
+  });
+  return list;
+}
+
 function renderFormations(items, settings, company) {
   const section = document.querySelector('#formacoes');
   const container = document.querySelector('#formation-list');
@@ -222,6 +278,8 @@ function renderFormations(items, settings, company) {
   active.forEach((item) => {
     const card = document.createElement('article');
     card.className = 'formation-card';
+    const closeFriends = isCloseFriendsFormation(item);
+    if (closeFriends) card.classList.add('formation-card--close-friends');
     const heading = document.createElement('div');
     const eyebrow = document.createElement('small'); eyebrow.textContent = item.eyebrow || item.format || 'Formação Vert';
     const title = document.createElement('h3'); title.textContent = item.title;
@@ -229,6 +287,14 @@ function renderFormations(items, settings, company) {
     const description = document.createElement('p'); description.textContent = item.description || 'Conheça esta experiência de formação do Instituto Vert.';
     const meta = document.createElement('div'); meta.className = 'formation-card__meta';
     [item.format, item.schedule, item.location].filter(Boolean).forEach((value) => { const span = document.createElement('span'); span.textContent = value; meta.append(span); });
+    const previews = closeFriends ? renderFormationPreviews(item) : null;
+    const instagramMetrics = closeFriends ? renderInstagramMetrics(item) : null;
+    let instagramLink = null;
+    if (closeFriends && item.instagramUrl) {
+      instagramLink = trackableLink(item.instagramUrl, 'instagram_close_friends');
+      instagramLink.className = 'formation-card__instagram';
+      instagramLink.innerHTML = `<span aria-hidden="true">◎</span><span><small>Instagram do Close Friends</small><strong>${escapeText(item.instagramHandle || 'Ver perfil')}</strong></span><b aria-hidden="true">↗</b>`;
+    }
     const message = item.whatsappMessage || settings.whatsappMessage || 'Olá! Meu nome é {nome}. Quero informações sobre {curso}. Sou {perfil}. {curso_anterior}';
     const formationPhone = (company.whatsappMode || 'shared') === 'shared'
       ? company.phone
@@ -238,7 +304,12 @@ function renderFormations(items, settings, company) {
     link.className = 'formation-card__action';
     link.innerHTML = `<span>${escapeText(item.buttonLabel || settings.buttonLabel || 'Quero saber mais')}</span><b aria-hidden="true">→</b>`;
     prepareLeadLink(link, { message, label: `Formação — ${item.title}`, leadType: 'formation', courseId: item.id || '', courseTitle: item.title });
-    card.append(heading, description, meta, link);
+    card.append(heading, description);
+    if (previews) card.append(previews);
+    if (instagramMetrics) card.append(instagramMetrics);
+    card.append(meta);
+    if (instagramLink) card.append(instagramLink);
+    card.append(link);
     container.append(card);
   });
 }

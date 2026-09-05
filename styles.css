@@ -84,6 +84,24 @@ h2 { font-size:clamp(2.3rem,6vw,3.7rem); }
 .formation-card__meta span { padding:7px 9px; border:1px solid var(--line); border-radius:999px; color:var(--champagne); font-size:.56rem; letter-spacing:.08em; text-transform:uppercase; }
 .formation-card__action { display:flex; min-height:54px; align-items:center; justify-content:space-between; margin-top:auto; padding:0 16px; border-radius:10px; background:var(--champagne); color:var(--deep); font-size:.65rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
 .formation-card__action b { font-size:1.15rem; font-weight:400; }
+.formation-card__previews { display:grid; grid-auto-columns:minmax(104px,1fr); grid-auto-flow:column; gap:8px; margin:0 0 16px; padding-bottom:2px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; }
+.formation-card__previews::-webkit-scrollbar { display:none; }
+.formation-card__previews figure { position:relative; min-width:0; aspect-ratio:4/5; margin:0; overflow:hidden; border:1px solid var(--line); border-radius:11px; background:#20120d; scroll-snap-align:start; }
+.formation-card__previews img,.formation-card__previews video { width:100%; height:100%; object-fit:cover; }
+.formation-card__previews figcaption { position:absolute; right:0; bottom:0; left:0; display:grid; gap:2px; padding:30px 8px 8px; background:linear-gradient(transparent,rgba(20,11,8,.94)); pointer-events:none; }
+.formation-card__previews figcaption small { font-size:.46rem; letter-spacing:.12em; }
+.formation-card__previews figcaption strong { overflow:hidden; font-size:.58rem; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
+.formation-card__previews figcaption span { display:-webkit-box; overflow:hidden; color:var(--nude); font-family:var(--serif); font-size:.61rem; line-height:1.2; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+.formation-card__metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin:0 0 15px; }
+.formation-card__metrics>span { display:grid; gap:1px; padding:9px; border:1px solid var(--line); border-radius:9px; background:rgba(255,255,255,.025); }
+.formation-card__metrics strong { font-family:var(--serif); font-size:1.15rem; font-weight:400; }
+.formation-card__metrics small { color:var(--nude); font-size:.45rem; letter-spacing:.08em; line-height:1.25; text-transform:uppercase; }
+.formation-card__instagram { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:9px; min-height:48px; margin:0 0 9px; padding:8px 12px; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.035); }
+.formation-card__instagram>span:first-child { display:grid; width:30px; height:30px; place-items:center; border-radius:50%; background:rgba(239,215,210,.12); color:var(--rose); font-size:1.05rem; }
+.formation-card__instagram>span:nth-child(2) { display:grid; gap:1px; }
+.formation-card__instagram small { font-size:.46rem; letter-spacing:.11em; }
+.formation-card__instagram strong { overflow:hidden; font-size:.65rem; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
+.formation-card__instagram b { color:var(--rose); font-size:.85rem; font-weight:400; }
 footer { padding-block:34px 110px; border-top:1px solid var(--line); color:#9e8271; }
 footer>div { display:flex; align-items:center; justify-content:space-between; gap:24px; font-size:.62rem; }
 footer p { margin:0; }
@@ -174,6 +192,9 @@ footer strong { color:var(--rose); font-family:var(--serif); font-size:1.35rem; 
   .formation-card__meta span { padding:6px 8px; font-size:.51rem; }
   .formation-card__meta span:nth-child(n+3) { display:none; }
   .formation-card__action { min-height:48px; }
+  .formation-card__previews { grid-auto-columns:42%; margin-right:-18px; padding-right:18px; }
+  .formation-card__metrics { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .formation-card__instagram { min-height:46px; }
   footer { padding-bottom:104px; }
   footer>div { align-items:flex-start; flex-direction:column; gap:8px; }
   .floating-whatsapp { right:10px; bottom:max(10px,env(safe-area-inset-bottom)); left:10px; justify-content:center; min-height:58px; }

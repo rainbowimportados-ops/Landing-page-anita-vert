@@ -35,7 +35,7 @@ let loadingAdmin = false;
 const blankItems = {
   units: () => ({ id: crypto.randomUUID(), name: 'Nova unidade', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', address: '', phone: '', contactUrl: '', contactButtonLabel: '', whatsappMessage: '', collectLead: true, mapsUrl: '', mapsQuery: '', website: '', active: true }),
   links: () => ({ id: crypto.randomUUID(), title: 'Novo link', url: '', preMessage: '', collectLead: true, active: true }),
-  formations: () => ({ id: crypto.randomUUID(), title: 'Nova formação', eyebrow: 'Para dentistas e estudantes', description: '', format: 'Presencial', schedule: '', location: '', whatsappPhone: '', buttonLabel: 'Quero informações', whatsappMessage: '', active: true }),
+  formations: () => ({ id: crypto.randomUUID(), category: 'course', title: 'Nova formação', eyebrow: 'Para dentistas e estudantes', description: '', format: 'Presencial', schedule: '', location: '', whatsappPhone: '', buttonLabel: 'Quero informações', whatsappMessage: '', instagramHandle: '', instagramUrl: '', previews: [], active: true }),
   campaigns: () => ({ id: crypto.randomUUID(), title: 'Nova campanha', description: '', url: '', buttonLabel: 'Saiba mais', active: true }),
   testimonials: () => ({ id: crypto.randomUUID(), author: 'Paciente', text: '', active: true }),
   portfolio: () => ({ id: crypto.randomUUID(), title: 'Novo resultado', procedure: '', description: '', details: '', mediaUrl: '', fileName: '', posterUrl: '', mediaType: 'image', active: true }),
@@ -64,6 +64,7 @@ const PORTFOLIO_ACCEPT = [
 ].join(',');
 
 const DOCUMENT_EXTENSIONS = new Set(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'txt', 'csv']);
+const FORMATION_PREVIEW_ACCEPT = 'image/jpeg,image/png,image/webp,image/gif,image/avif,video/mp4';
 
 function detectMediaType(file) {
   const extension = file.name.split('.').pop()?.toLowerCase() || '';
@@ -99,6 +100,17 @@ function mediaPreview(item) {
   const tag = item.mediaType === 'video' ? 'video' : 'img';
   const attributes = item.mediaType === 'video' ? 'muted controls playsinline' : 'alt="Prévia da mídia"';
   return `<${tag} class="media-thumb" src="${url || fallback}" ${attributes}></${tag}>`;
+}
+
+function isCloseFriendsFormation(item = {}) {
+  return item.category === 'close_friends' || /close\s*friends/i.test(item.title || '');
+}
+
+function formationPreviewMedia(item = {}) {
+  if (!item.mediaUrl) return '<div class="formation-preview-placeholder"><span aria-hidden="true">＋</span><small>Adicione uma imagem ou vídeo</small></div>';
+  const url = escapeHtml(item.mediaUrl);
+  if (item.mediaType === 'video') return `<video class="formation-preview-thumb" src="${url}" muted controls playsinline preload="metadata"></video>`;
+  return `<img class="formation-preview-thumb" src="${url}" alt="Prévia do conteúdo" />`;
 }
 
 function escapeHtml(value = '') {
@@ -258,6 +270,43 @@ function textareaField(label, key, value, options = {}) {
   return `<label class="field${wide ? ' wide' : ''}">${label}<textarea data-key="${key}" rows="${rows}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(value)}</textarea></label>`;
 }
 
+function selectField(label, key, value, choices, options = {}) {
+  const { wide = false, refresh = false } = options;
+  const optionsHtml = choices.map(([optionValue, optionLabel]) => `<option value="${escapeHtml(optionValue)}" ${value === optionValue ? 'selected' : ''}>${escapeHtml(optionLabel)}</option>`).join('');
+  return `<label class="field${wide ? ' wide' : ''}">${label}<select data-key="${key}" ${refresh ? 'data-refresh-on-change' : ''}>${optionsHtml}</select></label>`;
+}
+
+function formationPreviewEditor(item, itemIndex) {
+  const previews = Array.isArray(item.previews) ? item.previews : [];
+  const metrics = item.instagramMetrics || {};
+  const metricsStatus = metrics.updatedAt
+    ? `Última sincronização: ${new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(metrics.updatedAt))}`
+    : 'Aguardando conexão autorizada do Instagram no Windsor.';
+  const previewCards = previews.length
+    ? previews.map((preview, previewIndex) => `<article class="formation-preview-editor" data-formation-preview data-preview-index="${previewIndex}">
+        <div class="formation-preview-editor__media">${formationPreviewMedia(preview)}<label class="upload">Anexar ou trocar<input type="file" data-formation-preview-upload accept="${FORMATION_PREVIEW_ACCEPT}" /></label></div>
+        <div class="formation-preview-editor__fields">
+          <div class="repeat-card__top"><strong>Prévia ${previewIndex + 1}</strong><button class="remove" type="button" data-remove-formation-preview>Remover</button></div>
+          <label class="field">Título<input data-preview-key="title" value="${escapeHtml(preview.title || '')}" placeholder="Ex.: Bastidores clínicos" /></label>
+          <label class="field">Descrição curta<input data-preview-key="description" value="${escapeHtml(preview.description || '')}" placeholder="O que a pessoa verá" /></label>
+          <label class="field">URL da mídia<input data-preview-key="mediaUrl" type="url" value="${escapeHtml(preview.mediaUrl || '')}" placeholder="https://" /></label>
+        </div>
+      </article>`).join('')
+    : '<div class="empty-state empty-state--compact"><strong>Nenhuma prévia adicionada</strong><p>Use conteúdos autorizados que mostrem o valor do Close Friends.</p></div>';
+
+  return `<section class="close-friends-settings wide" aria-label="Configuração do Close Friends">
+    <div class="close-friends-settings__heading"><div><small>Vitrine do Close Friends</small><strong>Instagram e prévias do conteúdo</strong></div><span>Até 4 prévias</span></div>
+    <div class="fields">
+      ${field('Usuário do Instagram', 'instagramHandle', item.instagramHandle || '', { placeholder: '@institutovert.br' })}
+      ${field('Link do Instagram', 'instagramUrl', item.instagramUrl || '', { type: 'url', placeholder: 'https://instagram.com/...' })}
+    </div>
+    <div class="formation-preview-list">${previewCards}</div>
+    <button class="small-action" type="button" data-add-formation-preview data-formation-index="${itemIndex}" ${previews.length >= 4 ? 'disabled' : ''}>+ Adicionar prévia</button>
+    <div class="windsor-status"><span aria-hidden="true"></span><div><strong>Dados do Instagram via Windsor</strong><small>${escapeHtml(metricsStatus)}</small></div></div>
+    <p class="helper">As mídias privadas são escolhidas por você. A integração externa será usada somente para métricas autorizadas do perfil, sem armazenar senha aqui.</p>
+  </section>`;
+}
+
 function toggle(value) {
   return `<label class="toggle"><input data-key="active" type="checkbox" ${value ? 'checked' : ''} /> Mostrar no cartão</label>`;
 }
@@ -315,6 +364,7 @@ function renderList(type) {
     ].join('');
     if (type === 'links') fields = field('Texto do botão', 'title', item.title) + field('Link', 'url', item.url, { type: 'url' }) + field('Mensagem pré-preenchida (para link do WhatsApp)', 'preMessage', item.preMessage || '', { wide: true, placeholder: 'Olá! Meu nome é {nome}…' }) + `<div class="field wide">${leadToggle(item.collectLead)}</div>`;
     if (type === 'formations') fields = [
+      selectField('Tipo', 'category', item.category || (isCloseFriendsFormation(item) ? 'close_friends' : 'course'), [['course', 'Curso ou formação'], ['close_friends', 'Close Friends']], { refresh: true }),
       field('Nome da formação', 'title', item.title),
       field('Selo acima do título', 'eyebrow', item.eyebrow || '', { placeholder: 'Curso presencial' }),
       textareaField('Descrição', 'description', item.description || '', { wide: true, placeholder: 'Apresente os objetivos e diferenciais desta formação.' }),
@@ -324,6 +374,7 @@ function renderList(type) {
       field('WhatsApp específico', 'whatsappPhone', item.whatsappPhone || '', { placeholder: 'Deixe vazio para usar o padrão' }),
       field('Texto do botão', 'buttonLabel', item.buttonLabel || '', { placeholder: 'Quero saber mais' }),
       textareaField('Mensagem enviada ao WhatsApp', 'whatsappMessage', item.whatsappMessage || '', { wide: true, rows: 4, placeholder: 'Olá! Meu nome é {nome}. Quero informações sobre {curso}. Sou {perfil}. {curso_anterior}' }),
+      isCloseFriendsFormation(item) ? formationPreviewEditor(item, index) : '',
     ].join('');
     if (type === 'campaigns') fields = field('Título', 'title', item.title) + field('Texto', 'description', item.description, { wide: true }) + field('Texto do botão', 'buttonLabel', item.buttonLabel) + field('Link', 'url', item.url, { type: 'url' });
     if (type === 'testimonials') fields = field('Nome', 'author', item.author) + field('Depoimento', 'text', item.text, { wide: true });
@@ -373,13 +424,24 @@ contentForm.addEventListener('input', (event) => {
     return;
   }
   const card = event.target.closest('.repeat-card');
-  if (!card || !event.target.dataset.key) return;
+  if (!card) return;
+  if (event.target.dataset.previewKey) {
+    const previewCard = event.target.closest('[data-formation-preview]');
+    const item = content.formations[Number(card.dataset.index)];
+    const previewItem = item.previews?.[Number(previewCard.dataset.previewIndex)];
+    if (!previewItem) return;
+    previewItem[event.target.dataset.previewKey] = event.target.value;
+    setDirty();
+    return;
+  }
+  if (!event.target.dataset.key) return;
   const item = content[card.dataset.type][Number(card.dataset.index)];
   item[event.target.dataset.key] = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
   if (card.dataset.type === 'units' && ['street', 'number', 'complement', 'neighborhood', 'city', 'state'].includes(event.target.dataset.key)) syncUnitAddress(item, card);
   const heading = card.querySelector('.repeat-card__top strong');
   heading.textContent = item.name || item.title || item.author || 'Item';
   setDirty();
+  if (event.target.dataset.refreshOnChange !== undefined) renderList(card.dataset.type);
 });
 
 function syncUnitAddress(item, card) {
@@ -422,6 +484,25 @@ contentForm.addEventListener('focusout', async (event) => {
 });
 
 contentForm.addEventListener('click', (event) => {
+  const addPreviewButton = event.target.closest('[data-add-formation-preview]');
+  if (addPreviewButton) {
+    const item = content.formations[Number(addPreviewButton.dataset.formationIndex)];
+    item.previews ||= [];
+    if (item.previews.length >= 4) return;
+    item.previews.push({ id: crypto.randomUUID(), title: '', description: '', mediaUrl: '', mediaType: 'image' });
+    renderList('formations');
+    setDirty();
+    return;
+  }
+  const removePreviewButton = event.target.closest('[data-remove-formation-preview]');
+  if (removePreviewButton) {
+    const card = removePreviewButton.closest('.repeat-card');
+    const previewCard = removePreviewButton.closest('[data-formation-preview]');
+    content.formations[Number(card.dataset.index)].previews.splice(Number(previewCard.dataset.previewIndex), 1);
+    renderList('formations');
+    setDirty();
+    return;
+  }
   const removeButton = event.target.closest('[data-remove]');
   if (!removeButton) return;
   const card = removeButton.closest('.repeat-card');
@@ -461,6 +542,45 @@ contentForm.addEventListener('change', async (event) => {
     if (input) input.value = data.publicUrl;
     const image = document.getElementById(event.target.dataset.preview);
     if (image) image.src = data.publicUrl;
+    setDirty();
+    return;
+  }
+  if (event.target.matches('[data-formation-preview-upload]') && event.target.files?.[0]) {
+    const file = event.target.files[0];
+    const card = event.target.closest('.repeat-card');
+    const previewCard = event.target.closest('[data-formation-preview]');
+    const item = content.formations[Number(card.dataset.index)].previews[Number(previewCard.dataset.previewIndex)];
+    const mediaType = detectMediaType(file);
+    if (!['image', 'video'].includes(mediaType) || (mediaType === 'video' && file.type !== 'video/mp4')) {
+      setStatus('Use uma imagem compatível ou um vídeo MP4.', 'error');
+      event.target.value = '';
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      setStatus('O arquivo ultrapassa o limite de 20 MB.', 'error');
+      event.target.value = '';
+      return;
+    }
+    if (mediaType === 'image' && !await canDecodeImage(file)) {
+      setStatus('Esta imagem parece estar danificada ou não é compatível.', 'error');
+      event.target.value = '';
+      return;
+    }
+    const extension = file.name.split('.').pop().toLowerCase();
+    const path = `formation-preview-${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    event.target.disabled = true;
+    setStatus('Enviando prévia do Close Friends…');
+    const { error } = await supabase.storage.from('digital-card-media').upload(path, file, { cacheControl: '3600', upsert: false });
+    event.target.disabled = false;
+    if (error) {
+      setStatus(`Falha no envio: ${error.message}`, 'error');
+      return;
+    }
+    const { data } = supabase.storage.from('digital-card-media').getPublicUrl(path);
+    item.mediaUrl = data.publicUrl;
+    item.mediaType = mediaType;
+    item.fileName = file.name;
+    renderList('formations');
     setDirty();
     return;
   }
