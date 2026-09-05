@@ -123,7 +123,7 @@
       <section class="formations shell" id="formacoes" aria-labelledby="formacoes-titulo" hidden>
         <div class="section-title formation-title">
           <div><p class="eyebrow" id="formations-eyebrow">Educação Vert</p><h2 id="formacoes-titulo">Formação que transforma técnica em confiança.</h2></div>
-          <p id="formations-description">Cursos e experiências para dentistas que buscam excelência clínica.</p>
+        <p id="formations-description">Cursos e experiências para dentistas e estudantes de Odontologia.</p>
         </div>
         <div class="formation-grid" id="formation-list"></div>
       </section>
@@ -162,19 +162,26 @@
         <p id="lead-dialog-description">Informe seus dados para receber atendimento personalizado.</p>
         <label>Nome<input id="lead-name" name="name" autocomplete="name" maxlength="100" required /></label>
         <label>Telefone com DDD<input id="lead-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="(16) 99999-9999" required /></label>
-        <label>Profissão <small>opcional</small><input id="lead-profession" name="profession" autocomplete="organization-title" maxlength="100" /></label>
+        <label id="lead-profession-field">Profissão <small>opcional</small><input id="lead-profession" name="profession" autocomplete="organization-title" maxlength="100" /></label>
         <div class="formation-lead-fields" id="formation-lead-fields" hidden>
-          <label>Você é dentista?
-            <select name="isDentist" disabled required><option value="">Selecione</option><option value="yes">Sim</option><option value="no">Não</option></select>
-          </label>
-          <label>Já fez algum curso na área?
-            <select name="hasPreviousCourse" disabled required><option value="">Selecione</option><option value="yes">Sim</option><option value="no">Não, será o primeiro</option></select>
-          </label>
-          <label>Qual é a sua cidade?<input name="city" disabled autocomplete="address-level2" maxlength="100" placeholder="Digite sua cidade" required /></label>
+          <fieldset class="choice-field">
+            <legend>Você é:</legend>
+            <div class="choice-field__options">
+              <label><input name="isDentist" type="radio" value="yes" disabled required /><span>Dentista</span></label>
+              <label><input name="isDentist" type="radio" value="no" disabled required /><span>Estudante</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="choice-field">
+            <legend>Já fez algum curso na área?</legend>
+            <div class="choice-field__options">
+              <label><input name="hasPreviousCourse" type="radio" value="yes" disabled required /><span>Sim</span></label>
+              <label><input name="hasPreviousCourse" type="radio" value="no" disabled required /><span>Não</span></label>
+            </div>
+          </fieldset>
         </div>
         <label class="lead-consent"><input name="consent" type="checkbox" required /><span>Autorizo o Instituto Vert a usar estes dados para responder ao meu contato.</span></label>
         <p class="lead-form__feedback" id="lead-feedback" role="status"></p>
-        <button class="lead-form__submit" type="submit">Continuar para o atendimento</button>
+        <button class="lead-form__submit" type="submit">Chamar no WhatsApp</button>
       </form>
     </dialog>
 

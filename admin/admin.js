@@ -35,7 +35,7 @@ let loadingAdmin = false;
 const blankItems = {
   units: () => ({ id: crypto.randomUUID(), name: 'Nova unidade', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', address: '', phone: '', contactUrl: '', contactButtonLabel: '', whatsappMessage: '', collectLead: true, mapsUrl: '', mapsQuery: '', website: '', active: true }),
   links: () => ({ id: crypto.randomUUID(), title: 'Novo link', url: '', preMessage: '', collectLead: true, active: true }),
-  formations: () => ({ id: crypto.randomUUID(), title: 'Nova formação', eyebrow: 'Para dentistas', description: '', format: 'Presencial', schedule: '', location: '', whatsappPhone: '', buttonLabel: 'Quero saber mais', whatsappMessage: '', active: true }),
+  formations: () => ({ id: crypto.randomUUID(), title: 'Nova formação', eyebrow: 'Para dentistas e estudantes', description: '', format: 'Presencial', schedule: '', location: '', whatsappPhone: '', buttonLabel: 'Quero informações', whatsappMessage: '', active: true }),
   campaigns: () => ({ id: crypto.randomUUID(), title: 'Nova campanha', description: '', url: '', buttonLabel: 'Saiba mais', active: true }),
   testimonials: () => ({ id: crypto.randomUUID(), author: 'Paciente', text: '', active: true }),
   portfolio: () => ({ id: crypto.randomUUID(), title: 'Novo resultado', procedure: '', description: '', details: '', mediaUrl: '', fileName: '', posterUrl: '', mediaType: 'image', active: true }),
@@ -323,7 +323,7 @@ function renderList(type) {
       field('Cidade ou local', 'location', item.location || '', { placeholder: 'Franca - SP' }),
       field('WhatsApp específico', 'whatsappPhone', item.whatsappPhone || '', { placeholder: 'Deixe vazio para usar o padrão' }),
       field('Texto do botão', 'buttonLabel', item.buttonLabel || '', { placeholder: 'Quero saber mais' }),
-      textareaField('Mensagem enviada ao WhatsApp', 'whatsappMessage', item.whatsappMessage || '', { wide: true, rows: 4, placeholder: 'Olá! Meu nome é {nome} e tenho interesse em {curso}.' }),
+      textareaField('Mensagem enviada ao WhatsApp', 'whatsappMessage', item.whatsappMessage || '', { wide: true, rows: 4, placeholder: 'Olá! Meu nome é {nome}. Quero informações sobre {curso}. Perfil: {perfil}.' }),
     ].join('');
     if (type === 'campaigns') fields = field('Título', 'title', item.title) + field('Texto', 'description', item.description, { wide: true }) + field('Texto do botão', 'buttonLabel', item.buttonLabel) + field('Link', 'url', item.url, { type: 'url' });
     if (type === 'testimonials') fields = field('Nome', 'author', item.author) + field('Depoimento', 'text', item.text, { wide: true });
@@ -519,7 +519,7 @@ async function loadLeads() {
   const formationList = document.querySelector('#formation-leads-list');
   list.innerHTML = '<div class="empty-state"><strong>Carregando contatos…</strong></div>';
   if (formationList) formationList.innerHTML = '<div class="empty-state"><strong>Carregando interessados…</strong></div>';
-  const { data, error } = await supabase.from('digital_card_leads').select('name,phone,profession,button,unit,created_at,lead_type,is_dentist,has_previous_course,city,course_title').order('created_at', { ascending: false }).limit(200);
+  const { data, error } = await supabase.from('digital_card_leads').select('name,phone,profession,button,unit,created_at,lead_type,is_dentist,has_previous_course,course_title').order('created_at', { ascending: false }).limit(200);
   if (error) {
     list.innerHTML = `<div class="empty-state"><strong>Não foi possível carregar</strong><p>${escapeHtml(error.message)}</p></div>`;
     if (formationList) formationList.innerHTML = list.innerHTML;
@@ -547,9 +547,9 @@ function renderLeadCard(lead) {
 function renderFormationLeadCard(lead) {
   const digits = String(lead.phone).replace(/\D/g, '');
   const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lead.created_at));
-  const dentist = lead.is_dentist === true ? 'Dentista' : lead.is_dentist === false ? 'Não é dentista' : 'Não informado';
+  const dentist = lead.is_dentist === true ? 'Dentista' : lead.is_dentist === false ? 'Estudante de Odontologia' : 'Perfil não informado';
   const previousCourse = lead.has_previous_course === true ? 'Já fez curso' : lead.has_previous_course === false ? 'Primeiro curso' : 'Curso anterior não informado';
-  return `<article class="lead-card lead-card--formation"><div><small>${escapeHtml(date)} · Formação</small><strong>${escapeHtml(lead.name)}</strong><span>${escapeHtml(lead.course_title || lead.button)}</span><ul><li>${escapeHtml(dentist)}</li><li>${escapeHtml(previousCourse)}</li><li>${escapeHtml(lead.city || 'Cidade não informada')}</li></ul></div><div><small>${escapeHtml(lead.phone)}</small><a href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">Chamar no WhatsApp <span>→</span></a></div></article>`;
+  return `<article class="lead-card lead-card--formation"><div><small>${escapeHtml(date)} · Formação</small><strong>${escapeHtml(lead.name)}</strong><span>${escapeHtml(lead.course_title || lead.button)}</span><ul><li>${escapeHtml(dentist)}</li><li>${escapeHtml(previousCourse)}</li></ul></div><div><small>${escapeHtml(lead.phone)}</small><a href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">Chamar no WhatsApp <span>→</span></a></div></article>`;
 }
 
 document.querySelector('#refresh-leads').addEventListener('click', () => void loadLeads());
