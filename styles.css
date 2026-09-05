@@ -70,6 +70,19 @@ h2 { font-size:clamp(2.3rem,6vw,3.7rem); }
 .dentist-link { display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:50px; padding-block:68px; }
 .dentist-link>div:last-child { display:grid; gap:8px; }
 .dentist-link>div:last-child a { display:flex; min-height:58px; align-items:center; justify-content:space-between; padding:0 18px; border:1px solid var(--line); border-radius:10px; font-size:.72rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase; }
+.formations { padding-block:82px 74px; }
+.formation-title { align-items:start; }
+.formation-title>div { max-width:610px; }
+.formation-title>p { max-width:300px; margin:8px 0 0; color:var(--nude); font-family:var(--serif); font-size:1rem; line-height:1.55; }
+.formation-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.formation-card { display:flex; min-height:330px; flex-direction:column; padding:28px; border:1px solid var(--line); border-radius:18px; background:linear-gradient(145deg,rgba(106,69,46,.42),rgba(43,27,20,.7)); box-shadow:inset 0 1px rgba(255,255,255,.04); }
+.formation-card small { color:var(--rose); font-size:.58rem; font-weight:500; letter-spacing:.16em; text-transform:uppercase; }
+.formation-card h3 { margin:8px 0 0; font-family:var(--serif); font-size:2rem; font-weight:300; line-height:1.05; }
+.formation-card>p { margin:18px 0; color:var(--nude); font-family:var(--serif); font-size:1rem; line-height:1.5; }
+.formation-card__meta { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:24px; }
+.formation-card__meta span { padding:7px 9px; border:1px solid var(--line); border-radius:999px; color:var(--champagne); font-size:.56rem; letter-spacing:.08em; text-transform:uppercase; }
+.formation-card__action { display:flex; min-height:54px; align-items:center; justify-content:space-between; margin-top:auto; padding:0 16px; border-radius:10px; background:var(--champagne); color:var(--deep); font-size:.65rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
+.formation-card__action b { font-size:1.15rem; font-weight:400; }
 footer { padding-block:34px 110px; border-top:1px solid var(--line); color:#9e8271; }
 footer>div { display:flex; align-items:center; justify-content:space-between; gap:24px; font-size:.62rem; }
 footer p { margin:0; }
@@ -83,8 +96,9 @@ footer strong { color:var(--rose); font-family:var(--serif); font-size:1.35rem; 
 .lead-form>p:not(.eyebrow):not(.lead-form__feedback) { margin:-4px 0 4px; color:#745d50; font-family:var(--serif); font-size:1rem; line-height:1.45; }
 .lead-form label { display:grid; gap:7px; color:#654b3e; font-size:.68rem; font-weight:600; letter-spacing:.03em; }
 .lead-form label small { color:#8b7467; font-weight:400; }
-.lead-form input:not([type="checkbox"]) { width:100%; padding:13px 14px; border:1px solid rgba(74,47,31,.18); border-radius:10px; background:#fff; color:var(--deep); font:inherit; outline:none; }
-.lead-form input:focus { border-color:var(--cacao); box-shadow:0 0 0 3px rgba(106,69,46,.12); }
+.lead-form input:not([type="checkbox"]),.lead-form select { width:100%; padding:13px 14px; border:1px solid rgba(74,47,31,.18); border-radius:10px; background:#fff; color:var(--deep); font:inherit; outline:none; }
+.lead-form input:focus,.lead-form select:focus { border-color:var(--cacao); box-shadow:0 0 0 3px rgba(106,69,46,.12); }
+.formation-lead-fields { display:grid; gap:14px; padding:16px; border:1px solid rgba(74,47,31,.12); border-radius:13px; background:#f1e7dc; }
 .lead-consent { grid-template-columns:auto 1fr; align-items:start; line-height:1.45; }
 .lead-consent input { margin-top:2px; accent-color:var(--cacao); }
 .lead-dialog__close { position:absolute; z-index:2; top:15px; right:15px; width:36px; height:36px; border:0; border-radius:50%; background:#eadfd3; color:var(--chocolate); font-size:1.35rem; cursor:pointer; }
@@ -124,6 +138,10 @@ footer strong { color:var(--rose); font-family:var(--serif); font-size:1.35rem; 
   .campaign-grid,.testimonial-grid { grid-template-columns:1fr; }
   .google-card__content { padding:16px; }
   .dentist-link { grid-template-columns:1fr; gap:25px; padding-block:54px; }
+  .formations { padding-block:58px 50px; }
+  .formation-title>p { max-width:none; }
+  .formation-grid { grid-template-columns:1fr; }
+  .formation-card { min-height:300px; padding:22px; }
   footer { padding-bottom:104px; }
   footer>div { align-items:flex-start; flex-direction:column; gap:8px; }
   .floating-whatsapp { right:10px; bottom:max(10px,env(safe-area-inset-bottom)); left:10px; justify-content:center; min-height:58px; }

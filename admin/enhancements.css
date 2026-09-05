@@ -32,6 +32,13 @@
 .cep-status[data-state="error"] { color: var(--danger); }
 .cep-status[data-state="success"] { color: var(--green); }
 .toggle--lead { padding: 12px; border-radius: 10px; background: #f5eee6; }
+.formation-settings { margin-bottom: 10px; border-left: 4px solid var(--cacao); }
+.formations-list .repeat-card { border-left: 4px solid #8a6b57; }
+.formations-list textarea { resize: vertical; }
+.formation-leads-heading { padding-top: 10px; border-top: 1px solid var(--border); }
+.lead-card--formation { border-left: 4px solid var(--cacao); }
+.lead-card--formation ul { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 0; padding: 0; list-style: none; }
+.lead-card--formation li { padding: 5px 8px; border-radius: 999px; background: #f2e6d7; color: #654b3e; font-size: .6rem; }
 .unit-contact-list { margin-top: 12px; }
 .unit-contact-card { border-left: 4px solid var(--cacao); }
 .unit-contact-card .repeat-card__top > div { display: grid; gap: 3px; }

@@ -6,7 +6,6 @@
     <meta name="theme-color" content="#2b1b14" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Painel administrativo — Instituto Vert</title>
-    <script src="/canonical.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -62,6 +61,7 @@
           <button class="nav-link" data-section="empresa">Dados da empresa</button>
           <button class="nav-link" data-section="unidades">Unidades</button>
           <button class="nav-link" data-section="links">Links e contatos</button>
+          <button class="nav-link" data-section="formacoes">Formações e cursos</button>
           <button class="nav-link" data-section="contatos">Contatos recebidos</button>
           <button class="nav-link" data-section="campanhas">Campanhas e promoções</button>
           <button class="nav-link" data-section="depoimentos">Depoimentos</button>
@@ -155,6 +155,24 @@
               <div class="repeat-list unit-contact-list" id="unit-contacts-list"></div>
               <div class="subheading"><h3>Links adicionais</h3><button type="button" class="small-action" data-add="links">+ Novo link</button></div>
               <div class="repeat-list" id="links-list"></div>
+            </section>
+
+            <section class="panel" data-panel="formacoes">
+              <div class="panel__heading"><div><p class="eyebrow">Educação Vert</p><h2>Formações e cursos</h2></div><button type="button" class="small-action" data-add="formations">+ Nova formação</button></div>
+              <p class="helper">Cadastre os conteúdos direcionados a dentistas. Todo clique abre a qualificação do interessado antes de encaminhar ao WhatsApp.</p>
+              <div class="form-grid formation-settings">
+                <label>Título da seção<input name="formationSettings.title" placeholder="Formação que transforma técnica em confiança." /></label>
+                <label>Chamada da seção<input name="formationSettings.eyebrow" placeholder="Educação Vert" /></label>
+                <label class="wide">Descrição<textarea name="formationSettings.description" rows="3" placeholder="Cursos e experiências para dentistas que buscam excelência."></textarea></label>
+                <label>WhatsApp padrão<input name="formationSettings.phone" inputmode="tel" placeholder="5516999999999" /></label>
+                <label>Texto do botão<input name="formationSettings.buttonLabel" placeholder="Quero saber mais" /></label>
+                <label class="wide">Mensagem padrão do WhatsApp<textarea name="formationSettings.whatsappMessage" rows="4" placeholder="Olá! Meu nome é {nome} e tenho interesse em {curso}."></textarea></label>
+              </div>
+              <p class="helper">Variáveis disponíveis: <strong>{nome}</strong>, <strong>{telefone}</strong>, <strong>{curso}</strong>, <strong>{dentista}</strong>, <strong>{curso_anterior}</strong> e <strong>{cidade}</strong>.</p>
+              <div class="subheading"><h3>Conteúdos publicados</h3></div>
+              <div class="repeat-list formations-list" id="formations-list"></div>
+              <div class="subheading formation-leads-heading"><h3>Interessados nas formações</h3><button type="button" class="small-action" id="refresh-formation-leads">Atualizar</button></div>
+              <div class="leads-list" id="formation-leads-list"><div class="empty-state"><strong>Carregando interessados…</strong></div></div>
             </section>
 
             <section class="panel" data-panel="contatos">

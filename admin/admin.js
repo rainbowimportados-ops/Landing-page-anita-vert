@@ -35,6 +35,7 @@ let loadingAdmin = false;
 const blankItems = {
   units: () => ({ id: crypto.randomUUID(), name: 'Nova unidade', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', address: '', phone: '', contactUrl: '', contactButtonLabel: '', whatsappMessage: '', collectLead: true, mapsUrl: '', mapsQuery: '', website: '', active: true }),
   links: () => ({ id: crypto.randomUUID(), title: 'Novo link', url: '', preMessage: '', collectLead: true, active: true }),
+  formations: () => ({ id: crypto.randomUUID(), title: 'Nova formação', eyebrow: 'Para dentistas', description: '', format: 'Presencial', schedule: '', location: '', whatsappPhone: '', buttonLabel: 'Quero saber mais', whatsappMessage: '', active: true }),
   campaigns: () => ({ id: crypto.randomUUID(), title: 'Nova campanha', description: '', url: '', buttonLabel: 'Saiba mais', active: true }),
   testimonials: () => ({ id: crypto.randomUUID(), author: 'Paciente', text: '', active: true }),
   portfolio: () => ({ id: crypto.randomUUID(), title: 'Novo resultado', procedure: '', description: '', details: '', mediaUrl: '', fileName: '', posterUrl: '', mediaType: 'image', active: true }),
@@ -233,9 +234,21 @@ function fillCompany() {
   });
 }
 
+function fillFormationSettings() {
+  contentForm.querySelectorAll('[name^="formationSettings."]').forEach((field) => {
+    const key = field.name.split('.')[1];
+    field.value = content.formationSettings?.[key] ?? '';
+  });
+}
+
 function field(label, key, value, options = {}) {
   const { wide = false, type = 'text', placeholder = '' } = options;
   return `<label class="field${wide ? ' wide' : ''}">${label}<input data-key="${key}" type="${type}" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" /></label>`;
+}
+
+function textareaField(label, key, value, options = {}) {
+  const { wide = false, placeholder = '', rows = 3 } = options;
+  return `<label class="field${wide ? ' wide' : ''}">${label}<textarea data-key="${key}" rows="${rows}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(value)}</textarea></label>`;
 }
 
 function toggle(value) {
@@ -294,6 +307,17 @@ function renderList(type) {
       `<div class="field wide">${leadToggle(item.collectLead)}</div>`,
     ].join('');
     if (type === 'links') fields = field('Texto do botão', 'title', item.title) + field('Link', 'url', item.url, { type: 'url' }) + field('Mensagem pré-preenchida (para link do WhatsApp)', 'preMessage', item.preMessage || '', { wide: true, placeholder: 'Olá! Meu nome é {nome}…' }) + `<div class="field wide">${leadToggle(item.collectLead)}</div>`;
+    if (type === 'formations') fields = [
+      field('Nome da formação', 'title', item.title),
+      field('Selo acima do título', 'eyebrow', item.eyebrow || '', { placeholder: 'Curso presencial' }),
+      textareaField('Descrição', 'description', item.description || '', { wide: true, placeholder: 'Apresente os objetivos e diferenciais desta formação.' }),
+      field('Formato', 'format', item.format || '', { placeholder: 'Presencial, online ou imersão' }),
+      field('Data ou disponibilidade', 'schedule', item.schedule || '', { placeholder: 'Próxima turma em breve' }),
+      field('Cidade ou local', 'location', item.location || '', { placeholder: 'Franca - SP' }),
+      field('WhatsApp específico', 'whatsappPhone', item.whatsappPhone || '', { placeholder: 'Deixe vazio para usar o padrão' }),
+      field('Texto do botão', 'buttonLabel', item.buttonLabel || '', { placeholder: 'Quero saber mais' }),
+      textareaField('Mensagem enviada ao WhatsApp', 'whatsappMessage', item.whatsappMessage || '', { wide: true, rows: 4, placeholder: 'Olá! Meu nome é {nome} e tenho interesse em {curso}.' }),
+    ].join('');
     if (type === 'campaigns') fields = field('Título', 'title', item.title) + field('Texto', 'description', item.description, { wide: true }) + field('Texto do botão', 'buttonLabel', item.buttonLabel) + field('Link', 'url', item.url, { type: 'url' });
     if (type === 'testimonials') fields = field('Nome', 'author', item.author) + field('Depoimento', 'text', item.text, { wide: true });
     if (type === 'portfolio') fields = field('Título do resultado', 'title', item.title) + field('Procedimento ou trabalho', 'procedure', item.procedure || '') + field('Descrição do resultado', 'description', item.description || '', { wide: true, placeholder: 'Conte o que foi realizado e o objetivo do caso.' }) + field('Informações complementares', 'details', item.details || '', { wide: true, placeholder: 'Ex.: planejamento individualizado, período ou técnica.' }) + field('URL da mídia ou documento', 'mediaUrl', item.mediaUrl, { wide: true, type: 'url' }) + `<label class="field">Tipo<select data-key="mediaType"><option value="image" ${item.mediaType === 'image' || !item.mediaType ? 'selected' : ''}>Imagem</option><option value="video" ${item.mediaType === 'video' ? 'selected' : ''}>Vídeo</option><option value="document" ${item.mediaType === 'document' ? 'selected' : ''}>Documento</option></select></label>` + field('Capa do vídeo', 'posterUrl', item.posterUrl || '', { type: 'url' });
@@ -308,7 +332,8 @@ function renderList(type) {
 
 function renderAll() {
   fillCompany();
-  ['units', 'links', 'campaigns', 'testimonials', 'portfolio'].forEach(renderList);
+  fillFormationSettings();
+  ['units', 'links', 'formations', 'campaigns', 'testimonials', 'portfolio'].forEach(renderList);
   renderUnitContacts();
   sendPreview();
 }
@@ -330,6 +355,13 @@ contentForm.addEventListener('input', (event) => {
     content.company[key] = event.target.value;
     const previewId = IDENTITY_PREVIEW_IDS[key];
     if (previewId) document.getElementById(previewId).src = event.target.value || DEFAULT_IDENTITY_ASSETS[key];
+    setDirty();
+    return;
+  }
+  if (companyName?.startsWith('formationSettings.')) {
+    const key = companyName.split('.')[1];
+    content.formationSettings ||= {};
+    content.formationSettings[key] = event.target.value;
     setDirty();
     return;
   }
@@ -477,25 +509,44 @@ async function loadMetrics() {
 
 async function loadLeads() {
   const list = document.querySelector('#leads-list');
+  const formationList = document.querySelector('#formation-leads-list');
   list.innerHTML = '<div class="empty-state"><strong>Carregando contatos…</strong></div>';
-  const { data, error } = await supabase.from('digital_card_leads').select('name,phone,profession,button,unit,created_at').order('created_at', { ascending: false }).limit(200);
+  if (formationList) formationList.innerHTML = '<div class="empty-state"><strong>Carregando interessados…</strong></div>';
+  const { data, error } = await supabase.from('digital_card_leads').select('name,phone,profession,button,unit,created_at,lead_type,is_dentist,has_previous_course,city,course_title').order('created_at', { ascending: false }).limit(200);
   if (error) {
     list.innerHTML = `<div class="empty-state"><strong>Não foi possível carregar</strong><p>${escapeHtml(error.message)}</p></div>`;
+    if (formationList) formationList.innerHTML = list.innerHTML;
     return;
   }
   document.querySelector('#metric-leads').textContent = data.length.toLocaleString('pt-BR');
-  if (!data.length) {
+  const contactLeads = data.filter((lead) => lead.lead_type !== 'formation');
+  const formationLeads = data.filter((lead) => lead.lead_type === 'formation');
+  if (!contactLeads.length) {
     list.innerHTML = '<div class="empty-state"><strong>Nenhum contato recebido ainda</strong><p>Os novos contatos aparecerão aqui.</p></div>';
-    return;
+  } else {
+    list.innerHTML = contactLeads.map(renderLeadCard).join('');
   }
-  list.innerHTML = data.map((lead) => {
-    const digits = String(lead.phone).replace(/\D/g, '');
-    const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lead.created_at));
-    return `<article class="lead-card"><div><small>${escapeHtml(date)}</small><strong>${escapeHtml(lead.name)}</strong><span>${escapeHtml(lead.profession || 'Profissão não informada')}</span></div><div><small>${escapeHtml(lead.button)}${lead.unit ? ` · ${escapeHtml(lead.unit)}` : ''}</small><a href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.phone)} <span>→</span></a></div></article>`;
-  }).join('');
+  if (formationList) formationList.innerHTML = formationLeads.length
+    ? formationLeads.map(renderFormationLeadCard).join('')
+    : '<div class="empty-state"><strong>Nenhum interessado ainda</strong><p>Os leads dos cursos aparecerão aqui com suas respostas.</p></div>';
+}
+
+function renderLeadCard(lead) {
+  const digits = String(lead.phone).replace(/\D/g, '');
+  const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lead.created_at));
+  return `<article class="lead-card"><div><small>${escapeHtml(date)}</small><strong>${escapeHtml(lead.name)}</strong><span>${escapeHtml(lead.profession || 'Profissão não informada')}</span></div><div><small>${escapeHtml(lead.button)}${lead.unit ? ` · ${escapeHtml(lead.unit)}` : ''}</small><a href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.phone)} <span>→</span></a></div></article>`;
+}
+
+function renderFormationLeadCard(lead) {
+  const digits = String(lead.phone).replace(/\D/g, '');
+  const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lead.created_at));
+  const dentist = lead.is_dentist === true ? 'Dentista' : lead.is_dentist === false ? 'Não é dentista' : 'Não informado';
+  const previousCourse = lead.has_previous_course === true ? 'Já fez curso' : lead.has_previous_course === false ? 'Primeiro curso' : 'Curso anterior não informado';
+  return `<article class="lead-card lead-card--formation"><div><small>${escapeHtml(date)} · Formação</small><strong>${escapeHtml(lead.name)}</strong><span>${escapeHtml(lead.course_title || lead.button)}</span><ul><li>${escapeHtml(dentist)}</li><li>${escapeHtml(previousCourse)}</li><li>${escapeHtml(lead.city || 'Cidade não informada')}</li></ul></div><div><small>${escapeHtml(lead.phone)}</small><a href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">Chamar no WhatsApp <span>→</span></a></div></article>`;
 }
 
 document.querySelector('#refresh-leads').addEventListener('click', () => void loadLeads());
+document.querySelector('#refresh-formation-leads').addEventListener('click', () => void loadLeads());
 
 preview.addEventListener('load', sendPreview);
 
@@ -543,6 +594,9 @@ async function openAdmin(nextSession, passwordJustConfigured = false) {
   try {
     const data = await loadCardContent();
     content = data.content;
+    content.company ||= {};
+    content.formationSettings ||= {};
+    content.formations ||= [];
     renderAll();
     setDirty(false);
   } catch (error) {

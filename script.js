@@ -41,6 +41,10 @@ function personalizeMessage(message, lead = {}) {
     .replaceAll('{nome}', lead.name || '')
     .replaceAll('{telefone}', lead.phone || '')
     .replaceAll('{profissao}', lead.profession || '')
+    .replaceAll('{curso}', lead.course || '')
+    .replaceAll('{dentista}', lead.isDentist === true ? 'Sim' : lead.isDentist === false ? 'Não' : '')
+    .replaceAll('{curso_anterior}', lead.hasPreviousCourse === true ? 'Sim' : lead.hasPreviousCourse === false ? 'Não' : '')
+    .replaceAll('{cidade}', lead.city || '')
     .replace(/\s{2,}/g, ' ')
     .trim();
 }
@@ -55,12 +59,15 @@ function applyPreMessage(destination, message, lead = {}) {
   } catch { return safe; }
 }
 
-function prepareLeadLink(link, { collectLead = true, message = '', label = 'Contato', unit = '' } = {}) {
+function prepareLeadLink(link, { collectLead = true, message = '', label = 'Contato', unit = '', leadType = 'contact', courseId = '', courseTitle = '' } = {}) {
   if (!collectLead) return link;
   link.dataset.collectLead = 'true';
   link.dataset.preMessage = message;
   link.dataset.leadLabel = label;
   link.dataset.leadUnit = unit;
+  link.dataset.leadType = leadType;
+  if (courseId) link.dataset.courseId = courseId;
+  if (courseTitle) link.dataset.courseTitle = courseTitle;
   return link;
 }
 
@@ -155,8 +162,43 @@ function renderExtraLinks(items) {
   });
 }
 
+function renderFormations(items, settings, company) {
+  const section = document.querySelector('#formacoes');
+  const container = document.querySelector('#formation-list');
+  const active = (items || []).filter((item) => item.active !== false && item.title);
+  if (!active.length) { section.hidden = true; return; }
+  section.hidden = false;
+  document.querySelector('#formations-eyebrow').textContent = settings.eyebrow || 'Educação Vert';
+  document.querySelector('#formacoes-titulo').textContent = settings.title || 'Formação que transforma técnica em confiança.';
+  document.querySelector('#formations-description').textContent = settings.description || 'Cursos e experiências para dentistas que buscam excelência clínica.';
+  container.replaceChildren();
+  active.forEach((item) => {
+    const card = document.createElement('article');
+    card.className = 'formation-card';
+    const heading = document.createElement('div');
+    const eyebrow = document.createElement('small'); eyebrow.textContent = item.eyebrow || item.format || 'Formação Vert';
+    const title = document.createElement('h3'); title.textContent = item.title;
+    heading.append(eyebrow, title);
+    const description = document.createElement('p'); description.textContent = item.description || 'Conheça esta experiência de formação do Instituto Vert.';
+    const meta = document.createElement('div'); meta.className = 'formation-card__meta';
+    [item.format, item.schedule, item.location].filter(Boolean).forEach((value) => { const span = document.createElement('span'); span.textContent = value; meta.append(span); });
+    const message = item.whatsappMessage || settings.whatsappMessage || 'Olá! Meu nome é {nome} e tenho interesse na formação {curso}. Sou dentista: {dentista}. Já fiz outro curso: {curso_anterior}. Minha cidade é {cidade}.';
+    const destination = whatsappUrl(item.whatsappPhone || settings.phone || company.phone, personalizeMessage(message, { course: item.title }));
+    const link = trackableLink(destination, `formacao_${item.id || 'curso'}`);
+    link.className = 'formation-card__action';
+    link.innerHTML = `<span>${escapeText(item.buttonLabel || settings.buttonLabel || 'Quero saber mais')}</span><b aria-hidden="true">→</b>`;
+    prepareLeadLink(link, { message, label: `Formação — ${item.title}`, leadType: 'formation', courseId: item.id || '', courseTitle: item.title });
+    card.append(heading, description, meta, link);
+    container.append(card);
+  });
+}
+
+function escapeText(value = '') {
+  return String(value).replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
+}
+
 function renderContent(content) {
-  if (!content) return; const company = content.company || {}; const units = content.units || []; currentCompany = company;
+  if (!content) return; const company = content.company || {}; const units = content.units || []; const formationSettings = content.formationSettings || {}; currentCompany = company;
   setText('.profile__identity p', company.category); setText('#titulo', company.name); setText('.intro .eyebrow', company.ctaLabel); setText('#cms-headline', company.headline); setText('#cms-description', company.description); setText('footer p', company.tagline);
   const hero = document.querySelector('.profile__photo > img');
   if (hero && company.heroImage) applyImageSource(hero, company.heroImage, new URL('./assets/hero.webp', import.meta.url).href);
@@ -170,7 +212,7 @@ function renderContent(content) {
   const selectedLogo = logoSources[selectedVariant] || logoSources.primaryDark;
   applyImageSource(logo, selectedLogo, DEFAULT_LOGOS.primaryDark);
   const cities = units.filter((unit) => unit.active !== false).map((unit) => unit.city).filter(Boolean); setText('.profile__identity span', company.identityLine || cities.join(' • '));
-  renderWhatsApp(units, company); renderUnits(units); renderPortfolio(content.portfolio); renderCards('campanhas', 'campaign-list', content.campaigns, 'campaign'); renderCards('depoimentos', 'testimonial-list', content.testimonials, 'testimonial'); renderExtraLinks(content.links);
+  renderWhatsApp(units, company); renderUnits(units); renderPortfolio(content.portfolio); renderCards('campanhas', 'campaign-list', content.campaigns, 'campaign'); renderCards('depoimentos', 'testimonial-list', content.testimonials, 'testimonial'); renderFormations(content.formations, formationSettings, company); renderExtraLinks(content.links);
   const instagram = document.querySelector('.quick-links a[data-track="instagram"]'); if (instagram && company.instagram) { instagram.href = safeUrl(company.instagram); const label = instagram.querySelector('small'); if (label) label.textContent = company.instagramLabel || 'Instagram'; }
   const floating = document.querySelector('.floating-whatsapp');
   const floatingMessage = company.whatsappMessage || 'Olá! Meu nome é {nome}. Vim pelo cartão do Instituto Vert e quero agendar uma avaliação.';
@@ -206,9 +248,16 @@ document.addEventListener('click', (event) => {
     button: link.dataset.leadLabel || link.textContent.trim(),
     unit: link.dataset.leadUnit || link.dataset.unit || '',
     track: link.dataset.track || 'contato',
+    leadType: link.dataset.leadType || 'contact',
+    courseId: link.dataset.courseId || '',
+    courseTitle: link.dataset.courseTitle || '',
   };
-  document.querySelector('#lead-dialog-title').textContent = currentCompany.leadFormTitle || 'Antes de continuar';
-  document.querySelector('#lead-dialog-description').textContent = currentCompany.leadFormDescription || 'Informe seus dados para receber atendimento personalizado.';
+  const isFormation = pendingLead.leadType === 'formation';
+  document.querySelector('#lead-dialog-title').textContent = isFormation ? `Interesse em ${pendingLead.courseTitle}` : currentCompany.leadFormTitle || 'Antes de continuar';
+  document.querySelector('#lead-dialog-description').textContent = isFormation ? 'Responda três perguntas rápidas para receber as informações da formação.' : currentCompany.leadFormDescription || 'Informe seus dados para receber atendimento personalizado.';
+  const formationFields = document.querySelector('#formation-lead-fields');
+  formationFields.hidden = !isFormation;
+  formationFields.querySelectorAll('input,select').forEach((field) => { field.disabled = !isFormation; });
   leadFeedback.textContent = '';
   leadDialog.showModal();
   requestAnimationFrame(() => document.querySelector('#lead-name').focus());
@@ -225,6 +274,10 @@ leadForm.addEventListener('submit', async (event) => {
     name: String(formData.get('name') || '').trim(),
     phone: String(formData.get('phone') || '').trim(),
     profession: String(formData.get('profession') || '').trim(),
+    isDentist: formData.get('isDentist') === 'yes' ? true : formData.get('isDentist') === 'no' ? false : null,
+    hasPreviousCourse: formData.get('hasPreviousCourse') === 'yes' ? true : formData.get('hasPreviousCourse') === 'no' ? false : null,
+    city: String(formData.get('city') || '').trim(),
+    course: pendingLead.courseTitle || '',
   };
   if (lead.phone.replace(/\D/g, '').length < 10) {
     leadFeedback.textContent = 'Informe um telefone válido com DDD.';
@@ -243,6 +296,12 @@ leadForm.addEventListener('submit', async (event) => {
     unit: pendingLead.unit || null,
     destination: destinationForStorage || null,
     consent: formData.get('consent') === 'on',
+    lead_type: pendingLead.leadType,
+    is_dentist: lead.isDentist,
+    has_previous_course: lead.hasPreviousCourse,
+    city: lead.city || null,
+    course_id: pendingLead.courseId || null,
+    course_title: pendingLead.courseTitle || null,
   });
   if (error) {
     leadFeedback.textContent = 'Não foi possível continuar agora. Tente novamente.';

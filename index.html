@@ -10,7 +10,6 @@
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/assets/hero.webp" />
     <title>Instituto Vert — Contato e agendamento</title>
-    <script src="/canonical.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -119,8 +118,16 @@
         </div>
       </section>
 
-      <section class="dentist-link shell" aria-label="Conteúdo para dentistas">
-        <div><p class="eyebrow">Você é dentista?</p><h2>Conteúdos e formação <em>Vert.</em></h2></div>
+      <section class="formations shell" id="formacoes" aria-labelledby="formacoes-titulo" hidden>
+        <div class="section-title formation-title">
+          <div><p class="eyebrow" id="formations-eyebrow">Educação Vert</p><h2 id="formacoes-titulo">Formação que transforma técnica em confiança.</h2></div>
+          <p id="formations-description">Cursos e experiências para dentistas que buscam excelência clínica.</p>
+        </div>
+        <div class="formation-grid" id="formation-list"></div>
+      </section>
+
+      <section class="dentist-link shell" aria-label="Outros conteúdos para dentistas">
+        <div><p class="eyebrow">Para profissionais</p><h2>Mais conteúdos <em>Vert.</em></h2></div>
         <div>
           <a href="https://wa.me/5516999657667?text=Ol%C3%A1!%20Sou%20dentista%20e%20quero%20informa%C3%A7%C3%B5es%20sobre%20o%20CURSO%20PRESENCIAL%20do%20Instituto%20Vert." target="_blank" rel="noopener noreferrer" data-track="curso_presencial">Curso presencial <span>→</span></a>
           <a href="https://wa.me/5516999657667?text=Ol%C3%A1!%20Sou%20dentista%20e%20quero%20entrar%20no%20CLOSE%20FRIENDS%20do%20Instituto%20Vert." target="_blank" rel="noopener noreferrer" data-track="close_friends">Close Friends <span>→</span></a>
@@ -144,6 +151,15 @@
         <label>Nome<input id="lead-name" name="name" autocomplete="name" maxlength="100" required /></label>
         <label>Telefone com DDD<input id="lead-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="(16) 99999-9999" required /></label>
         <label>Profissão <small>opcional</small><input id="lead-profession" name="profession" autocomplete="organization-title" maxlength="100" /></label>
+        <div class="formation-lead-fields" id="formation-lead-fields" hidden>
+          <label>Você é dentista?
+            <select name="isDentist" disabled required><option value="">Selecione</option><option value="yes">Sim</option><option value="no">Não</option></select>
+          </label>
+          <label>Já fez algum curso na área?
+            <select name="hasPreviousCourse" disabled required><option value="">Selecione</option><option value="yes">Sim</option><option value="no">Não, será o primeiro</option></select>
+          </label>
+          <label>Qual é a sua cidade?<input name="city" disabled autocomplete="address-level2" maxlength="100" placeholder="Digite sua cidade" required /></label>
+        </div>
         <label class="lead-consent"><input name="consent" type="checkbox" required /><span>Autorizo o Instituto Vert a usar estes dados para responder ao meu contato.</span></label>
         <p class="lead-form__feedback" id="lead-feedback" role="status"></p>
         <button class="lead-form__submit" type="submit">Continuar para o atendimento</button>
