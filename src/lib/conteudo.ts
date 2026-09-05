@@ -10,6 +10,7 @@ import {
   clinica as clinicaPadrao,
   depoimentos as depoimentosPadrao,
   faq as faqPadrao,
+  rodapeLegal as rodapeLegalPadrao,
   unidades as unidadesPadrao,
   type Depoimento,
   type Unidade,
@@ -47,7 +48,7 @@ export const conteudoPadrao: Conteudo = {
   unidades: unidadesPadrao,
   faq: faqPadrao,
   depoimentos: depoimentosPadrao,
-  rodapeLegal: '',
+  rodapeLegal: rodapeLegalPadrao,
 }
 
 /** Aplica os ajustes sobre os padrões, campo a campo. */
@@ -69,7 +70,9 @@ export function aplicar(ajustes: Ajustes | null | undefined): Conteudo {
 
     depoimentos: ajustes.depoimentos ?? depoimentosPadrao,
 
-    rodapeLegal: ajustes.rodapeLegal?.trim() ?? '',
+    // String vazia no painel volta ao padrão, em vez de sumir com a
+    // identificação que o CFO exige.
+    rodapeLegal: ajustes.rodapeLegal?.trim() || rodapeLegalPadrao,
   }
 }
 

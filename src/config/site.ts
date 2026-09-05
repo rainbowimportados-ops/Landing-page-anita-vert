@@ -61,6 +61,15 @@ export const clinica = {
   whatsappAtendimento: '5516999657667',
 }
 
+/**
+ * Identificação exigida pela resolução do CFO para publicidade odontológica.
+ * Dados do contrato social e do registro no CRO-SP; o painel em /config pode
+ * sobrescrever, mas o padrão já é o correto.
+ */
+export const rodapeLegal =
+  'CLÍNICA DRA ANITA MATIAS DE ALMEIDA LTDA · CNPJ 37.669.064/0001-90 · ' +
+  'Responsável técnica: Dra. Anita Matias de Almeida — CRO-SP 132978'
+
 export const unidades: Unidade[] = [
   {
     slug: 'franca',

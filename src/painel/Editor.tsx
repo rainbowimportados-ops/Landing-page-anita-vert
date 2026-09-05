@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   clinica as clinicaPadrao,
   faq as faqPadrao,
+  rodapeLegal as rodapeLegalPadrao,
   unidades as unidadesPadrao,
 } from '../config/site'
 import { SLUG, type Ajustes } from '../lib/conteudo'
@@ -201,12 +202,12 @@ export function Editor({ email, aoSair }: { email: string; aoSair: () => void })
           <h2 className="titulo-secao">Rodapé legal</h2>
           <p className="lead mt-2">
             Razão social, CNPJ e responsável técnico com CRO. Exigido pela resolução do CFO para
-            publicidade odontológica. Enquanto estiver vazio, a linha não aparece na página.
+            publicidade odontológica. Em branco, vale o texto padrão mostrado abaixo.
           </p>
           <textarea
             className={`${campo} mt-4`}
             rows={2}
-            placeholder="Instituto Vert Ltda · CNPJ 00.000.000/0001-00 · Resp. técnico: Dr(a). Nome — CRO-SP 00000"
+            placeholder={rodapeLegalPadrao}
             value={ajustes.rodapeLegal ?? ''}
             onChange={(e) => setAjustes((a) => ({ ...a, rodapeLegal: e.target.value }))}
           />
