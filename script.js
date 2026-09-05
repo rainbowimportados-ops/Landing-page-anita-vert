@@ -40,13 +40,20 @@ function whatsappUrl(phone, message) {
 }
 
 function personalizeMessage(message, lead = {}) {
+  const audience = lead.isDentist === true ? 'Dentista' : lead.isDentist === false ? 'Estudante de Odontologia' : '';
+  const courseExperience = lead.hasPreviousCourse === true
+    ? 'Já fiz outros cursos.'
+    : lead.hasPreviousCourse === false
+      ? 'Será o meu primeiro curso.'
+      : '';
   return String(message || '')
     .replaceAll('{nome}', lead.name || '')
     .replaceAll('{telefone}', lead.phone || '')
     .replaceAll('{profissao}', lead.profession || '')
     .replaceAll('{curso}', lead.course || '')
-    .replaceAll('{dentista}', lead.isDentist === true ? 'Sim' : lead.isDentist === false ? 'Não' : '')
-    .replaceAll('{curso_anterior}', lead.hasPreviousCourse === true ? 'Sim' : lead.hasPreviousCourse === false ? 'Não' : '')
+    .replaceAll('{dentista}', audience)
+    .replaceAll('{perfil}', audience)
+    .replaceAll('{curso_anterior}', courseExperience)
     .replaceAll('{cidade}', lead.city || '')
     .replaceAll('{unidade}', lead.unit || '')
     .replace(/\s{2,}/g, ' ')
@@ -210,7 +217,7 @@ function renderFormations(items, settings, company) {
   section.hidden = false;
   document.querySelector('#formations-eyebrow').textContent = settings.eyebrow || 'Educação Vert';
   document.querySelector('#formacoes-titulo').textContent = settings.title || 'Formação que transforma técnica em confiança.';
-  document.querySelector('#formations-description').textContent = settings.description || 'Cursos e experiências para dentistas que buscam excelência clínica.';
+  document.querySelector('#formations-description').textContent = settings.description || 'Cursos e experiências para dentistas e estudantes de Odontologia.';
   container.replaceChildren();
   active.forEach((item) => {
     const card = document.createElement('article');
@@ -222,7 +229,7 @@ function renderFormations(items, settings, company) {
     const description = document.createElement('p'); description.textContent = item.description || 'Conheça esta experiência de formação do Instituto Vert.';
     const meta = document.createElement('div'); meta.className = 'formation-card__meta';
     [item.format, item.schedule, item.location].filter(Boolean).forEach((value) => { const span = document.createElement('span'); span.textContent = value; meta.append(span); });
-    const message = item.whatsappMessage || settings.whatsappMessage || 'Olá! Meu nome é {nome} e tenho interesse na formação {curso}. Sou dentista: {dentista}. Já fiz outro curso: {curso_anterior}. Minha cidade é {cidade}.';
+    const message = item.whatsappMessage || settings.whatsappMessage || 'Olá! Meu nome é {nome}. Quero informações sobre {curso}. Sou {perfil}. {curso_anterior}';
     const formationPhone = (company.whatsappMode || 'shared') === 'shared'
       ? company.phone
       : (item.whatsappPhone || settings.phone || company.phone);
@@ -303,6 +310,7 @@ document.addEventListener('click', (event) => {
     courseTitle: link.dataset.courseTitle || '',
   };
   if (contactRouter.open) contactRouter.close();
+  leadForm.reset();
   const isFormation = pendingLead.leadType === 'formation';
   const isPatient = pendingLead.leadType === 'patient';
   const isAppointment = pendingLead.leadType === 'appointment';
@@ -314,13 +322,17 @@ document.addEventListener('click', (event) => {
         ? `Consulta em ${pendingLead.unit}`
         : currentCompany.leadFormTitle || 'Antes de continuar';
   document.querySelector('#lead-dialog-description').textContent = isFormation
-    ? 'Responda três perguntas rápidas para receber as informações da formação.'
+    ? 'Preencha seus dados e responda duas perguntas rápidas.'
     : isPatient
       ? 'Informe seu nome e telefone para identificarmos seu cadastro antes do atendimento.'
       : currentCompany.leadFormDescription || 'Informe seus dados para receber atendimento personalizado.';
   const formationFields = document.querySelector('#formation-lead-fields');
   formationFields.hidden = !isFormation;
   formationFields.querySelectorAll('input,select').forEach((field) => { field.disabled = !isFormation; });
+  const professionField = document.querySelector('#lead-profession-field');
+  const professionInput = document.querySelector('#lead-profession');
+  professionField.hidden = isFormation;
+  professionInput.disabled = isFormation;
   leadFeedback.textContent = '';
   leadDialog.showModal();
   requestAnimationFrame(() => document.querySelector('#lead-name').focus());
@@ -341,7 +353,7 @@ leadForm.addEventListener('submit', async (event) => {
     profession: String(formData.get('profession') || '').trim(),
     isDentist: formData.get('isDentist') === 'yes' ? true : formData.get('isDentist') === 'no' ? false : null,
     hasPreviousCourse: formData.get('hasPreviousCourse') === 'yes' ? true : formData.get('hasPreviousCourse') === 'no' ? false : null,
-    city: String(formData.get('city') || '').trim(),
+    city: '',
     course: pendingLead.courseTitle || '',
   };
   if (lead.phone.replace(/\D/g, '').length < 10) {
