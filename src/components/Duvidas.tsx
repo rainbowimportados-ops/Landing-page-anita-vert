@@ -1,7 +1,9 @@
-import { faq } from '../config/site'
+import { useConteudo } from '../lib/ConteudoContexto'
 import { Reveal } from './Reveal'
 
 export function Duvidas() {
+  const { faq } = useConteudo()
+
   return (
     <section id="duvidas" className="secao bg-superficie">
       <div className="container-vert grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">

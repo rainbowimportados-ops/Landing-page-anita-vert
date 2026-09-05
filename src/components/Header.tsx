@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { clinica } from '../config/site'
+import { useConteudo } from '../lib/ConteudoContexto'
 import { BotaoWhatsApp } from './CTA'
 
 const navegacao = [
@@ -11,6 +11,7 @@ const navegacao = [
 ]
 
 export function Header() {
+  const { clinica } = useConteudo()
   const [rolou, setRolou] = useState(false)
   const [menuAberto, setMenuAberto] = useState(false)
   const [secaoAtiva, setSecaoAtiva] = useState<string | null>(null)

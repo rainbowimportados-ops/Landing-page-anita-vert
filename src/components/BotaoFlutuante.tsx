@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { clinica } from '../config/site'
+import { useConteudo } from '../lib/ConteudoContexto'
 import { linkWhatsApp, registrarClique } from '../lib/analytics'
 import { IconWhatsApp } from './Icon'
 
@@ -10,6 +10,7 @@ const MENSAGEM = 'Olá! Vim pelo site e gostaria de agendar uma avaliação.'
  * Fica acima da safe area para não colidir com a barra de gestos (§5).
  */
 export function BotaoFlutuante() {
+  const { clinica } = useConteudo()
   const [visivel, setVisivel] = useState(false)
 
   useEffect(() => {

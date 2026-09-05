@@ -6,7 +6,12 @@ Duas páginas no mesmo build, servidas pelo projeto `instituto-vert` na Vercel.
 | --- | --- |
 | `/` | **Cartão digital** — página mobile-first de contatos e agendamento |
 | `/agendar` | **Landing page** — página de captação com tratamentos, processo e FAQ |
+| `/config` | Painel de configuração da landing page (login) |
 | `/admin` | Painel administrativo do cartão digital |
+
+O subdomínio **`vert.institutovert.app`** serve a landing page na raiz — um
+rewrite condicionado ao host manda `/` para `/agendar` — e o painel dela
+continua em `/config`.
 
 ## Cartão digital (`/`)
 
@@ -29,21 +34,33 @@ Construída em React + TypeScript + Tailwind, com o conteúdo centralizado em
 **`src/config/site.ts`** — dados da clínica, unidades, tratamentos, etapas, FAQ
 e a seção para dentistas. Não é preciso mexer nos componentes para trocar copy.
 
-### Pendências antes de divulgar esta rota
+### Configuração pelo painel (`/config`)
 
-`src/config/site.ts` tem itens marcados com `TODO` que a clínica precisa
-confirmar:
+O que está em `src/config/site.ts` é o **padrão**. O painel grava só as
+diferenças na tabela `public.landing_content`, e elas são aplicadas por cima na
+hora de renderizar. Campo em branco no painel mantém o texto do código; se o
+Supabase estiver fora do ar, a página abre com os padrões em vez de quebrar.
 
-- endereço completo e horário de atendimento das duas unidades;
-- link do Google Maps de cada unidade (`mapsUrl`) — sem ele o botão "Como
-  chegar" não aparece;
-- valor da primeira avaliação, convênios aceitos e formas de pagamento (FAQ);
-- calendário dos cursos e condições da locação de consultório;
-- razão social, CNPJ e responsável técnico com CRO no rodapé — exigidos pelo CFO
-  para publicidade odontológica.
+Editável pelo painel — é onde ficam as pendências que a clínica precisa
+preencher antes de divulgar a rota:
 
-A seção de depoimentos só é renderizada quando `depoimentos` tem itens.
-Preencher **apenas** com depoimentos reais e autorizados pelo paciente.
+- endereço, horários, link do Google Maps e WhatsApp de cada unidade;
+- respostas do FAQ (valor da avaliação, convênios, formas de pagamento);
+- depoimentos — a seção só aparece quando houver ao menos um, e devem ser
+  reais e autorizados pelo paciente;
+- razão social, CNPJ e responsável técnico com CRO no rodapé, exigidos pelo CFO
+  para publicidade odontológica. Enquanto vazio, a linha não é exibida.
+
+Segue apenas no código: textos dos tratamentos, diferenciais, etapas e a seção
+para dentistas.
+
+### Login e permissão
+
+Entrada por link mágico do Supabase, sem senha. Quem pode salvar não é decidido
+no navegador: o RLS de `landing_content` exige que o usuário esteja em
+`digital_card_admins` — a mesma tabela que já governa o painel do cartão. A
+tela apenas reflete essa decisão; um usuário logado fora dessa lista recebe o
+erro do banco ao tentar salvar.
 
 ## Medição de cliques
 

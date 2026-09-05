@@ -10,11 +10,12 @@ import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { Rodape } from './components/Rodape'
 import { Servicos } from './components/Servicos'
+import { ProvedorDeConteudo } from './lib/ConteudoContexto'
 import { Unidades } from './components/Unidades'
 
 export default function App() {
   return (
-    <>
+    <ProvedorDeConteudo>
       <a
         href="#tratamentos"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-marca-forte focus:px-5 focus:py-3 focus:text-sm focus:font-semibold focus:text-conteudo-inverso"
@@ -39,6 +40,6 @@ export default function App() {
 
       <Rodape />
       <BotaoFlutuante />
-    </>
+    </ProvedorDeConteudo>
   )
 }

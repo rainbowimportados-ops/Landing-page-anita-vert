@@ -1,8 +1,11 @@
-import { clinica, profissionais } from '../config/site'
+import { profissionais } from '../config/site'
+import { useConteudo } from '../lib/ConteudoContexto'
 import { BotaoWhatsApp } from './CTA'
 import { Reveal } from './Reveal'
 
 export function Dentistas() {
+  const { clinica } = useConteudo()
+
   return (
     <section id="dentistas" className="secao bg-superficie-inversa text-conteudo-inverso">
       <div className="container-vert">

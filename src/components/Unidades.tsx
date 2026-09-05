@@ -1,9 +1,11 @@
-import { unidades } from '../config/site'
+import { useConteudo } from '../lib/ConteudoContexto'
 import { BotaoWhatsApp } from './CTA'
 import { IconLocal, IconRelogio } from './Icon'
 import { Reveal } from './Reveal'
 
 export function Unidades() {
+  const { unidades } = useConteudo()
+
   return (
     <section id="unidades" className="secao bg-fundo">
       <div className="container-vert">

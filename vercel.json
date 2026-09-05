@@ -9,7 +9,6 @@
           "type": "host",
           "value": {
             "inc": [
-              "vert.institutovert.app",
               "instituto-vert-rainbowimportadosgmailcoms-projects.vercel.app",
               "instituto-vert-git-main-rainbowimportadosgmailcoms-projects.vercel.app",
               "instituto-vert-git-c-f3824f-rainbowimportadosgmailcoms-projects.vercel.app"
@@ -19,6 +18,13 @@
       ],
       "destination": "https://instituto-vert.vercel.app/:path*",
       "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "vert.institutovert.app" }],
+      "destination": "/agendar"
     }
   ],
   "headers": [

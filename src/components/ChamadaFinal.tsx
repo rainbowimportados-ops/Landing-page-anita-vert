@@ -1,8 +1,10 @@
-import { clinica } from '../config/site'
+import { useConteudo } from '../lib/ConteudoContexto'
 import { BotaoWhatsApp } from './CTA'
 import { Reveal } from './Reveal'
 
 export function ChamadaFinal() {
+  const { clinica } = useConteudo()
+
   return (
     <section className="secao bg-fundo">
       <div className="container-vert">

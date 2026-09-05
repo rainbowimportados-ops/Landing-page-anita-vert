@@ -1,4 +1,4 @@
-import { clinica, unidades } from '../config/site'
+import { useConteudo } from '../lib/ConteudoContexto'
 import { BotaoAncora, BotaoWhatsApp } from './CTA'
 import { IconSeta } from './Icon'
 
@@ -9,6 +9,8 @@ const promessas = [
 ]
 
 export function Hero() {
+  const { clinica, unidades } = useConteudo()
+
   return (
     <section id="topo" className="relative overflow-hidden bg-superficie-inversa pt-16 text-conteudo-inverso">
       {/* Halos decorativos: dão profundidade sem pedir uma foto de banco de imagem. */}

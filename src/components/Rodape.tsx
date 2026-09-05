@@ -1,11 +1,13 @@
-import { clinica, unidades } from '../config/site'
 import { registrarClique } from '../lib/analytics'
+import { useConteudo } from '../lib/ConteudoContexto'
 
 /** Links do rodapé com altura de toque de 44px (§2 touch-target-size). */
 const classeLink =
   'inline-flex min-h-[44px] items-center text-sm text-conteudo-inverso-suave underline-offset-4 transition-colors duration-rapido hover-fino:hover:text-conteudo-inverso hover-fino:hover:underline'
 
 export function Rodape() {
+  const { clinica, unidades, rodapeLegal } = useConteudo()
+
   return (
     <footer className="bg-superficie-rodape py-12 text-conteudo-inverso-suave">
       <div className="container-vert grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -67,11 +69,10 @@ export function Rodape() {
         <p>
           © {new Date().getFullYear()} {clinica.nome}. Todos os direitos reservados.
         </p>
-        <p className="mt-1">
-          {/* TODO: preencher a razão social, o CNPJ e o CRO do responsável técnico —
-              exigidos pela resolução do CFO para publicidade odontológica. */}
-          TODO: razão social · CNPJ · responsável técnico e CRO
-        </p>
+        {/* Razão social, CNPJ e responsável técnico com CRO: exigidos pela
+            resolução do CFO para publicidade odontológica. Preenchido pelo
+            painel em /config; enquanto vazio, a linha não é exibida. */}
+        {rodapeLegal && <p className="mt-1">{rodapeLegal}</p>}
       </div>
     </footer>
   )

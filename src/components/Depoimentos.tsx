@@ -1,4 +1,4 @@
-import { depoimentos } from '../config/site'
+import { useConteudo } from '../lib/ConteudoContexto'
 import { Reveal } from './Reveal'
 
 /**
@@ -6,6 +6,8 @@ import { Reveal } from './Reveal'
  * Nada aqui deve ser preenchido com texto fictício.
  */
 export function Depoimentos() {
+  const { depoimentos } = useConteudo()
+
   if (depoimentos.length === 0) return null
 
   return (
