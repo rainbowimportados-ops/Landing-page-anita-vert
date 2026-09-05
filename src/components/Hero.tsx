@@ -9,10 +9,18 @@ const promessas = [
 ]
 
 export function Hero() {
-  const { clinica, unidades } = useConteudo()
+  const { clinica, unidades, marca } = useConteudo()
 
   return (
     <section id="topo" className="relative overflow-hidden bg-superficie-inversa pt-16 text-conteudo-inverso">
+      {/* Capa enviada pelo painel, escurecida para o texto continuar legível. */}
+      {marca.capa && (
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <img src={marca.capa} alt="" className="h-full w-full object-cover opacity-25" />
+          <div className="absolute inset-0 bg-superficie-inversa/60" />
+        </div>
+      )}
+
       {/* Halos decorativos: dão profundidade sem pedir uma foto de banco de imagem. */}
       <div
         aria-hidden="true"

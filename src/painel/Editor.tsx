@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   clinica as clinicaPadrao,
   faq as faqPadrao,
@@ -6,6 +6,7 @@ import {
   unidades as unidadesPadrao,
 } from '../config/site'
 import { SLUG, type Ajustes } from '../lib/conteudo'
+import { CampoImagem } from './CampoImagem'
 import { supabase } from './supabase'
 
 type Estado = 'carregando' | 'pronto' | 'salvando' | 'salvo' | 'erro'
@@ -16,6 +17,8 @@ const campo =
 
 export function Editor({ email, aoSair }: { email: string; aoSair: () => void }) {
   const [ajustes, setAjustes] = useState<Ajustes>({})
+  // Guarda o que veio do banco, para saber se os seguidores mudaram de fato.
+  const ajustesOriginais = useRef<Ajustes | null>(null)
   const [estado, setEstado] = useState<Estado>('carregando')
   const [erro, setErro] = useState<string | null>(null)
 
@@ -26,7 +29,9 @@ export function Editor({ email, aoSair }: { email: string; aoSair: () => void })
       .eq('slug', SLUG)
       .maybeSingle()
       .then(({ data }) => {
-        setAjustes((data?.content as Ajustes) ?? {})
+        const vindos = (data?.content as Ajustes) ?? {}
+        ajustesOriginais.current = vindos
+        setAjustes(vindos)
         setEstado('pronto')
       })
   }, [])
@@ -34,9 +39,29 @@ export function Editor({ email, aoSair }: { email: string; aoSair: () => void })
   async function salvar() {
     setEstado('salvando')
     setErro(null)
+
+    // O número de seguidores não é buscado ao vivo, então guardamos quando ele
+    // foi informado — a página mostra "atualizado em" junto do número.
+    const paraSalvar: Ajustes = { ...ajustes }
+    if (paraSalvar.instagram?.perfil?.seguidores) {
+      paraSalvar.instagram = {
+        ...paraSalvar.instagram,
+        perfil: {
+          ...paraSalvar.instagram.perfil,
+          seguidoresAtualizadoEm:
+            paraSalvar.instagram.perfil.seguidores !==
+            ajustesOriginais.current?.instagram?.perfil?.seguidores
+              ? new Date().toISOString()
+              : paraSalvar.instagram.perfil.seguidoresAtualizadoEm,
+        },
+      }
+    }
+
     const { error } = await supabase
       .from('landing_content')
-      .upsert({ slug: SLUG, content: ajustes, updated_at: new Date().toISOString() })
+      .upsert({ slug: SLUG, content: paraSalvar, updated_at: new Date().toISOString() })
+
+    if (!error) ajustesOriginais.current = paraSalvar
 
     if (error) {
       // O RLS recusa quem não está em digital_card_admins.
@@ -50,6 +75,17 @@ export function Editor({ email, aoSair }: { email: string; aoSair: () => void })
     }
     setEstado('salvo')
     setTimeout(() => setEstado('pronto'), 2500)
+  }
+
+  function definirInstagram(campo: string, valor: unknown) {
+    setAjustes((a) => ({ ...a, instagram: { ...a.instagram, [campo]: valor } }))
+  }
+
+  function definirPerfil(campo: string, valor: unknown) {
+    setAjustes((a) => ({
+      ...a,
+      instagram: { ...a.instagram, perfil: { ...a.instagram?.perfil, [campo]: valor } },
+    }))
   }
 
   function definirUnidade(slug: string, campo: string, valor: string | string[]) {
@@ -195,6 +231,244 @@ export function Editor({ email, aoSair }: { email: string; aoSair: () => void })
                 />
               </div>
             ))}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="titulo-secao">Identidade visual</h2>
+          <p className="lead mt-2">
+            Imagens usadas na página. Sem logotipo enviado, vale a marca desenhada em código.
+          </p>
+          <div className="mt-5 space-y-6">
+            <CampoImagem
+              rotulo="Logotipo"
+              dica="Aparece no cabeçalho. PNG ou SVG com fundo transparente fica melhor."
+              pasta="marca"
+              valor={ajustes.marca?.logo}
+              aoMudar={(url) => setAjustes((a) => ({ ...a, marca: { ...a.marca, logo: url } }))}
+            />
+            <CampoImagem
+              rotulo="Imagem de capa"
+              dica="Fundo do topo da página. É escurecida automaticamente para o texto continuar legível."
+              pasta="capa"
+              valor={ajustes.marca?.capa}
+              aoMudar={(url) => setAjustes((a) => ({ ...a, marca: { ...a.marca, capa: url } }))}
+            />
+          </div>
+        </section>
+
+        <section>
+          <h2 className="titulo-secao">Campanha em destaque</h2>
+          <p className="lead mt-2">
+            Um banner logo abaixo do topo. Fica oculto enquanto não houver imagem nem título.
+          </p>
+          <div className="mt-5 space-y-4">
+            <CampoImagem
+              rotulo="Imagem do banner"
+              pasta="campanhas"
+              valor={ajustes.banner?.imagem}
+              aoMudar={(url) => setAjustes((a) => ({ ...a, banner: { ...a.banner, imagem: url } }))}
+            />
+            <div>
+              <label className={rotulo}>Título</label>
+              <input
+                className={campo}
+                value={ajustes.banner?.titulo ?? ''}
+                onChange={(e) =>
+                  setAjustes((a) => ({ ...a, banner: { ...a.banner, titulo: e.target.value } }))
+                }
+              />
+            </div>
+            <div>
+              <label className={rotulo}>Texto</label>
+              <textarea
+                className={campo}
+                rows={2}
+                value={ajustes.banner?.texto ?? ''}
+                onChange={(e) =>
+                  setAjustes((a) => ({ ...a, banner: { ...a.banner, texto: e.target.value } }))
+                }
+              />
+            </div>
+            <div>
+              <label className={rotulo}>Link ao clicar</label>
+              <input
+                className={campo}
+                placeholder="Deixe vazio para o banner não ser clicável"
+                value={ajustes.banner?.link ?? ''}
+                onChange={(e) =>
+                  setAjustes((a) => ({ ...a, banner: { ...a.banner, link: e.target.value } }))
+                }
+              />
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 className="titulo-secao">Instagram</h2>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className={rotulo}>Perfil da clínica</label>
+              <input
+                className={campo}
+                placeholder={clinicaPadrao.instagram}
+                value={ajustes.instagram?.clinica ?? ''}
+                onChange={(e) => definirInstagram('clinica', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className={rotulo}>Perfil da Dra. Anita</label>
+              <input
+                className={campo}
+                placeholder="https://www.instagram.com/usuario"
+                value={ajustes.instagram?.anita ?? ''}
+                onChange={(e) => definirInstagram('anita', e.target.value)}
+              />
+            </div>
+          </div>
+
+          <h3 className="mt-8 font-display text-lg text-conteudo">Prévia do perfil</h3>
+          <p className="lead mt-1">
+            Um card com foto, nome e seguidores. Aparece quando houver ao menos nome ou @.
+          </p>
+          <div className="mt-4 space-y-4">
+            <CampoImagem
+              rotulo="Foto do perfil"
+              pasta="perfil"
+              valor={ajustes.instagram?.perfil?.foto}
+              aoMudar={(url) => definirPerfil('foto', url)}
+            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={rotulo}>Nome exibido</label>
+                <input
+                  className={campo}
+                  placeholder="Dra. Anita Matias de Almeida"
+                  value={ajustes.instagram?.perfil?.nome ?? ''}
+                  onChange={(e) => definirPerfil('nome', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className={rotulo}>Usuário, sem o @</label>
+                <input
+                  className={campo}
+                  placeholder="dra.anitaalmeida"
+                  value={ajustes.instagram?.perfil?.usuario ?? ''}
+                  onChange={(e) => definirPerfil('usuario', e.target.value.replace('@', ''))}
+                />
+              </div>
+            </div>
+            <div>
+              <label className={rotulo}>Número de seguidores</label>
+              <input
+                className={campo}
+                type="number"
+                min={0}
+                inputMode="numeric"
+                placeholder="Deixe vazio para não mostrar"
+                value={ajustes.instagram?.perfil?.seguidores ?? ''}
+                onChange={(e) =>
+                  definirPerfil('seguidores', e.target.value ? Number(e.target.value) : undefined)
+                }
+              />
+              <p className="mt-2 text-xs leading-relaxed text-conteudo-tenue">
+                Este número não é buscado do Instagram automaticamente — isso exigiria um app da
+                Meta com token no servidor. A página mostra a data em que você informou, para o
+                valor não se passar por tempo real. Atualize quando quiser.
+              </p>
+            </div>
+          </div>
+
+          <h3 className="mt-8 font-display text-lg text-conteudo">Publicações</h3>
+          <p className="lead mt-1">
+            Cole o endereço de cada post. Eles são renderizados pelo próprio Instagram, então
+            acompanham qualquer edição feita por lá.
+          </p>
+          <div className="mt-4 space-y-3">
+            {(ajustes.instagram?.posts ?? []).map((url, i) => (
+              <div key={i} className="flex gap-2">
+                <input
+                  className={campo}
+                  placeholder="https://www.instagram.com/p/..."
+                  value={url}
+                  onChange={(e) => {
+                    const lista = [...(ajustes.instagram?.posts ?? [])]
+                    lista[i] = e.target.value
+                    definirInstagram('posts', lista)
+                  }}
+                />
+                <button
+                  onClick={() =>
+                    definirInstagram(
+                      'posts',
+                      (ajustes.instagram?.posts ?? []).filter((_, j) => j !== i),
+                    )
+                  }
+                  aria-label={`Remover publicação ${i + 1}`}
+                  className="inline-flex min-h-[44px] w-11 shrink-0 items-center justify-center rounded-lg border border-borda-forte text-red-700"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => definirInstagram('posts', [...(ajustes.instagram?.posts ?? []), ''])}
+              className="inline-flex min-h-[44px] items-center rounded-full border border-borda-forte px-5 text-sm font-medium text-conteudo"
+            >
+              Adicionar publicação
+            </button>
+          </div>
+
+          <h3 className="mt-8 font-display text-lg text-conteudo">Galeria de casos</h3>
+          <p className="lead mt-1">
+            Imagens enviadas por você, para casos que não estão no Instagram. Use apenas fotos com
+            autorização do paciente.
+          </p>
+          <div className="mt-4 space-y-4">
+            {(ajustes.galeria ?? []).map((imagem, i) => (
+              <div key={i} className="rounded-card border border-borda bg-superficie p-5">
+                <CampoImagem
+                  rotulo={`Imagem ${i + 1}`}
+                  pasta="galeria"
+                  valor={imagem.url}
+                  aoMudar={(url) => {
+                    const lista = [...(ajustes.galeria ?? [])]
+                    lista[i] = { ...lista[i], url }
+                    setAjustes((a) => ({ ...a, galeria: lista }))
+                  }}
+                />
+                <input
+                  className={`${campo} mt-3`}
+                  placeholder="Legenda (opcional)"
+                  value={imagem.legenda ?? ''}
+                  onChange={(e) => {
+                    const lista = [...(ajustes.galeria ?? [])]
+                    lista[i] = { ...lista[i], legenda: e.target.value }
+                    setAjustes((a) => ({ ...a, galeria: lista }))
+                  }}
+                />
+                <button
+                  onClick={() =>
+                    setAjustes((a) => ({
+                      ...a,
+                      galeria: (a.galeria ?? []).filter((_, j) => j !== i),
+                    }))
+                  }
+                  className="mt-3 inline-flex min-h-[44px] items-center text-sm font-medium text-red-700"
+                >
+                  Remover imagem
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() =>
+                setAjustes((a) => ({ ...a, galeria: [...(a.galeria ?? []), { url: '' }] }))
+              }
+              className="inline-flex min-h-[44px] items-center rounded-full border border-borda-forte px-5 text-sm font-medium text-conteudo"
+            >
+              Adicionar imagem
+            </button>
           </div>
         </section>
 

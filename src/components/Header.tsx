@@ -11,7 +11,7 @@ const navegacao = [
 ]
 
 export function Header() {
-  const { clinica } = useConteudo()
+  const { clinica, marca } = useConteudo()
   const [rolou, setRolou] = useState(false)
   const [menuAberto, setMenuAberto] = useState(false)
   const [secaoAtiva, setSecaoAtiva] = useState<string | null>(null)
@@ -65,6 +65,9 @@ export function Header() {
           className="-ml-1 inline-flex min-h-[44px] items-center gap-2 rounded-lg px-1"
           aria-label={`${clinica.nome} — início`}
         >
+          {marca.logo ? (
+            <img src={marca.logo} alt="" className="h-8 w-8 rounded-lg object-contain" />
+          ) : (
           <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden="true">
             <rect
               width="32"
@@ -81,6 +84,7 @@ export function Header() {
               strokeLinejoin="round"
             />
           </svg>
+          )}
           <span
             className={`font-display text-lg tracking-tight transition-colors duration-padrao ${
               sobreHero ? 'text-conteudo-inverso' : 'text-conteudo'

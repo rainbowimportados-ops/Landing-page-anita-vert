@@ -6,7 +6,7 @@ const classeLink =
   'inline-flex min-h-[44px] items-center text-sm text-conteudo-inverso-suave underline-offset-4 transition-colors duration-rapido hover-fino:hover:text-conteudo-inverso hover-fino:hover:underline'
 
 export function Rodape() {
-  const { clinica, unidades, rodapeLegal } = useConteudo()
+  const { clinica, unidades, rodapeLegal, instagram } = useConteudo()
 
   return (
     <footer className="bg-superficie-rodape py-12 text-conteudo-inverso-suave">
@@ -42,16 +42,30 @@ export function Rodape() {
           <ul className="mt-1">
             <li>
               <a
-                href={clinica.instagram}
+                href={instagram.clinica}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => registrarClique('rodape_instagram')}
+                onClick={() => registrarClique('rodape_instagram_clinica')}
                 className={classeLink}
               >
-                Instagram
+                Instagram da clínica
                 <span className="sr-only"> (abre em uma nova aba)</span>
               </a>
             </li>
+            {instagram.anita && (
+              <li>
+                <a
+                  href={instagram.anita}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => registrarClique('rodape_instagram_anita')}
+                  className={classeLink}
+                >
+                  Instagram da Dra. Anita
+                  <span className="sr-only"> (abre em uma nova aba)</span>
+                </a>
+              </li>
+            )}
             {clinica.email && (
               <li>
                 <a
