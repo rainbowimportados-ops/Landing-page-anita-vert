@@ -20,6 +20,47 @@ const SUPABASE_URL = 'https://xiskevunqbvmoclygppc.supabase.co'
 const CHAVE_PUBLICA = 'sb_publishable_aDaa3WVZP7siuPw8IbK_Wg_Y68x-MHH'
 export const SLUG = 'instituto-vert'
 
+export type PerfilInstagram = {
+  nome?: string
+  usuario?: string
+  /** URL pública no bucket digital-card-media. */
+  foto?: string
+  seguidores?: number
+  /** ISO, gravado ao salvar. A tela mostra "atualizado em" para o número
+   *  nunca se passar por tempo real. */
+  seguidoresAtualizadoEm?: string
+}
+
+export type Instagram = {
+  /** URL do perfil da clínica. */
+  clinica?: string
+  /** URL do perfil da responsável técnica. */
+  anita?: string
+  perfil?: PerfilInstagram
+  /** URLs de posts, renderizados pelo embed oficial do Instagram. */
+  posts?: string[]
+}
+
+export type ImagemCaso = {
+  url: string
+  legenda?: string
+}
+
+export type Marca = {
+  /** Substitui o logotipo desenhado em SVG quando enviado. */
+  logo?: string
+  /** Imagem de fundo do hero. */
+  capa?: string
+}
+
+export type Banner = {
+  imagem?: string
+  titulo?: string
+  texto?: string
+  /** Para onde o banner leva. Vazio deixa o banner sem link. */
+  link?: string
+}
+
 /** Só os campos que a clínica pode editar pelo painel. */
 export type Ajustes = {
   clinica?: Partial<Pick<
@@ -33,6 +74,12 @@ export type Ajustes = {
   depoimentos?: Depoimento[]
   /** Razão social, CNPJ e responsável técnico com CRO, exigidos pelo CFO. */
   rodapeLegal?: string
+  instagram?: Instagram
+  /** Imagens de casos enviadas pelo painel, além dos posts do Instagram. */
+  galeria?: ImagemCaso[]
+  marca?: Marca
+  /** Campanha em destaque. Sem imagem nem título, não aparece. */
+  banner?: Banner
 }
 
 export type Conteudo = {
@@ -41,6 +88,10 @@ export type Conteudo = {
   faq: typeof faqPadrao
   depoimentos: Depoimento[]
   rodapeLegal: string
+  instagram: Instagram
+  galeria: ImagemCaso[]
+  marca: Marca
+  banner: Banner | null
 }
 
 export const conteudoPadrao: Conteudo = {
@@ -49,6 +100,10 @@ export const conteudoPadrao: Conteudo = {
   faq: faqPadrao.filter((item) => item.resposta.trim() !== ''),
   depoimentos: depoimentosPadrao,
   rodapeLegal: rodapeLegalPadrao,
+  instagram: { clinica: clinicaPadrao.instagram },
+  galeria: [],
+  marca: {},
+  banner: null,
 }
 
 /** Aplica os ajustes sobre os padrões, campo a campo. */
@@ -77,6 +132,22 @@ export function aplicar(ajustes: Ajustes | null | undefined): Conteudo {
     // String vazia no painel volta ao padrão, em vez de sumir com a
     // identificação que o CFO exige.
     rodapeLegal: ajustes.rodapeLegal?.trim() || rodapeLegalPadrao,
+
+    instagram: {
+      clinica: ajustes.instagram?.clinica?.trim() || clinicaPadrao.instagram,
+      anita: ajustes.instagram?.anita?.trim() || undefined,
+      perfil: ajustes.instagram?.perfil,
+      posts: (ajustes.instagram?.posts ?? []).filter((u) => u.trim() !== ''),
+    },
+
+    galeria: (ajustes.galeria ?? []).filter((i) => i.url.trim() !== ''),
+    marca: ajustes.marca ?? {},
+
+    // Banner sem imagem nem título não tem o que mostrar.
+    banner:
+      ajustes.banner && (ajustes.banner.imagem || ajustes.banner.titulo)
+        ? ajustes.banner
+        : null,
   }
 }
 
