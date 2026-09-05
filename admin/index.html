@@ -199,9 +199,9 @@
                 <label class="wide">Descrição<textarea name="formationSettings.description" rows="3" placeholder="Cursos e experiências para dentistas e estudantes de Odontologia."></textarea></label>
                 <label>WhatsApp padrão<input name="formationSettings.phone" inputmode="tel" placeholder="5516999999999" /></label>
                 <label>Texto do botão<input name="formationSettings.buttonLabel" placeholder="Quero saber mais" /></label>
-                <label class="wide">Mensagem padrão do WhatsApp<textarea name="formationSettings.whatsappMessage" rows="4" placeholder="Olá! Meu nome é {nome} e tenho interesse em {curso}."></textarea></label>
+                <label class="wide">Mensagem padrão do WhatsApp<textarea name="formationSettings.whatsappMessage" rows="4" placeholder="Olá! Meu nome é {nome}. Quero informações sobre {curso}. Sou {perfil}. {curso_anterior}"></textarea></label>
               </div>
-              <p class="helper">Variáveis disponíveis: <strong>{nome}</strong>, <strong>{telefone}</strong>, <strong>{curso}</strong>, <strong>{perfil}</strong> (Dentista ou Estudante) e <strong>{curso_anterior}</strong>.</p>
+              <p class="helper">Variáveis disponíveis: <strong>{nome}</strong>, <strong>{telefone}</strong>, <strong>{curso}</strong>, <strong>{perfil}</strong> (Dentista ou Estudante) e <strong>{curso_anterior}</strong> (gera a frase sobre cursos anteriores).</p>
               <div class="subheading"><h3>Conteúdos publicados</h3></div>
               <div class="repeat-list formations-list" id="formations-list"></div>
               <div class="subheading formation-leads-heading"><h3>Interessados nas formações</h3><button type="button" class="small-action" id="refresh-formation-leads">Atualizar</button></div>

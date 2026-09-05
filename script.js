@@ -41,6 +41,11 @@ function whatsappUrl(phone, message) {
 
 function personalizeMessage(message, lead = {}) {
   const audience = lead.isDentist === true ? 'Dentista' : lead.isDentist === false ? 'Estudante de Odontologia' : '';
+  const courseExperience = lead.hasPreviousCourse === true
+    ? 'Já fiz outros cursos.'
+    : lead.hasPreviousCourse === false
+      ? 'Será o meu primeiro curso.'
+      : '';
   return String(message || '')
     .replaceAll('{nome}', lead.name || '')
     .replaceAll('{telefone}', lead.phone || '')
@@ -48,7 +53,7 @@ function personalizeMessage(message, lead = {}) {
     .replaceAll('{curso}', lead.course || '')
     .replaceAll('{dentista}', audience)
     .replaceAll('{perfil}', audience)
-    .replaceAll('{curso_anterior}', lead.hasPreviousCourse === true ? 'Sim' : lead.hasPreviousCourse === false ? 'Não' : '')
+    .replaceAll('{curso_anterior}', courseExperience)
     .replaceAll('{cidade}', lead.city || '')
     .replaceAll('{unidade}', lead.unit || '')
     .replace(/\s{2,}/g, ' ')
@@ -224,7 +229,7 @@ function renderFormations(items, settings, company) {
     const description = document.createElement('p'); description.textContent = item.description || 'Conheça esta experiência de formação do Instituto Vert.';
     const meta = document.createElement('div'); meta.className = 'formation-card__meta';
     [item.format, item.schedule, item.location].filter(Boolean).forEach((value) => { const span = document.createElement('span'); span.textContent = value; meta.append(span); });
-    const message = item.whatsappMessage || settings.whatsappMessage || 'Olá! Meu nome é {nome}. Quero informações sobre {curso}. Perfil: {perfil}. Já fiz outro curso: {curso_anterior}.';
+    const message = item.whatsappMessage || settings.whatsappMessage || 'Olá! Meu nome é {nome}. Quero informações sobre {curso}. Sou {perfil}. {curso_anterior}';
     const formationPhone = (company.whatsappMode || 'shared') === 'shared'
       ? company.phone
       : (item.whatsappPhone || settings.phone || company.phone);

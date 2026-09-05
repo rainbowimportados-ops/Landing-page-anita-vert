@@ -323,7 +323,7 @@ function renderList(type) {
       field('Cidade ou local', 'location', item.location || '', { placeholder: 'Franca - SP' }),
       field('WhatsApp específico', 'whatsappPhone', item.whatsappPhone || '', { placeholder: 'Deixe vazio para usar o padrão' }),
       field('Texto do botão', 'buttonLabel', item.buttonLabel || '', { placeholder: 'Quero saber mais' }),
-      textareaField('Mensagem enviada ao WhatsApp', 'whatsappMessage', item.whatsappMessage || '', { wide: true, rows: 4, placeholder: 'Olá! Meu nome é {nome}. Quero informações sobre {curso}. Perfil: {perfil}.' }),
+      textareaField('Mensagem enviada ao WhatsApp', 'whatsappMessage', item.whatsappMessage || '', { wide: true, rows: 4, placeholder: 'Olá! Meu nome é {nome}. Quero informações sobre {curso}. Sou {perfil}. {curso_anterior}' }),
     ].join('');
     if (type === 'campaigns') fields = field('Título', 'title', item.title) + field('Texto', 'description', item.description, { wide: true }) + field('Texto do botão', 'buttonLabel', item.buttonLabel) + field('Link', 'url', item.url, { type: 'url' });
     if (type === 'testimonials') fields = field('Nome', 'author', item.author) + field('Depoimento', 'text', item.text, { wide: true });
