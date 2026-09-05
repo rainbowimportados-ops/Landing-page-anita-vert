@@ -12,9 +12,30 @@ import { supabase } from './supabase'
  * Quem pode salvar continua sendo decisão do RLS: o usuário precisa estar em
  * digital_card_admins. Esta tela apenas autentica.
  */
+/** Olho aberto quando a senha está visível; cortado quando está oculta. */
+function Olho({ aberto }: { aberto: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5"
+      aria-hidden="true"
+    >
+      <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" />
+      <circle cx="12" cy="12" r="3" />
+      {!aberto && <path d="M4 20 20 4" />}
+    </svg>
+  )
+}
+
 export function Login() {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
+  const [mostrarSenha, setMostrarSenha] = useState(false)
   const [entrando, setEntrando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
 
@@ -65,17 +86,29 @@ export function Login() {
             <label htmlFor="senha" className="block text-sm font-medium text-conteudo">
               Senha
             </label>
-            <input
-              id="senha"
-              type="password"
-              required
-              autoComplete="current-password"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              className="mt-1.5 h-11 w-full rounded-lg border border-borda-forte bg-superficie px-3 text-sm text-conteudo"
-            />
+            <div className="relative mt-1.5">
+              <input
+                id="senha"
+                type={mostrarSenha ? 'text' : 'password'}
+                required
+                autoComplete="current-password"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                className="h-11 w-full rounded-lg border border-borda-forte bg-superficie pl-3 pr-12 text-sm text-conteudo"
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarSenha((v) => !v)}
+                aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                aria-pressed={mostrarSenha}
+                className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center rounded-r-lg text-conteudo-tenue transition-colors duration-rapido hover-fino:hover:text-conteudo"
+              >
+                <Olho aberto={mostrarSenha} />
+              </button>
+            </div>
             <p className="mt-2 text-xs leading-relaxed text-conteudo-tenue">
-              A mesma senha que abre o painel do cartão digital.
+              A mesma senha que abre o painel do cartão digital, em
+              institutovert.app/admin.
             </p>
           </div>
 
