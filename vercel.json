@@ -20,13 +20,6 @@
       "permanent": true
     }
   ],
-  "rewrites": [
-    {
-      "source": "/",
-      "has": [{ "type": "host", "value": "vert.institutovert.app" }],
-      "destination": "/agendar"
-    }
-  ],
   "headers": [
     {
       "source": "/assets/(.*)",
