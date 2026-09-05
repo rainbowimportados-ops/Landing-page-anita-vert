@@ -1,0 +1,18 @@
+{
+  "id": "/config",
+  "name": "Vert · Configuração da landing",
+  "short_name": "Vert Config",
+  "description": "Painel de conteúdo da landing page do Instituto Vert.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "/config/",
+  "scope": "/config/",
+  "display": "standalone",
+  "theme_color": "#163A2C",
+  "background_color": "#FBF9F5",
+  "icons": [
+    { "src": "/icones/painel-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icones/painel-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icones/painel-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

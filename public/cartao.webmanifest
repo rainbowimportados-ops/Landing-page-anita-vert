@@ -1,0 +1,18 @@
+{
+  "id": "/",
+  "name": "Instituto Vert",
+  "short_name": "Vert",
+  "description": "Contatos, unidades e agendamento do Instituto Vert.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#2b1b14",
+  "background_color": "#21140f",
+  "icons": [
+    { "src": "/icones/vert-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icones/vert-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icones/vert-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
