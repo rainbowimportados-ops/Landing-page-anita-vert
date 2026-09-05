@@ -214,13 +214,20 @@ document.querySelectorAll('.nav-link').forEach((button) => {
     button.classList.add('is-active');
     document.querySelector(`[data-panel="${button.dataset.section}"]`).classList.add('is-active');
     if (button.dataset.section === 'links' && content) renderUnitContacts();
+    const mobileNav = document.querySelector('#mobile-section-nav');
+    if (mobileNav) mobileNav.value = button.dataset.section;
   });
+});
+
+document.querySelector('#mobile-section-nav')?.addEventListener('change', (event) => {
+  document.querySelector(`.nav-link[data-section="${event.target.value}"]`)?.click();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 function fillCompany() {
   contentForm.querySelectorAll('[name^="company."]').forEach((field) => {
     const key = field.name.split('.')[1];
-    field.value = content.company?.[key] ?? (key === 'logoVariant' ? 'primaryDark' : '');
+    field.value = content.company?.[key] ?? (key === 'logoVariant' ? 'primaryDark' : key === 'whatsappMode' ? 'shared' : '');
   });
   const previews = {
     'hero-preview': content.company?.heroImage || DEFAULT_IDENTITY_ASSETS.heroImage,

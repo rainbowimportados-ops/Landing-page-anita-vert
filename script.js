@@ -5,8 +5,11 @@ document.getElementById('year').textContent = new Date().getFullYear();
 const leadDialog = document.querySelector('#lead-dialog');
 const leadForm = document.querySelector('#lead-form');
 const leadFeedback = document.querySelector('#lead-feedback');
+const contactRouter = document.querySelector('#contact-router');
+const contactRouterOptions = document.querySelector('#contact-router-options');
 let pendingLead = null;
 let currentCompany = {};
+let currentUnits = [];
 
 const DEFAULT_LOGOS = {
   primaryDark: new URL('./assets/logo-principal-marrom.jpeg', import.meta.url).href,
@@ -45,6 +48,7 @@ function personalizeMessage(message, lead = {}) {
     .replaceAll('{dentista}', lead.isDentist === true ? 'Sim' : lead.isDentist === false ? 'Não' : '')
     .replaceAll('{curso_anterior}', lead.hasPreviousCourse === true ? 'Sim' : lead.hasPreviousCourse === false ? 'Não' : '')
     .replaceAll('{cidade}', lead.city || '')
+    .replaceAll('{unidade}', lead.unit || '')
     .replace(/\s{2,}/g, ' ')
     .trim();
 }
@@ -86,17 +90,53 @@ function trackableLink(url, track, unit) {
 function renderWhatsApp(units, company) {
   const container = document.querySelector('.whatsapp-actions');
   container.replaceChildren();
-  units.filter((unit) => unit.active !== false).forEach((unit) => {
-    const message = unit.whatsappMessage || company.whatsappMessage || `Olá! Meu nome é {nome}. Vim pelo cartão do Instituto Vert e quero agendar uma avaliação na unidade de ${String(unit.city || unit.name).toUpperCase()}.`;
-    const destination = unit.contactUrl || whatsappUrl(unit.phone || company.phone, personalizeMessage(message));
-    const link = trackableLink(applyPreMessage(destination, message), 'whatsapp_agendar', unit.id);
-    prepareLeadLink(link, { collectLead: unit.collectLead !== false, message, label: `WhatsApp — ${unit.city || unit.name}`, unit: unit.name || unit.city });
-    link.className = 'contact-button contact-button--primary';
-    link.innerHTML = '<span class="contact-button__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.3-4.7a8.5 8.5 0 1 1 16.2-4.1Z"/><path d="M8.2 7.7c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.5l.8 1.8c.1.3.1.5-.1.7l-.6.8c-.2.2-.1.4 0 .6.5 1 1.3 1.8 2.3 2.3.2.1.4.2.6 0l.8-1c.2-.2.4-.3.7-.2l1.9.9c.3.1.5.3.5.5 0 .3-.1 1.4-.7 2-.6.7-1.5.9-2.4.7-1-.2-2.3-.7-3.9-2.1-1.3-1.2-2.2-2.6-2.5-3.6-.3-.9 0-2.1.9-3.5Z"/></svg></span>';
-    const copy = document.createElement('span'); copy.innerHTML = '<small>WhatsApp</small>';
-    const strong = document.createElement('strong'); strong.textContent = unit.contactButtonLabel || `Agendar em ${unit.city || unit.name}`; copy.append(strong); link.append(copy);
-    const arrow = document.createElement('span'); arrow.className = 'contact-button__arrow'; arrow.setAttribute('aria-hidden', 'true'); arrow.textContent = '→'; link.append(arrow); container.append(link);
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'contact-button contact-button--primary contact-button--router';
+  button.dataset.openContactRouter = '';
+  button.innerHTML = '<span class="contact-button__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.3-4.7a8.5 8.5 0 1 1 16.2-4.1Z"/><path d="M8.2 7.7c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.5l.8 1.8c.1.3.1.5-.1.7l-.6.8c-.2.2-.1.4 0 .6.5 1 1.3 1.8 2.3 2.3.2.1.4.2.6 0l.8-1c.2-.2.4-.3.7-.2l1.9.9c.3.1.5.3.5.5 0 .3-.1 1.4-.7 2-.6.7-1.5.9-2.4.7-1-.2-2.3-.7-3.9-2.1-1.3-1.2-2.2-2.6-2.5-3.6-.3-.9 0-2.1.9-3.5Z"/></svg></span>';
+  const copy = document.createElement('span'); copy.innerHTML = '<small>Atendimento rápido</small>';
+  const strong = document.createElement('strong'); strong.textContent = company.contactButtonLabel || 'Falar no WhatsApp'; copy.append(strong); button.append(copy);
+  const arrow = document.createElement('span'); arrow.className = 'contact-button__arrow'; arrow.setAttribute('aria-hidden', 'true'); arrow.textContent = '→'; button.append(arrow); container.append(button);
+  renderContactRouter(units, company);
+}
+
+function renderContactRouter(units, company) {
+  const activeUnits = units.filter((unit) => unit.active !== false);
+  const sharedNumber = company.phone || activeUnits[0]?.phone;
+  const useSharedNumber = (company.whatsappMode || 'shared') === 'shared';
+  contactRouterOptions.replaceChildren();
+
+  activeUnits.forEach((unit) => {
+    const unitName = unit.city || unit.name || 'Unidade';
+    const message = unit.whatsappMessage || company.whatsappMessage || 'Olá! Meu nome é {nome} e quero agendar uma avaliação em {unidade}.';
+    const phone = useSharedNumber ? sharedNumber : (unit.phone || sharedNumber);
+    const destination = useSharedNumber
+      ? whatsappUrl(sharedNumber, personalizeMessage(message, { unit: unitName }))
+      : (unit.contactUrl || whatsappUrl(phone, personalizeMessage(message, { unit: unitName })));
+    const link = trackableLink(applyPreMessage(destination, message, { unit: unitName }), 'whatsapp_agendar', unit.id);
+    link.className = 'contact-router__option';
+    link.innerHTML = `<span><small>Nova consulta</small><strong>${escapeText(unit.contactButtonLabel || `Consulta em ${unitName}`)}</strong></span><b aria-hidden="true">→</b>`;
+    prepareLeadLink(link, { collectLead: unit.collectLead !== false, message, label: `Consulta — ${unitName}`, unit: unitName, leadType: 'appointment' });
+    contactRouterOptions.append(link);
   });
+
+  const patientMessage = company.patientMessage || 'Olá! Meu nome é {nome}, já sou paciente do Instituto Vert e preciso de atendimento.';
+  const patient = trackableLink(whatsappUrl(sharedNumber, personalizeMessage(patientMessage)), 'whatsapp_paciente');
+  patient.className = 'contact-router__option';
+  patient.innerHTML = '<span><small>Atendimento</small><strong>Já sou paciente</strong></span><b aria-hidden="true">→</b>';
+  prepareLeadLink(patient, { message: patientMessage, label: 'Já sou paciente', leadType: 'patient' });
+  contactRouterOptions.append(patient);
+
+  const formationSection = document.querySelector('#formacoes');
+  if (formationSection && !formationSection.hidden) {
+    const formation = document.createElement('a');
+    formation.href = '#formacoes';
+    formation.className = 'contact-router__option';
+    formation.dataset.contactRouteFormation = '';
+    formation.innerHTML = '<span><small>Educação Vert</small><strong>Cursos e formações</strong></span><b aria-hidden="true">↓</b>';
+    contactRouterOptions.append(formation);
+  }
 }
 
 function renderUnits(units) {
@@ -183,7 +223,10 @@ function renderFormations(items, settings, company) {
     const meta = document.createElement('div'); meta.className = 'formation-card__meta';
     [item.format, item.schedule, item.location].filter(Boolean).forEach((value) => { const span = document.createElement('span'); span.textContent = value; meta.append(span); });
     const message = item.whatsappMessage || settings.whatsappMessage || 'Olá! Meu nome é {nome} e tenho interesse na formação {curso}. Sou dentista: {dentista}. Já fiz outro curso: {curso_anterior}. Minha cidade é {cidade}.';
-    const destination = whatsappUrl(item.whatsappPhone || settings.phone || company.phone, personalizeMessage(message, { course: item.title }));
+    const formationPhone = (company.whatsappMode || 'shared') === 'shared'
+      ? company.phone
+      : (item.whatsappPhone || settings.phone || company.phone);
+    const destination = whatsappUrl(formationPhone, personalizeMessage(message, { course: item.title }));
     const link = trackableLink(destination, `formacao_${item.id || 'curso'}`);
     link.className = 'formation-card__action';
     link.innerHTML = `<span>${escapeText(item.buttonLabel || settings.buttonLabel || 'Quero saber mais')}</span><b aria-hidden="true">→</b>`;
@@ -198,7 +241,7 @@ function escapeText(value = '') {
 }
 
 function renderContent(content) {
-  if (!content) return; const company = content.company || {}; const units = content.units || []; const formationSettings = content.formationSettings || {}; currentCompany = company;
+  if (!content) return; const company = content.company || {}; const units = content.units || []; const formationSettings = content.formationSettings || {}; currentCompany = company; currentUnits = units;
   setText('.profile__identity p', company.category); setText('#titulo', company.name); setText('.intro .eyebrow', company.ctaLabel); setText('#cms-headline', company.headline); setText('#cms-description', company.description); setText('footer p', company.tagline);
   const hero = document.querySelector('.profile__photo > img');
   if (hero && company.heroImage) applyImageSource(hero, company.heroImage, new URL('./assets/hero.webp', import.meta.url).href);
@@ -212,12 +255,11 @@ function renderContent(content) {
   const selectedLogo = logoSources[selectedVariant] || logoSources.primaryDark;
   applyImageSource(logo, selectedLogo, DEFAULT_LOGOS.primaryDark);
   const cities = units.filter((unit) => unit.active !== false).map((unit) => unit.city).filter(Boolean); setText('.profile__identity span', company.identityLine || cities.join(' • '));
-  renderWhatsApp(units, company); renderUnits(units); renderPortfolio(content.portfolio); renderCards('campanhas', 'campaign-list', content.campaigns, 'campaign'); renderCards('depoimentos', 'testimonial-list', content.testimonials, 'testimonial'); renderFormations(content.formations, formationSettings, company); renderExtraLinks(content.links);
+  renderUnits(units); renderPortfolio(content.portfolio); renderCards('campanhas', 'campaign-list', content.campaigns, 'campaign'); renderCards('depoimentos', 'testimonial-list', content.testimonials, 'testimonial'); renderFormations(content.formations, formationSettings, company); renderExtraLinks(content.links); renderWhatsApp(units, company);
   const instagram = document.querySelector('.quick-links a[data-track="instagram"]'); if (instagram && company.instagram) { instagram.href = safeUrl(company.instagram); const label = instagram.querySelector('small'); if (label) label.textContent = company.instagramLabel || 'Instagram'; }
   const floating = document.querySelector('.floating-whatsapp');
-  const floatingMessage = company.whatsappMessage || 'Olá! Meu nome é {nome}. Vim pelo cartão do Instituto Vert e quero agendar uma avaliação.';
-  floating.href = whatsappUrl(company.phone || units[0]?.phone, personalizeMessage(floatingMessage));
-  prepareLeadLink(floating, { collectLead: company.collectLeadFloating !== false, message: floatingMessage, label: 'WhatsApp fixo' });
+  const floatingLabel = floating.querySelector('span:last-child');
+  if (floatingLabel) floatingLabel.textContent = company.contactButtonLabel || 'Falar no WhatsApp';
   bindTracking();
 }
 
@@ -239,6 +281,14 @@ function bindTracking() {
 }
 
 document.addEventListener('click', (event) => {
+  const routerTrigger = event.target.closest('[data-open-contact-router]');
+  if (routerTrigger) {
+    event.preventDefault();
+    renderContactRouter(currentUnits, currentCompany);
+    contactRouter.showModal();
+    return;
+  }
+  if (event.target.closest('[data-contact-route-formation]')) contactRouter.close();
   const link = event.target.closest('a[data-collect-lead="true"]');
   if (!link) return;
   event.preventDefault();
@@ -252,9 +302,22 @@ document.addEventListener('click', (event) => {
     courseId: link.dataset.courseId || '',
     courseTitle: link.dataset.courseTitle || '',
   };
+  if (contactRouter.open) contactRouter.close();
   const isFormation = pendingLead.leadType === 'formation';
-  document.querySelector('#lead-dialog-title').textContent = isFormation ? `Interesse em ${pendingLead.courseTitle}` : currentCompany.leadFormTitle || 'Antes de continuar';
-  document.querySelector('#lead-dialog-description').textContent = isFormation ? 'Responda três perguntas rápidas para receber as informações da formação.' : currentCompany.leadFormDescription || 'Informe seus dados para receber atendimento personalizado.';
+  const isPatient = pendingLead.leadType === 'patient';
+  const isAppointment = pendingLead.leadType === 'appointment';
+  document.querySelector('#lead-dialog-title').textContent = isFormation
+    ? `Interesse em ${pendingLead.courseTitle}`
+    : isPatient
+      ? 'Atendimento para paciente'
+      : isAppointment
+        ? `Consulta em ${pendingLead.unit}`
+        : currentCompany.leadFormTitle || 'Antes de continuar';
+  document.querySelector('#lead-dialog-description').textContent = isFormation
+    ? 'Responda três perguntas rápidas para receber as informações da formação.'
+    : isPatient
+      ? 'Informe seu nome e telefone para identificarmos seu cadastro antes do atendimento.'
+      : currentCompany.leadFormDescription || 'Informe seus dados para receber atendimento personalizado.';
   const formationFields = document.querySelector('#formation-lead-fields');
   formationFields.hidden = !isFormation;
   formationFields.querySelectorAll('input,select').forEach((field) => { field.disabled = !isFormation; });
@@ -265,6 +328,8 @@ document.addEventListener('click', (event) => {
 
 document.querySelector('[data-close-lead]').addEventListener('click', () => leadDialog.close());
 leadDialog.addEventListener('click', (event) => { if (event.target === leadDialog) leadDialog.close(); });
+document.querySelector('[data-close-contact-router]').addEventListener('click', () => contactRouter.close());
+contactRouter.addEventListener('click', (event) => { if (event.target === contactRouter) contactRouter.close(); });
 
 leadForm.addEventListener('submit', async (event) => {
   event.preventDefault();

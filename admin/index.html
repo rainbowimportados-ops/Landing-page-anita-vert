@@ -60,13 +60,27 @@
           <button class="nav-link is-active" data-section="visao-geral">Visão geral</button>
           <button class="nav-link" data-section="empresa">Dados da empresa</button>
           <button class="nav-link" data-section="unidades">Unidades</button>
-          <button class="nav-link" data-section="links">Links e contatos</button>
+          <button class="nav-link" data-section="links">WhatsApp e contatos</button>
           <button class="nav-link" data-section="formacoes">Formações e cursos</button>
           <button class="nav-link" data-section="contatos">Contatos recebidos</button>
           <button class="nav-link" data-section="campanhas">Campanhas e promoções</button>
           <button class="nav-link" data-section="depoimentos">Depoimentos</button>
           <button class="nav-link" data-section="resultados">Resultados e trabalhos</button>
         </nav>
+        <label class="mobile-section-picker" for="mobile-section-nav">
+          <span>Área do painel</span>
+          <select id="mobile-section-nav" aria-label="Escolha a área do painel">
+            <option value="visao-geral">Visão geral</option>
+            <option value="empresa">Dados da empresa</option>
+            <option value="unidades">Unidades</option>
+            <option value="links">WhatsApp e contatos</option>
+            <option value="formacoes">Formações e cursos</option>
+            <option value="contatos">Contatos recebidos</option>
+            <option value="campanhas">Campanhas e promoções</option>
+            <option value="depoimentos">Depoimentos</option>
+            <option value="resultados">Resultados e trabalhos</option>
+          </select>
+        </label>
         <button class="logout" id="logout">Sair</button>
       </aside>
 
@@ -139,17 +153,29 @@
             </section>
 
             <section class="panel" data-panel="links">
-              <div class="panel__heading"><div><p class="eyebrow">Contato</p><h2>Links e contatos</h2></div></div>
+              <div class="panel__heading"><div><p class="eyebrow">Atendimento</p><h2>WhatsApp e contatos</h2></div></div>
+              <div class="contact-flow-note">
+                <strong>Um botão, caminhos organizados</strong>
+                <p>No cartão, o visitante toca em “Falar no WhatsApp” e escolhe consulta por unidade, atendimento de paciente ou formações antes de enviar seus dados.</p>
+              </div>
               <div class="form-grid">
+                <label>Configuração dos números
+                  <select name="company.whatsappMode">
+                    <option value="shared">Um número para tudo</option>
+                    <option value="byUnit">Um número para cada unidade</option>
+                  </select>
+                </label>
                 <label>WhatsApp principal<input name="company.phone" inputmode="tel" placeholder="5516999999999" /></label>
                 <label>Site<input name="company.website" type="url" placeholder="https://" /></label>
                 <label>Instagram<input name="company.instagram" type="url" /></label>
                 <label>Nome no Instagram<input name="company.instagramLabel" /></label>
-                <label class="wide">Mensagem padrão do WhatsApp<textarea name="company.whatsappMessage" rows="3" placeholder="Olá! Meu nome é {nome} e quero agendar uma avaliação."></textarea></label>
+                <label>Texto do botão principal<input name="company.contactButtonLabel" placeholder="Falar no WhatsApp" /></label>
+                <label class="wide">Mensagem padrão para novas consultas<textarea name="company.whatsappMessage" rows="3" placeholder="Olá! Meu nome é {nome} e quero agendar uma avaliação em {unidade}."></textarea></label>
+                <label class="wide">Mensagem para quem já é paciente<textarea name="company.patientMessage" rows="3" placeholder="Olá! Meu nome é {nome}, já sou paciente do Instituto Vert e preciso de atendimento."></textarea></label>
                 <label>Título do formulário<input name="company.leadFormTitle" placeholder="Antes de continuar" /></label>
                 <label>Texto do formulário<input name="company.leadFormDescription" placeholder="Informe seus dados para receber atendimento." /></label>
               </div>
-              <p class="helper">Use <strong>{nome}</strong>, <strong>{telefone}</strong> ou <strong>{profissao}</strong> nas mensagens para personalizá-las automaticamente.</p>
+              <p class="helper">Use <strong>{nome}</strong>, <strong>{telefone}</strong>, <strong>{profissao}</strong> ou <strong>{unidade}</strong> nas mensagens. No modo “um número”, todos os caminhos usam o WhatsApp principal. No modo “por unidade”, cada consulta usa o telefone cadastrado na unidade.</p>
               <div class="subheading"><h3>Botões de contato por unidade</h3></div>
               <p class="helper">Cada unidade possui destino, mensagem e captação próprios. O WhatsApp principal acima funciona apenas como reserva quando a unidade não tiver um número.</p>
               <div class="repeat-list unit-contact-list" id="unit-contacts-list"></div>

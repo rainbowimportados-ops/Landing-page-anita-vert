@@ -32,6 +32,38 @@
 .cep-status[data-state="error"] { color: var(--danger); }
 .cep-status[data-state="success"] { color: var(--green); }
 .toggle--lead { padding: 12px; border-radius: 10px; background: #f5eee6; }
+.toggle input {
+  width: 18px !important;
+  min-width: 18px;
+  height: 18px !important;
+  margin: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.mobile-section-picker { display: none; }
+.contact-flow-note {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 16px;
+  padding: 15px 17px;
+  border-left: 4px solid var(--green);
+  border-radius: 11px;
+  background: #e8f1ec;
+}
+.contact-flow-note strong { font-family: "Cormorant Garamond", serif; font-size: 1.15rem; }
+.contact-flow-note p { margin: 0; color: #587064; font-size: .7rem; line-height: 1.55; }
+.form-grid select {
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 38px 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+  color: var(--chocolate);
+  outline: none;
+}
+.form-grid select:focus { border-color: var(--mocha); box-shadow: 0 0 0 3px rgba(138,107,87,.12); }
 .formation-settings { margin-bottom: 10px; border-left: 4px solid var(--cacao); }
 .formations-list .repeat-card { border-left: 4px solid #8a6b57; }
 .formations-list textarea { resize: vertical; }
@@ -85,6 +117,30 @@
   text-decoration: none;
 }
 @media (max-width: 760px) {
+  html, body, .app, .workspace, .editor, .panel, .repeat-card { max-width: 100%; overflow-x: clip; }
+  .sidebar { overflow: visible; padding: 12px 14px; }
+  .sidebar nav { display: none; }
+  .mobile-section-picker { display: grid; gap: 5px; color: rgba(255,255,255,.72); font-size: .58rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+  .mobile-section-picker select { width: 100%; min-height: 44px; padding: 0 40px 0 13px; border: 1px solid rgba(255,255,255,.18); border-radius: 10px; background: #3b281f; color: white; font-size: .78rem; font-weight: 500; text-transform: none; }
+  .topbar { gap: 12px; }
+  .topbar h1 { font-size: 1.45rem; }
+  .topbar .eyebrow { font-size: .56rem; }
+  .topbar__actions { gap: 6px; }
+  .topbar__actions .button { padding: 10px 11px; font-size: .66rem; }
+  .panel__heading { gap: 10px; margin-bottom: 16px; }
+  .panel__heading h2 { font-size: 1.8rem; }
+  .small-action { flex: 0 0 auto; padding: 8px 10px; font-size: .65rem; }
+  .form-grid { gap: 13px; padding: 15px; border-radius: 13px; }
+  .form-grid label, .field { min-width: 0; font-size: .68rem; }
+  .form-grid input, .form-grid textarea, .form-grid select, .field input, .field textarea, .field select { min-width: 0; max-width: 100%; padding: 11px 12px; }
+  .repeat-card { min-width: 0; padding: 14px; }
+  .repeat-card__top { gap: 10px; }
+  .repeat-card__top strong { font-size: 1.08rem; }
+  .fields { min-width: 0; gap: 11px; }
+  .toggle, .toggle--lead { width: 100%; min-height: 44px; align-items: center; padding: 11px 12px; line-height: 1.35; }
+  .unit-contact-card__badge { display: none; }
+  .brand-note { align-items: flex-start; }
+  .brand-note img { width: 64px; height: 64px; }
   .media-list .repeat-card { grid-template-columns: 1fr; }
   .media-list .media-thumb { height: 280px; }
   .document-preview { min-height: 220px; }
@@ -93,4 +149,12 @@
   .leads-list { margin-top: 14px; }
   .identity-upload > div { grid-template-columns: 1fr; }
   .brand-assets { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 761px) and (max-width: 1180px) {
+  .sidebar { width: 210px; }
+  .workspace { margin-left: 210px; }
+  .editor { padding-inline: 24px; }
+  .editor-grid { grid-template-columns: 1fr; }
+  .preview-pane { display: none; }
 }
