@@ -151,7 +151,8 @@ function renderUnits(units) {
   units.filter((unit) => unit.active !== false).forEach((unit) => {
     const card = document.createElement('article'); card.className = 'google-card';
     const map = document.createElement('div'); map.className = 'google-card__preview';
-    const iframe = document.createElement('iframe'); iframe.src = `https://www.google.com/maps?q=${encodeURIComponent(unit.mapsQuery || `${unit.name}, ${unit.city}`)}&output=embed`; iframe.title = `Prévia de ${unit.name} no Google Maps`; iframe.loading = 'lazy'; iframe.referrerPolicy = 'no-referrer-when-downgrade'; map.append(iframe);
+    const mapQuery = unit.address || unit.mapsQuery || `${unit.name}, ${unit.city}`;
+    const iframe = document.createElement('iframe'); iframe.src = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`; iframe.title = `Prévia de ${unit.name} no Google Maps`; iframe.loading = 'lazy'; iframe.referrerPolicy = 'no-referrer-when-downgrade'; map.append(iframe);
     const body = document.createElement('div'); body.className = 'google-card__content'; body.innerHTML = '<span class="google-card__google" aria-label="Google"><i></i> Google</span>';
     const name = document.createElement('div'); name.innerHTML = '<small>Instituto Vert</small>'; const strong = document.createElement('strong'); strong.textContent = unit.name; name.append(strong); body.append(name);
     if (unit.address) { const address = document.createElement('small'); address.textContent = unit.address; address.style.marginTop = '8px'; body.append(address); }
