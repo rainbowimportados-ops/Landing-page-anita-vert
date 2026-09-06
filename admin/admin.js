@@ -291,7 +291,7 @@ function formationPreviewEditor(item, itemIndex) {
     : '<div class="empty-state empty-state--compact"><strong>Nenhuma prévia adicionada</strong><p>Use conteúdos autorizados que mostrem o valor do Close Friends.</p></div>';
 
   return `<section class="close-friends-settings wide" aria-label="Configuração do Close Friends">
-    <div class="close-friends-settings__heading"><div><small>Vitrine do Close Friends</small><strong>Perfil fechado e prévias manuais</strong></div><span>Até 4 prévias</span></div>
+    <div class="close-friends-settings__heading"><div><strong>Perfil fechado e prévias manuais</strong></div><span>Até 4 prévias</span></div>
     <div class="fields">
       ${field('Usuário do Close Friends', 'instagramHandle', item.instagramHandle || '', { placeholder: '@exxclusiveama' })}
       ${field('Link do perfil fechado', 'instagramUrl', item.instagramUrl || '', { type: 'url', placeholder: 'https://instagram.com/...' })}
