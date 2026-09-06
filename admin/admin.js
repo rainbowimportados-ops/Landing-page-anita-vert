@@ -278,10 +278,6 @@ function selectField(label, key, value, choices, options = {}) {
 
 function formationPreviewEditor(item, itemIndex) {
   const previews = Array.isArray(item.previews) ? item.previews : [];
-  const metrics = item.instagramMetrics || {};
-  const metricsStatus = metrics.updatedAt
-    ? `Última sincronização: ${new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(metrics.updatedAt))}`
-    : 'Aguardando conexão autorizada do Instagram no Windsor.';
   const previewCards = previews.length
     ? previews.map((preview, previewIndex) => `<article class="formation-preview-editor" data-formation-preview data-preview-index="${previewIndex}">
         <div class="formation-preview-editor__media">${formationPreviewMedia(preview)}<label class="upload">Anexar ou trocar<input type="file" data-formation-preview-upload accept="${FORMATION_PREVIEW_ACCEPT}" /></label></div>
@@ -295,15 +291,15 @@ function formationPreviewEditor(item, itemIndex) {
     : '<div class="empty-state empty-state--compact"><strong>Nenhuma prévia adicionada</strong><p>Use conteúdos autorizados que mostrem o valor do Close Friends.</p></div>';
 
   return `<section class="close-friends-settings wide" aria-label="Configuração do Close Friends">
-    <div class="close-friends-settings__heading"><div><small>Vitrine do Close Friends</small><strong>Instagram e prévias do conteúdo</strong></div><span>Até 4 prévias</span></div>
+    <div class="close-friends-settings__heading"><div><small>Vitrine do Close Friends</small><strong>Perfil fechado e prévias manuais</strong></div><span>Até 4 prévias</span></div>
     <div class="fields">
-      ${field('Usuário do Instagram', 'instagramHandle', item.instagramHandle || '', { placeholder: '@institutovert.br' })}
-      ${field('Link do Instagram', 'instagramUrl', item.instagramUrl || '', { type: 'url', placeholder: 'https://instagram.com/...' })}
+      ${field('Usuário do Close Friends', 'instagramHandle', item.instagramHandle || '', { placeholder: '@exxclusiveama' })}
+      ${field('Link do perfil fechado', 'instagramUrl', item.instagramUrl || '', { type: 'url', placeholder: 'https://instagram.com/...' })}
     </div>
     <div class="formation-preview-list">${previewCards}</div>
     <button class="small-action" type="button" data-add-formation-preview data-formation-index="${itemIndex}" ${previews.length >= 4 ? 'disabled' : ''}>+ Adicionar prévia</button>
-    <div class="windsor-status"><span aria-hidden="true"></span><div><strong>Dados do Instagram via Windsor</strong><small>${escapeHtml(metricsStatus)}</small></div></div>
-    <p class="helper">As mídias privadas são escolhidas por você. A integração externa será usada somente para métricas autorizadas do perfil, sem armazenar senha aqui.</p>
+    <div class="manual-preview-status"><span aria-hidden="true">✓</span><div><strong>Conteúdo controlado por você</strong><small>Como o perfil é fechado, as imagens e os vídeos exibidos no cartão são somente os arquivos que você adicionar aqui.</small></div></div>
+    <p class="helper">Este perfil não usa a conexão do Windsor. A integração externa fica reservada aos perfis públicos do Instituto Vert e da Dra. Anita.</p>
   </section>`;
 }
 
