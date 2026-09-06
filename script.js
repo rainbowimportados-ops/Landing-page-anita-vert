@@ -245,26 +245,6 @@ function renderFormationPreviews(item) {
   return gallery;
 }
 
-function renderInstagramMetrics(item) {
-  const metrics = item.instagramMetrics || {};
-  const entries = [
-    [metrics.followers, 'seguidores'],
-    [metrics.reach30d, 'alcance em 30 dias'],
-    [metrics.contentCount, 'conteúdos'],
-  ].filter(([value]) => value !== undefined && value !== null && value !== '');
-  if (!entries.length) return null;
-  const list = document.createElement('div');
-  list.className = 'formation-card__metrics';
-  list.setAttribute('aria-label', 'Dados recentes do Instagram');
-  entries.forEach(([value, label]) => {
-    const metric = document.createElement('span');
-    const strong = document.createElement('strong'); strong.textContent = Number(value).toLocaleString('pt-BR');
-    const small = document.createElement('small'); small.textContent = label;
-    metric.append(strong, small); list.append(metric);
-  });
-  return list;
-}
-
 function renderFormations(items, settings, company) {
   const section = document.querySelector('#formacoes');
   const container = document.querySelector('#formation-list');
@@ -288,7 +268,6 @@ function renderFormations(items, settings, company) {
     const meta = document.createElement('div'); meta.className = 'formation-card__meta';
     [item.format, item.schedule, item.location].filter(Boolean).forEach((value) => { const span = document.createElement('span'); span.textContent = value; meta.append(span); });
     const previews = closeFriends ? renderFormationPreviews(item) : null;
-    const instagramMetrics = closeFriends ? renderInstagramMetrics(item) : null;
     let instagramLink = null;
     if (closeFriends && item.instagramUrl) {
       instagramLink = trackableLink(item.instagramUrl, 'instagram_close_friends');
@@ -306,7 +285,6 @@ function renderFormations(items, settings, company) {
     prepareLeadLink(link, { message, label: `Formação — ${item.title}`, leadType: 'formation', courseId: item.id || '', courseTitle: item.title });
     card.append(heading, description);
     if (previews) card.append(previews);
-    if (instagramMetrics) card.append(instagramMetrics);
     card.append(meta);
     if (instagramLink) card.append(instagramLink);
     card.append(link);
@@ -334,7 +312,8 @@ function renderContent(content) {
   applyImageSource(logo, selectedLogo, DEFAULT_LOGOS.primaryDark);
   const cities = units.filter((unit) => unit.active !== false).map((unit) => unit.city).filter(Boolean); setText('.profile__identity span', company.identityLine || cities.join(' • '));
   renderUnits(units); renderPortfolio(content.portfolio); renderCards('campanhas', 'campaign-list', content.campaigns, 'campaign'); renderCards('depoimentos', 'testimonial-list', content.testimonials, 'testimonial'); renderFormations(content.formations, formationSettings, company); renderExtraLinks(content.links); renderWhatsApp(units, company);
-  const instagram = document.querySelector('.quick-links a[data-track="instagram"]'); if (instagram && company.instagram) { instagram.href = safeUrl(company.instagram); const label = instagram.querySelector('small'); if (label) label.textContent = company.instagramLabel || 'Instagram'; }
+  const instagram = document.querySelector('.quick-links a[data-track="instagram"]'); if (instagram && company.instagram) { instagram.href = safeUrl(company.instagram); const label = instagram.querySelector('small'); if (label) label.textContent = company.instagramLabel || '@institutovert.br'; }
+  const anitaInstagram = document.querySelector('.quick-links a[data-track="instagram_anita"]'); if (anitaInstagram && company.anitaInstagram) { anitaInstagram.href = safeUrl(company.anitaInstagram); const label = anitaInstagram.querySelector('small'); if (label) label.textContent = company.anitaInstagramLabel || '@dra.anitaalmeida'; }
   const floating = document.querySelector('.floating-whatsapp');
   const floatingLabel = floating.querySelector('span:last-child');
   if (floatingLabel) floatingLabel.textContent = company.contactButtonLabel || 'Falar no WhatsApp';

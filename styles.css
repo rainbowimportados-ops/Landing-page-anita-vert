@@ -34,7 +34,7 @@ h2 { font-size:clamp(2.3rem,6vw,3.7rem); }
 .contact-button small { display:block; margin-bottom:2px; font-size:.59rem; font-weight:500; letter-spacing:.16em; opacity:.78; text-transform:uppercase; }
 .contact-button strong { display:block; font-size:.85rem; font-weight:600; letter-spacing:.04em; }
 .contact-button__arrow { font-size:1.35rem; }
-.quick-links { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+.quick-links { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; }
 .quick-links a { display:flex; min-width:0; min-height:96px; align-items:center; justify-content:center; flex-direction:column; padding:10px 6px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.025); text-align:center; }
 .quick-links a>span { color:var(--rose); font-size:1.3rem; }
 .quick-links strong { margin-top:5px; font-size:.65rem; font-weight:500; }
@@ -168,6 +168,7 @@ footer strong { color:var(--rose); font-family:var(--serif); font-size:1.35rem; 
   .intro>p:last-child { margin-top:10px; font-size:1rem; }
   .whatsapp-actions { margin-top:20px; }
   .contact-button { min-height:76px; padding:12px; }
+  .quick-links { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .quick-links a { min-height:88px; }
   .quick-links strong { font-size:.58rem; }
   .proof { padding-block:66px 54px; }

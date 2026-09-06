@@ -174,13 +174,22 @@
                 </label>
                 <label>WhatsApp principal<input name="company.phone" inputmode="tel" placeholder="5516999999999" /></label>
                 <label>Site<input name="company.website" type="url" placeholder="https://" /></label>
-                <label>Instagram<input name="company.instagram" type="url" /></label>
-                <label>Nome no Instagram<input name="company.instagramLabel" /></label>
+                <label>Instagram da clínica<input name="company.instagram" type="url" placeholder="https://www.instagram.com/institutovert.br" /></label>
+                <label>Usuário da clínica<input name="company.instagramLabel" placeholder="@institutovert.br" /></label>
+                <label>Instagram da Dra. Anita<input name="company.anitaInstagram" type="url" placeholder="https://www.instagram.com/dra.anitaalmeida" /></label>
+                <label>Usuário da Dra. Anita<input name="company.anitaInstagramLabel" placeholder="@dra.anitaalmeida" /></label>
                 <label>Texto do botão principal<input name="company.contactButtonLabel" placeholder="Falar no WhatsApp" /></label>
                 <label class="wide">Mensagem padrão para novas consultas<textarea name="company.whatsappMessage" rows="3" placeholder="Olá! Meu nome é {nome} e quero agendar uma avaliação em {unidade}."></textarea></label>
                 <label class="wide">Mensagem para quem já é paciente<textarea name="company.patientMessage" rows="3" placeholder="Olá! Meu nome é {nome}, já sou paciente do Instituto Vert e preciso de atendimento."></textarea></label>
                 <label>Título do formulário<input name="company.leadFormTitle" placeholder="Antes de continuar" /></label>
                 <label>Texto do formulário<input name="company.leadFormDescription" placeholder="Informe seus dados para receber atendimento." /></label>
+              </div>
+              <div class="instagram-public-note">
+                <span aria-hidden="true"></span>
+                <div>
+                  <strong>Perfis públicos usados na integração</strong>
+                  <p>Somente o Instagram do Instituto Vert e o da Dra. Anita são destinados à conexão com o Windsor e à exibição de publicações e prévias públicas. O perfil fechado do Close Friends é configurado manualmente em “Formações e cursos”.</p>
+                </div>
               </div>
               <p class="helper">Use <strong>{nome}</strong>, <strong>{telefone}</strong>, <strong>{profissao}</strong> ou <strong>{unidade}</strong> nas mensagens. No modo “um número”, todos os caminhos usam o WhatsApp principal. No modo “por unidade”, cada consulta usa o telefone cadastrado na unidade.</p>
               <div class="subheading"><h3>Botões de contato por unidade</h3></div>

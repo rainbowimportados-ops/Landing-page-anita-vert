@@ -93,11 +93,13 @@
 .formation-preview-editor__fields { display: grid; align-content: start; gap: 9px; }
 .formation-preview-editor__fields .repeat-card__top { margin-bottom: 0; }
 .empty-state--compact { padding: 20px; background: rgba(255,255,255,.6); }
-.windsor-status { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 10px; background: #e8f1ec; }
-.windsor-status > span { width: 9px; height: 9px; flex: none; border-radius: 50%; background: #b6883b; box-shadow: 0 0 0 4px rgba(182,136,59,.13); }
-.windsor-status > div { display: grid; gap: 2px; }
-.windsor-status strong { color: #385447; font-size: .68rem; }
-.windsor-status small { color: #587064; font-size: .61rem; }
+.manual-preview-status,.instagram-public-note { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border-radius: 10px; background: #f2e6d7; }
+.manual-preview-status > span,.instagram-public-note > span { display: grid; width: 22px; height: 22px; flex: none; place-items: center; border-radius: 50%; background: var(--cacao); color: white; font-size: .65rem; font-weight: 700; }
+.manual-preview-status > div,.instagram-public-note > div { display: grid; gap: 3px; }
+.manual-preview-status strong,.instagram-public-note strong { color: var(--cacao); font-size: .68rem; }
+.manual-preview-status small,.instagram-public-note p { margin: 0; color: #6e5548; font-size: .61rem; line-height: 1.55; }
+.instagram-public-note { margin-top: 14px; background: #e8f1ec; }
+.instagram-public-note > span { width: 9px; height: 9px; margin: 6px; background: var(--green); box-shadow: 0 0 0 4px rgba(32,122,85,.12); }
 .close-friends-settings > .helper { margin: -4px 0 0; line-height: 1.5; }
 .formation-leads-heading { padding-top: 10px; border-top: 1px solid var(--border); }
 .lead-card--formation { border-left: 4px solid var(--cacao); }
