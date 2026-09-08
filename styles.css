@@ -92,6 +92,7 @@ footer>div { display:flex; align-items:center; justify-content:space-between; ga
 footer p { margin:0; }
 footer>div>span { color:var(--nude); letter-spacing:.16em; }
 footer strong { color:var(--rose); font-family:var(--serif); font-size:1.35rem; font-weight:300; }
+.privacy-settings { margin:3px 0 0; padding:0; border:0; border-bottom:1px solid currentColor; background:none; color:var(--nude); font:inherit; cursor:pointer; }
 .floating-whatsapp { position:fixed; z-index:30; right:18px; bottom:max(18px,env(safe-area-inset-bottom)); display:flex; min-height:54px; align-items:center; gap:9px; padding:0 18px; border:2px solid rgba(255,255,255,.72); border-radius:999px; background:var(--whatsapp); color:#fff; box-shadow:0 14px 40px rgba(0,0,0,.38); font-size:.72rem; font-weight:600; }
 .floating-whatsapp { cursor:pointer; font-family:var(--sans); }
 .contact-button--router { width:100%; border:0; cursor:pointer; text-align:left; font-family:var(--sans); }
@@ -131,6 +132,22 @@ footer strong { color:var(--rose); font-family:var(--serif); font-size:1.35rem; 
 .lead-form__feedback { min-height:18px; margin:0; color:#8f3f36; font-size:.68rem; }
 .lead-form__submit { min-height:52px; border:0; border-radius:10px; background:var(--whatsapp); color:white; font:600 .73rem var(--sans); letter-spacing:.04em; cursor:pointer; }
 .lead-form__submit:disabled { cursor:wait; opacity:.65; }
+.privacy-dialog { width:min(92vw,500px); padding:0; border:1px solid rgba(234,218,198,.4); border-radius:24px; background:var(--ivory); color:var(--deep); box-shadow:0 30px 100px rgba(0,0,0,.58); }
+.privacy-dialog::backdrop { background:rgba(20,11,8,.82); backdrop-filter:blur(6px); }
+.privacy-form { display:grid; gap:14px; padding:30px; }
+.privacy-form__icon { display:grid; width:48px; height:48px; place-items:center; border-radius:50%; background:#eadfd3; color:var(--cacao); }
+.privacy-form__icon svg { width:27px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.privacy-form h2 { max-width:420px; color:var(--chocolate); font-size:2.55rem; }
+.privacy-form>p:not(.eyebrow) { margin:0; color:#745d50; font-family:var(--serif); font-size:1rem; line-height:1.5; }
+.privacy-form label { display:grid; gap:7px; color:#654b3e; font-size:.72rem; font-weight:600; }
+.privacy-form label small { color:#8b7467; font-weight:400; }
+.privacy-form input { width:100%; min-height:48px; padding:12px 14px; border:1px solid rgba(74,47,31,.18); border-radius:10px; background:#fff; color:var(--deep); font:400 16px var(--sans); outline:none; }
+.privacy-form input:focus { border-color:var(--cacao); box-shadow:0 0 0 3px rgba(106,69,46,.12); }
+.privacy-form .privacy-form__note { padding:11px 12px; border-radius:10px; background:#eee4da; font:400 .68rem/1.45 var(--sans); }
+.privacy-form__actions { display:grid; grid-template-columns:1fr 1.15fr; gap:8px; }
+.privacy-form__actions button { min-height:50px; padding:10px 14px; border-radius:10px; font:600 .68rem/1.25 var(--sans); cursor:pointer; }
+.privacy-form__decline { border:1px solid rgba(74,47,31,.18); background:#fff; color:var(--cacao); }
+.privacy-form__accept { border:0; background:var(--cacao); color:#fff; }
 .campaigns,.testimonials { padding-block:72px; }
 .campaign-grid,.testimonial-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
 .campaign-card,.testimonial-card { padding:24px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.035); }
@@ -191,6 +208,11 @@ footer strong { color:var(--rose); font-family:var(--serif); font-size:1.35rem; 
   .lead-form>p:not(.eyebrow):not(.lead-form__feedback) { font-size:.9rem; }
   .choice-field__options span { min-height:44px; padding:7px 8px; }
   .lead-form__submit { min-height:48px; }
+  .privacy-dialog { max-height:calc(100dvh - 20px); overflow:auto; border-radius:18px; }
+  .privacy-form { gap:11px; padding:22px 16px 16px; }
+  .privacy-form h2 { font-size:2rem; }
+  .privacy-form__actions { grid-template-columns:1fr; }
+  .privacy-form__accept { grid-row:1; }
 }
 @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } * { transition-duration:.01ms!important; } }
 @media (hover:none) { .contact-button:hover { transform:none; } }

@@ -137,7 +137,7 @@
       </section>
     </main>
 
-    <footer><div class="shell"><span>INSTITUTO <strong>VERT</strong></span><p>Ciência, beleza e excelência em equilíbrio.</p><small>© <span id="year"></span> Instituto Vert<br />Cliques medidos anonimamente para melhorar o atendimento.</small></div></footer>
+    <footer><div class="shell"><span>INSTITUTO <strong>VERT</strong></span><p>Ciência, beleza e excelência em equilíbrio.</p><small>© <span id="year"></span> Instituto Vert<br /><button class="privacy-settings" type="button" data-privacy-settings>Privacidade e dados</button></small></div></footer>
 
     <button class="floating-whatsapp" id="whatsapp-router-trigger" type="button" data-open-contact-router>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.3-4.7a8.5 8.5 0 1 1 16.2-4.1Z"/><path d="M8.2 7.7c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.5l.8 1.8c.1.3.1.5-.1.7l-.6.8c-.2.2-.1.4 0 .6.5 1 1.3 1.8 2.3 2.3.2.1.4.2.6 0l.8-1c.2-.2.4-.3.7-.2l1.9.9c.3.1.5.3.5.5 0 .3-.1 1.4-.7 2-.6.7-1.5.9-2.4.7-1-.2-2.3-.7-3.9-2.1-1.3-1.2-2.2-2.6-2.5-3.6-.3-.9 0-2.1.9-3.5Z"/></svg>
@@ -162,6 +162,7 @@
         <p id="lead-dialog-description">Informe seus dados para receber atendimento personalizado.</p>
         <label>Nome<input id="lead-name" name="name" autocomplete="name" maxlength="100" required /></label>
         <label>Telefone com DDD<input id="lead-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="(16) 99999-9999" required /></label>
+        <label>Seu Instagram <small>opcional</small><input id="lead-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" placeholder="@seuusuario" /></label>
         <label id="lead-profession-field">Profissão <small>opcional</small><input id="lead-profession" name="profession" autocomplete="organization-title" maxlength="100" /></label>
         <div class="formation-lead-fields" id="formation-lead-fields" hidden>
           <fieldset class="choice-field">
@@ -182,6 +183,21 @@
         <label class="lead-consent"><input name="consent" type="checkbox" required /><span>Autorizo o Instituto Vert a usar estes dados para responder ao meu contato.</span></label>
         <p class="lead-form__feedback" id="lead-feedback" role="status"></p>
         <button class="lead-form__submit" type="submit">Chamar no WhatsApp</button>
+      </form>
+    </dialog>
+
+    <dialog class="privacy-dialog" id="privacy-dialog" aria-labelledby="privacy-dialog-title">
+      <form class="privacy-form" id="privacy-form">
+        <span class="privacy-form__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.2c0 4.7 3.1 8.2 7.5 9.8 4.4-1.6 7.5-5.1 7.5-9.8V6L12 3Z"/><path d="m9.2 12 1.8 1.8 3.9-4.1"/></svg></span>
+        <p class="eyebrow">Sua privacidade</p>
+        <h2 id="privacy-dialog-title">Podemos registrar sua visita?</h2>
+        <p>Com sua autorização, registramos as páginas e os botões acessados para melhorar o atendimento. O Instagram não informa automaticamente quem você é.</p>
+        <label>Seu @ do Instagram <small>opcional</small><input id="privacy-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" placeholder="@seuusuario" /></label>
+        <p class="privacy-form__note">Você pode continuar sem rastreamento e alterar esta escolha depois em “Privacidade e dados”.</p>
+        <div class="privacy-form__actions">
+          <button class="privacy-form__decline" type="button" data-privacy-decline>Continuar sem rastreamento</button>
+          <button class="privacy-form__accept" type="submit">Autorizar e continuar</button>
+        </div>
       </form>
     </dialog>
 

@@ -33,6 +33,7 @@ let dirty = false;
 let loadingAdmin = false;
 let contactLeads = [];
 let formationLeads = [];
+let visitorJourneys = [];
 let selectedLeadIds = new Set();
 let leadDialogMode = 'edit';
 
@@ -513,35 +514,120 @@ function sendPreview() {
 
 async function loadMetrics() {
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const { data, error } = await supabase.from('digital_card_clicks').select('botao').gte('created_at', since);
-  if (error) return;
+  const [clickResult, leadResult] = await Promise.all([
+    supabase.from('digital_card_clicks').select('botao,visitor_id,instagram_handle').gte('created_at', since),
+    supabase.from('digital_card_leads').select('visitor_id,instagram_handle').gte('created_at', since),
+  ]);
+  if (clickResult.error || leadResult.error) return;
+  const data = clickResult.data || [];
   const views = data.filter((row) => row.botao === 'visualizacao_pagina').length;
-  const clicks = data.length - views;
+  const interactions = data.filter((row) => !['visualizacao_pagina', 'consentimento_autorizado', 'preferencias_privacidade'].includes(row.botao));
+  const clicks = interactions.length;
   const whatsapp = data.filter((row) => row.botao.startsWith('whatsapp')).length;
+  const visitors = new Set(data.map((row) => row.visitor_id).filter(Boolean)).size;
+  const instagramProfiles = [...data, ...(leadResult.data || [])].filter((row) => row.instagram_handle).map((row) => row.visitor_id || row.instagram_handle);
+  const instagram = new Set(instagramProfiles).size;
   document.querySelector('#metric-views').textContent = views.toLocaleString('pt-BR');
   document.querySelector('#metric-clicks').textContent = clicks.toLocaleString('pt-BR');
   document.querySelector('#metric-whatsapp').textContent = whatsapp.toLocaleString('pt-BR');
+  document.querySelector('#metric-visitors').textContent = visitors.toLocaleString('pt-BR');
+  document.querySelector('#metric-instagram').textContent = instagram.toLocaleString('pt-BR');
 }
 
 async function loadLeads() {
   const list = document.querySelector('#leads-list');
   const formationList = document.querySelector('#formation-leads-list');
+  const journeyList = document.querySelector('#journey-list');
   list.innerHTML = '<div class="empty-state"><strong>Carregando contatos…</strong></div>';
+  if (journeyList) journeyList.innerHTML = '<div class="empty-state"><strong>Carregando acessos…</strong></div>';
   if (formationList) formationList.innerHTML = '<div class="empty-state"><strong>Carregando interessados…</strong></div>';
-  const { data, error } = await supabase.from('digital_card_leads').select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at').order('created_at', { ascending: false }).limit(500);
-  if (error) {
-    list.innerHTML = `<div class="empty-state"><strong>Não foi possível carregar</strong><p>${escapeHtml(error.message)}</p></div>`;
+  const [leadResult, clickResult] = await Promise.all([
+    supabase.from('digital_card_leads').select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at,visitor_id,instagram_handle,source_origin').order('created_at', { ascending: false }).limit(500),
+    supabase.from('digital_card_clicks').select('visitor_id,botao,unidade,origem,dispositivo,instagram_handle,created_at').not('visitor_id', 'is', null).order('created_at', { ascending: false }).limit(5000),
+  ]);
+  if (leadResult.error || clickResult.error) {
+    const message = leadResult.error?.message || clickResult.error?.message || 'Erro desconhecido';
+    list.innerHTML = `<div class="empty-state"><strong>Não foi possível carregar</strong><p>${escapeHtml(message)}</p></div>`;
+    if (journeyList) journeyList.innerHTML = list.innerHTML;
     if (formationList) formationList.innerHTML = list.innerHTML;
     return;
   }
+  const data = leadResult.data || [];
   document.querySelector('#metric-leads').textContent = data.length.toLocaleString('pt-BR');
   contactLeads = data.filter((lead) => lead.lead_type !== 'formation');
   formationLeads = data.filter((lead) => lead.lead_type === 'formation');
+  visitorJourneys = aggregateVisitorJourneys(clickResult.data || [], data);
   selectedLeadIds = new Set([...selectedLeadIds].filter((id) => contactLeads.some((lead) => lead.id === id)));
+  renderVisitorJourneys();
   renderContactList();
   if (formationList) formationList.innerHTML = formationLeads.length
     ? formationLeads.map(renderFormationLeadCard).join('')
     : '<div class="empty-state"><strong>Nenhum interessado ainda</strong><p>Os leads dos cursos aparecerão aqui com suas respostas.</p></div>';
+}
+
+function aggregateVisitorJourneys(clicks, leads) {
+  const leadByVisitor = new Map();
+  leads.forEach((lead) => {
+    if (lead.visitor_id && !leadByVisitor.has(lead.visitor_id)) leadByVisitor.set(lead.visitor_id, lead);
+  });
+  const grouped = new Map();
+  clicks.forEach((click) => {
+    const id = click.visitor_id;
+    if (!id) return;
+    const current = grouped.get(id) || { visitorId:id, views:0, clicks:0, buttons:new Set(), origin:'direto', device:'', instagram:'', firstAt:click.created_at, lastAt:click.created_at };
+    if (click.botao === 'visualizacao_pagina') current.views += 1;
+    else if (!['consentimento_autorizado', 'preferencias_privacidade'].includes(click.botao)) { current.clicks += 1; current.buttons.add(click.botao); }
+    current.origin = click.origem || current.origin;
+    current.device = click.dispositivo || current.device;
+    current.instagram = click.instagram_handle || current.instagram;
+    if (new Date(click.created_at) < new Date(current.firstAt)) current.firstAt = click.created_at;
+    if (new Date(click.created_at) > new Date(current.lastAt)) current.lastAt = click.created_at;
+    grouped.set(id, current);
+  });
+  return [...grouped.values()].map((journey) => {
+    const lead = leadByVisitor.get(journey.visitorId) || null;
+    const instagram = lead?.instagram_handle || journey.instagram || '';
+    const stage = instagram ? 'instagram' : lead ? 'identified' : journey.clicks > 0 ? 'clicked' : 'viewed';
+    return { ...journey, buttons:[...journey.buttons], lead, instagram, stage };
+  }).sort((a, b) => new Date(b.lastAt) - new Date(a.lastAt));
+}
+
+function filteredVisitorJourneys() {
+  const search = document.querySelector('#journey-search').value.trim().toLocaleLowerCase('pt-BR');
+  const filter = document.querySelector('#journey-filter').value;
+  return visitorJourneys.filter((journey) => {
+    const searchable = [journey.lead?.name, journey.lead?.phone, journey.instagram, journey.origin, journey.device, ...journey.buttons].filter(Boolean).join(' ').toLocaleLowerCase('pt-BR');
+    return (filter === 'all' || journey.stage === filter) && (!search || searchable.includes(search));
+  });
+}
+
+function renderVisitorJourneys() {
+  const list = document.querySelector('#journey-list');
+  if (!list) return;
+  const journeys = filteredVisitorJourneys();
+  document.querySelector('#journey-count').textContent = `${journeys.length} ${journeys.length === 1 ? 'visitante' : 'visitantes'}`;
+  if (!journeys.length) {
+    list.innerHTML = '<div class="empty-state"><strong>Nenhum acesso encontrado</strong><p>Ajuste a busca ou a etapa selecionada.</p></div>';
+    return;
+  }
+  list.innerHTML = journeys.map(renderVisitorJourney).join('');
+}
+
+function renderVisitorJourney(journey) {
+  const lead = journey.lead;
+  const name = lead?.name || journey.instagram || `Visitante ${journey.visitorId.slice(0, 6).toUpperCase()}`;
+  const stageLabels = { viewed:'Somente visualizou', clicked:'Clicou', identified:'Contato enviado', instagram:'Instagram informado' };
+  const stageClass = journey.stage === 'instagram' ? ' journey-status--instagram' : journey.stage === 'identified' ? ' journey-status--identified' : '';
+  const instagramUser = String(journey.instagram || '').replace(/^@/, '');
+  const instagramLink = instagramUser ? `<a href="https://www.instagram.com/${encodeURIComponent(instagramUser)}" target="_blank" rel="noopener noreferrer">${escapeHtml(journey.instagram)}</a>` : '';
+  const phoneDigits = String(lead?.phone || '').replace(/\D/g, '');
+  const phoneLink = phoneDigits ? `<a href="https://wa.me/${phoneDigits}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.phone)}</a>` : '';
+  const date = new Intl.DateTimeFormat('pt-BR', { dateStyle:'short', timeStyle:'short' }).format(new Date(journey.lastAt));
+  return `<article class="journey-row">
+    <div class="journey-row__identity"><strong>${escapeHtml(name)}</strong><span class="journey-status${stageClass}">${stageLabels[journey.stage]}</span>${instagramLink}${phoneLink}</div>
+    <div class="journey-row__activity"><span>${journey.views} ${journey.views === 1 ? 'visualização' : 'visualizações'} · ${journey.clicks} ${journey.clicks === 1 ? 'clique' : 'cliques'}</span><small>${escapeHtml(journey.origin)} · ${escapeHtml(journey.device || 'dispositivo não informado')}</small><small>${escapeHtml(journey.buttons.join(', ') || 'Nenhum botão acessado')}</small></div>
+    <time datetime="${escapeHtml(journey.lastAt)}">Último acesso<br>${escapeHtml(date)}</time>
+  </article>`;
 }
 
 function filteredContactLeads() {
@@ -549,7 +635,7 @@ function filteredContactLeads() {
   const filter = document.querySelector('#lead-filter').value;
   return contactLeads.filter((lead) => {
     const matchesFilter = filter === 'all' || (filter === 'marked' ? lead.marked : !lead.marked);
-    const searchable = [lead.name, lead.phone, lead.profession, lead.button, lead.unit, ...(lead.tags || [])].join(' ').toLocaleLowerCase('pt-BR');
+    const searchable = [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.button, lead.unit, lead.source_origin, ...(lead.tags || [])].join(' ').toLocaleLowerCase('pt-BR');
     return matchesFilter && (!search || searchable.includes(search));
   });
 }
@@ -569,6 +655,7 @@ function renderContactList() {
 
 function renderLeadRow(lead) {
   const digits = String(lead.phone).replace(/\D/g, '');
+  const journey = visitorJourneys.find((item) => item.visitorId === lead.visitor_id);
   const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lead.created_at));
   const tags = (lead.tags || []).map((tag) => `<span class="lead-tag">${escapeHtml(tag)}</span>`).join('');
   return `<article class="lead-row${lead.marked ? ' is-marked' : ''}" data-lead-id="${escapeHtml(lead.id)}">
@@ -577,10 +664,11 @@ function renderLeadRow(lead) {
       <strong>${escapeHtml(lead.name)}</strong>
       <span>${escapeHtml(lead.profession || 'Profissão não informada')}</span>
       <a href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.phone)}</a>
+      ${lead.instagram_handle ? `<a href="https://www.instagram.com/${encodeURIComponent(String(lead.instagram_handle).replace(/^@/, ''))}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.instagram_handle)}</a>` : ''}
       ${tags ? `<div class="lead-tags">${tags}</div>` : ''}
     </div>
-    <div class="lead-row__source" data-label="Origem"><span>${escapeHtml(lead.button)}</span><small>${escapeHtml(lead.unit || 'Sem unidade')}</small></div>
-    <time class="lead-row__date" data-label="Recebido em" datetime="${escapeHtml(lead.created_at)}">${escapeHtml(date)}</time>
+    <div class="lead-row__source" data-label="Origem"><span>${escapeHtml(lead.button)}</span><small>${escapeHtml(lead.unit || 'Sem unidade')}</small><small>${escapeHtml(lead.source_origin || 'Origem não identificada')}</small></div>
+    <time class="lead-row__date" data-label="Recebido em" datetime="${escapeHtml(lead.created_at)}">${escapeHtml(date)}${journey ? `<br><strong>${journey.clicks} ${journey.clicks === 1 ? 'clique' : 'cliques'}</strong>` : ''}</time>
     <div class="lead-row__actions" data-label="Ações">
       <button type="button" data-lead-action="mark" aria-label="${lead.marked ? 'Desmarcar' : 'Marcar'} ${escapeHtml(lead.name)}" title="${lead.marked ? 'Desmarcar' : 'Marcar'}">${lead.marked ? '★' : '☆'}</button>
       <button type="button" data-lead-action="tag" title="Etiquetar">Etiqueta</button>
@@ -602,6 +690,8 @@ document.querySelector('#refresh-leads').addEventListener('click', () => void lo
 document.querySelector('#refresh-formation-leads').addEventListener('click', () => void loadLeads());
 document.querySelector('#lead-search').addEventListener('input', renderContactList);
 document.querySelector('#lead-filter').addEventListener('change', renderContactList);
+document.querySelector('#journey-search').addEventListener('input', renderVisitorJourneys);
+document.querySelector('#journey-filter').addEventListener('change', renderVisitorJourneys);
 
 function updateLeadSelectionBar() {
   const visible = filteredContactLeads();
@@ -679,6 +769,7 @@ function openLeadDialog(mode, ids) {
   document.querySelector('#lead-dialog-title').textContent = mode === 'tag' ? `Etiquetar ${ids.length === 1 ? 'contato' : `${ids.length} contatos`}` : 'Editar contato';
   document.querySelector('#lead-edit-name').value = lead?.name || '';
   document.querySelector('#lead-edit-phone').value = lead?.phone || '';
+  document.querySelector('#lead-edit-instagram').value = lead?.instagram_handle || '';
   document.querySelector('#lead-edit-profession').value = lead?.profession || '';
   document.querySelector('#lead-edit-tags').value = mode === 'tag' && ids.length > 1 ? '' : (lead?.tags || []).join(', ');
   document.querySelector('#lead-edit-marked').checked = Boolean(lead?.marked);
@@ -706,6 +797,7 @@ document.querySelector('#lead-dialog-form').addEventListener('submit', async (ev
     : {
         name: document.querySelector('#lead-edit-name').value.trim(),
         phone: document.querySelector('#lead-edit-phone').value.trim(),
+        instagram_handle: document.querySelector('#lead-edit-instagram').value.trim() || null,
         profession: document.querySelector('#lead-edit-profession').value.trim() || null,
         tags,
         marked: document.querySelector('#lead-edit-marked').checked,
@@ -737,8 +829,8 @@ document.querySelector('#export-leads').addEventListener('click', () => {
     window.alert('Não há contatos para exportar.');
     return;
   }
-  const header = ['Nome', 'Telefone', 'Profissão', 'Origem', 'Unidade', 'Recebido em', 'Marcado', 'Etiquetas'];
-  const csvRows = rows.map((lead) => [lead.name, lead.phone, lead.profession, lead.button, lead.unit, lead.created_at, lead.marked ? 'Sim' : 'Não', (lead.tags || []).join('; ')]);
+  const header = ['Nome', 'Telefone', 'Instagram', 'Profissão', 'Origem', 'Unidade', 'Origem do acesso', 'Recebido em', 'Marcado', 'Etiquetas'];
+  const csvRows = rows.map((lead) => [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.button, lead.unit, lead.source_origin, lead.created_at, lead.marked ? 'Sim' : 'Não', (lead.tags || []).join('; ')]);
   const csv = '\uFEFF' + [header, ...csvRows].map((row) => row.map(csvCell).join(',')).join('\r\n');
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const link = document.createElement('a');

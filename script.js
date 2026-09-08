@@ -7,6 +7,14 @@ const leadForm = document.querySelector('#lead-form');
 const leadFeedback = document.querySelector('#lead-feedback');
 const contactRouter = document.querySelector('#contact-router');
 const contactRouterOptions = document.querySelector('#contact-router-options');
+const privacyDialog = document.querySelector('#privacy-dialog');
+const privacyForm = document.querySelector('#privacy-form');
+const PRIVACY_STORAGE_KEY = 'vert_card_privacy_v1';
+const VISITOR_STORAGE_KEY = 'vert_card_visitor_id';
+const INSTAGRAM_STORAGE_KEY = 'vert_card_instagram';
+const CONSENT_VERSION = '2026-09-v1';
+let trackingConsent = false;
+let visitorInstagram = '';
 let pendingLead = null;
 let currentCompany = {};
 let currentUnits = [];
@@ -23,6 +31,23 @@ function safeUrl(value, fallback = '#') {
     const url = new URL(value, window.location.origin);
     return ['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol) ? url.href : fallback;
   } catch { return fallback; }
+}
+
+function storageGet(key) { try { return window.localStorage.getItem(key) || ''; } catch { return ''; } }
+function storageSet(key, value) { try { window.localStorage.setItem(key, value); } catch {} }
+function storageRemove(key) { try { window.localStorage.removeItem(key); } catch {} }
+
+function visitorId() {
+  let id = storageGet(VISITOR_STORAGE_KEY);
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) return id;
+  id = crypto.randomUUID();
+  storageSet(VISITOR_STORAGE_KEY, id);
+  return id;
+}
+
+function normalizeInstagramHandle(value) {
+  const handle = String(value || '').trim().replace(/^@+/, '').replace(/[^a-zA-Z0-9._]/g, '').slice(0, 30);
+  return handle ? `@${handle}` : '';
 }
 
 function applyImageSource(image, value, fallback) {
@@ -280,15 +305,65 @@ function renderContent(content) {
 
 function detectarDispositivo() { return window.matchMedia('(max-width: 760px)').matches ? 'celular' : 'computador'; }
 function detectarOrigem() {
-  const params = new URLSearchParams(window.location.search); const campanha = ['utm_source', 'utm_medium', 'utm_campaign'].map((chave) => { const valor = params.get(chave); return valor ? `${chave.replace('utm_', '')}=${valor}` : ''; }).filter(Boolean).join(';');
+  const params = new URLSearchParams(window.location.search);
+  const origemInformada = params.get('origem');
+  if (origemInformada) return `instagram:${origemInformada}`.slice(0, 120);
+  const campanha = ['utm_source', 'utm_medium', 'utm_campaign'].map((chave) => { const valor = params.get(chave); return valor ? `${chave.replace('utm_', '')}=${valor}` : ''; }).filter(Boolean).join(';');
   if (campanha) return campanha.slice(0, 120); if (!document.referrer) return 'direto';
   try { const origem = new URL(document.referrer).hostname.replace(/^www\./, ''); return origem === window.location.hostname ? 'direto' : origem.slice(0, 120); } catch { return 'direto'; }
 }
 
 function registrarClique(botao, unidade = null) {
-  const payload = { botao: String(botao).slice(0, 40), unidade: unidade ? String(unidade).slice(0, 40) : null, origem: detectarOrigem(), dispositivo: detectarDispositivo() };
+  if (!trackingConsent || new URLSearchParams(window.location.search).get('preview') === 'admin') return;
+  const payload = {
+    botao: String(botao).slice(0, 40),
+    unidade: unidade ? String(unidade).slice(0, 40) : null,
+    origem: detectarOrigem(),
+    dispositivo: detectarDispositivo(),
+    visitor_id: visitorId(),
+    instagram_handle: visitorInstagram || null,
+    consent_version: CONSENT_VERSION,
+  };
   void fetch(`${SUPABASE_URL}/rest/v1/digital_card_clicks`, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`, Prefer: 'return=minimal' }, body: JSON.stringify(payload) }).catch(() => {});
 }
+
+function openPrivacyDialog() {
+  document.querySelector('#privacy-instagram').value = visitorInstagram || storageGet(INSTAGRAM_STORAGE_KEY);
+  privacyDialog.showModal();
+  requestAnimationFrame(() => document.querySelector('#privacy-instagram').focus());
+}
+
+function initializePrivacy() {
+  if (new URLSearchParams(window.location.search).get('preview') === 'admin') return;
+  const choice = storageGet(PRIVACY_STORAGE_KEY);
+  visitorInstagram = normalizeInstagramHandle(storageGet(INSTAGRAM_STORAGE_KEY));
+  trackingConsent = choice === 'accepted';
+  if (trackingConsent) registrarClique('visualizacao_pagina');
+  else if (choice !== 'declined') openPrivacyDialog();
+}
+
+privacyForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const wasTracking = trackingConsent;
+  visitorInstagram = normalizeInstagramHandle(new FormData(privacyForm).get('instagram'));
+  storageSet(PRIVACY_STORAGE_KEY, 'accepted');
+  if (visitorInstagram) storageSet(INSTAGRAM_STORAGE_KEY, visitorInstagram); else storageRemove(INSTAGRAM_STORAGE_KEY);
+  trackingConsent = true;
+  privacyDialog.close();
+  registrarClique(wasTracking ? 'preferencias_privacidade' : 'consentimento_autorizado');
+  if (!wasTracking) registrarClique('visualizacao_pagina');
+});
+
+document.querySelector('[data-privacy-decline]').addEventListener('click', () => {
+  trackingConsent = false;
+  visitorInstagram = '';
+  storageSet(PRIVACY_STORAGE_KEY, 'declined');
+  storageRemove(INSTAGRAM_STORAGE_KEY);
+  privacyDialog.close();
+});
+
+document.querySelector('[data-privacy-settings]').addEventListener('click', openPrivacyDialog);
+privacyDialog.addEventListener('cancel', (event) => event.preventDefault());
 
 function bindTracking() {
   document.querySelectorAll('[data-track]:not([data-tracking-bound])').forEach((link) => { link.dataset.trackingBound = 'true'; link.addEventListener('click', () => { if (link.dataset.collectLead !== 'true') registrarClique(link.dataset.track, link.dataset.unit || null); }); });
@@ -319,6 +394,7 @@ document.addEventListener('click', (event) => {
   };
   if (contactRouter.open) contactRouter.close();
   leadForm.reset();
+  document.querySelector('#lead-instagram').value = visitorInstagram || storageGet(INSTAGRAM_STORAGE_KEY);
   const isFormation = pendingLead.leadType === 'formation';
   const isPatient = pendingLead.leadType === 'patient';
   const isAppointment = pendingLead.leadType === 'appointment';
@@ -359,6 +435,7 @@ leadForm.addEventListener('submit', async (event) => {
     name: String(formData.get('name') || '').trim(),
     phone: String(formData.get('phone') || '').trim(),
     profession: String(formData.get('profession') || '').trim(),
+    instagram: normalizeInstagramHandle(formData.get('instagram')),
     isDentist: formData.get('isDentist') === 'yes' ? true : formData.get('isDentist') === 'no' ? false : null,
     hasPreviousCourse: formData.get('hasPreviousCourse') === 'yes' ? true : formData.get('hasPreviousCourse') === 'no' ? false : null,
     city: '',
@@ -387,11 +464,18 @@ leadForm.addEventListener('submit', async (event) => {
     city: lead.city || null,
     course_id: pendingLead.courseId || null,
     course_title: pendingLead.courseTitle || null,
+    visitor_id: trackingConsent ? visitorId() : null,
+    instagram_handle: lead.instagram || null,
+    source_origin: detectarOrigem(),
   });
   if (error) {
     leadFeedback.textContent = 'Não foi possível continuar agora. Tente novamente.';
     submit.disabled = false;
     return;
+  }
+  if (trackingConsent && lead.instagram) {
+    visitorInstagram = lead.instagram;
+    storageSet(INSTAGRAM_STORAGE_KEY, visitorInstagram);
   }
   registrarClique(pendingLead.track, pendingLead.unit || null);
   const destination = applyPreMessage(pendingLead.destination, pendingLead.message, lead);
@@ -401,4 +485,4 @@ leadForm.addEventListener('submit', async (event) => {
 });
 
 window.addEventListener('message', (event) => { if (event.origin === window.location.origin && event.data?.type === 'vert-card-preview') renderContent(event.data.content); });
-bindTracking(); registrarClique('visualizacao_pagina'); loadCardContent().then(({ content }) => renderContent(content)).catch(() => {});
+bindTracking(); initializePrivacy(); loadCardContent().then(({ content }) => renderContent(content)).catch(() => {});
