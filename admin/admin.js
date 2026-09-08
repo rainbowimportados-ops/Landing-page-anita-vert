@@ -744,8 +744,11 @@ document.querySelector('#export-leads').addEventListener('click', () => {
   const link = document.createElement('a');
   link.href = url;
   link.download = `contatos-instituto-vert-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.append(link);
   link.click();
-  URL.revokeObjectURL(url);
+  link.remove();
+  // O Safari do iPhone precisa de tempo para iniciar o download antes da URL temporária ser liberada.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 
 preview.addEventListener('load', sendPreview);
