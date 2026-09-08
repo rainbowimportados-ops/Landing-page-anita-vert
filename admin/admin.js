@@ -642,7 +642,10 @@ function renderVisitorJourneys() {
     const metric = document.querySelector(`#journey-summary-${key}`);
     if (metric) metric.textContent = value.toLocaleString('pt-BR');
   });
-  document.querySelector('#journey-count').textContent = `${journeys.length} ${journeys.length === 1 ? 'visitante' : 'visitantes'}`;
+  const journeyCount = document.querySelector('#journey-count');
+  const hasActiveFilter = document.querySelector('#journey-filter').value !== 'all' || Boolean(document.querySelector('#journey-search').value.trim());
+  journeyCount.hidden = !hasActiveFilter;
+  journeyCount.textContent = `${journeys.length} ${journeys.length === 1 ? 'resultado' : 'resultados'}`;
   if (!journeys.length) {
     list.innerHTML = '<div class="empty-state"><strong>Nenhum acesso encontrado</strong><p>Ajuste a busca ou a etapa selecionada.</p></div>';
     return;
