@@ -36,7 +36,10 @@ h2 { font-size:clamp(2.3rem,6vw,3.7rem); }
 .contact-button__arrow { font-size:1.35rem; }
 .quick-links { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; }
 .quick-links a { display:flex; min-width:0; min-height:96px; align-items:center; justify-content:center; flex-direction:column; padding:10px 6px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.025); text-align:center; }
-.quick-links a>span { color:var(--rose); font-size:1.3rem; }
+.quick-links a>span.quick-link__icon { display:grid; width:34px; height:34px; place-items:center; color:var(--rose); transition:transform .18s ease; }
+.quick-link__icon svg { width:30px; height:30px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.quick-link__icon .quick-link__dot { fill:currentColor; stroke:none; }
+.quick-links a:hover .quick-link__icon { transform:translateY(-1px); }
 .quick-links strong { margin-top:5px; font-size:.65rem; font-weight:500; }
 .quick-links small { max-width:100%; overflow:hidden; color:var(--nude); font-size:.52rem; text-overflow:ellipsis; white-space:nowrap; }
 .proof { padding-block:88px 72px; }
