@@ -232,18 +232,17 @@
             </section>
 
             <section class="panel" data-panel="contatos">
-              <div class="panel__heading"><div><p class="eyebrow">Atendimento</p><h2>Contatos recebidos</h2></div><button type="button" class="small-action" id="refresh-leads">Atualizar</button></div>
-              <p class="helper">Acompanhe quem somente visitou, quem clicou e quem enviou os dados para atendimento.</p>
+              <div class="panel__heading"><div><p class="eyebrow">Dados</p><h2>Contatos e acessos</h2></div><button type="button" class="small-action" id="refresh-leads">Atualizar</button></div>
               <div class="journey-summary" aria-label="Resumo da jornada dos visitantes">
-                <article><small>Visitantes</small><strong id="journey-summary-total">—</strong></article>
-                <article><small>Somente viram</small><strong id="journey-summary-viewed">—</strong></article>
-                <article><small>Clicaram</small><strong id="journey-summary-clicked">—</strong></article>
-                <article><small>Identificados</small><strong id="journey-summary-identified">—</strong></article>
+                <article><small>Total</small><strong id="journey-summary-total">—</strong></article>
+                <article><small>Só visualizaram</small><strong id="journey-summary-viewed">—</strong></article>
+                <article><small>Com cliques</small><strong id="journey-summary-clicked">—</strong></article>
+                <article><small>Com dados</small><strong id="journey-summary-identified">—</strong></article>
               </div>
               <section class="journey-panel" aria-labelledby="journey-title">
                 <div class="journey-panel__heading">
-                  <div><p class="eyebrow">Jornada do visitante</p><h3 id="journey-title">Acessos e cliques</h3></div>
-                  <span id="journey-count">0 visitantes</span>
+                  <h3 id="journey-title">Atividade por pessoa</h3>
+                  <span id="journey-count" hidden>0 resultados</span>
                 </div>
                 <div class="journey-toolbar">
                   <label><span>Buscar</span><input id="journey-search" type="search" placeholder="Nome, Instagram ou origem" autocomplete="off" /></label>
@@ -251,7 +250,7 @@
                 </div>
                 <div class="journey-list" id="journey-list"><div class="empty-state"><strong>Carregando acessos…</strong></div></div>
               </section>
-              <div class="subheading identified-leads-heading"><h3>Contatos identificados</h3></div>
+              <div class="subheading identified-leads-heading"><h3>Cadastros recebidos</h3></div>
               <div class="lead-toolbar" aria-label="Ferramentas dos contatos">
                 <label class="lead-search">
                   <span>Buscar contato</span>
