@@ -324,6 +324,7 @@
 .topbar__title .eyebrow { margin-bottom: 4px; font-size: .56rem; }
 .editor { max-width: 980px; padding-top: 28px; }
 .panel__heading { position: relative; align-items: center; margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+.panel__heading > div { min-width: 0; }
 .panel__heading h2 { font-size: 2rem; line-height: 1; }
 .panel__heading .eyebrow { margin-bottom: 6px; }
 .panel > .helper { max-width: 720px; margin-top: -5px; line-height: 1.6; }
@@ -346,14 +347,14 @@
 .dashboard-shortcuts i { grid-column: 3; grid-row: 1/3; color: #a18877; font-style: normal; }
 
 /* Leitura rápida da jornada */
-.journey-summary { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; margin-top: 18px; }
-.journey-summary article { position: relative; padding: 14px 15px; overflow: hidden; border: 1px solid var(--border); border-radius: 13px; background: white; }
+.journey-summary { display: grid; width: 100%; min-width: 0; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; margin-top: 18px; }
+.journey-summary article { position: relative; min-width: 0; padding: 14px 15px; overflow: hidden; border: 1px solid var(--border); border-radius: 13px; background: white; }
 .journey-summary article::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--nude); }
 .journey-summary article:nth-child(3)::before { background: #b68b57; }
 .journey-summary article:nth-child(4)::before { background: #8f5c7e; }
 .journey-summary small { display: block; color: #806a5e; font-size: .55rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
 .journey-summary strong { display: block; margin-top: 7px; font-family: "Cormorant Garamond",serif; font-size: 1.8rem; font-weight: 500; line-height: 1; }
-.journey-panel { margin-top: 10px; padding: 18px; border-radius: 16px; background: #eee6de; }
+.journey-panel { width: 100%; min-width: 0; max-width: 100%; margin-top: 10px; padding: 18px; overflow: hidden; border-radius: 16px; background: #eee6de; }
 .journey-toolbar { grid-template-columns: minmax(240px,1fr) 205px; }
 .journey-list { gap: 7px; }
 .journey-row { padding: 13px 14px; border-radius: 12px; }
@@ -373,34 +374,36 @@
 
 @media (max-width: 760px) {
   .sidebar { z-index: 8; padding: 9px 12px 10px; background: #2b1b14; }
-  .mobile-section-picker { grid-template-columns: 90px minmax(0,1fr); align-items: center; gap: 10px; }
-  .mobile-section-picker > span { color: var(--champagne); font-size: .55rem; line-height: 1.25; }
+  .sidebar .logout { display: none !important; }
+  .mobile-section-picker { grid-template-columns: minmax(0,1fr); align-items: center; gap: 0; }
+  .mobile-section-picker > span { display: none; }
   .mobile-section-picker select { min-height: 42px; border-radius: 12px; background-color: #3b281f; }
   .topbar { position: sticky; top: 61px; z-index: 7; min-height: 67px; align-items: center; padding: 10px 12px; border-bottom-color: rgba(74,47,31,.12); }
-  .topbar__title { flex: 1 1 auto; min-width: 105px; }
-  .topbar__title .eyebrow { display: none; }
-  .topbar__title h1 { font-family: Montserrat,sans-serif; font-size: .78rem; font-weight: 600; line-height: 1.25; white-space: normal; }
-  .topbar__actions { display: grid; grid-template-columns: auto auto; gap: 5px; flex: 0 0 auto; }
+  .topbar__title { display: none; }
+  .topbar__actions { display: grid; width: 100%; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 5px; }
   .topbar__actions .button { min-height: 38px; padding: 9px 10px; border-radius: 9px; font-size: .6rem; }
   .save-status { grid-column: 1/-1; grid-row: 2; min-height: 0; width: auto; font-size: .5rem; line-height: 1; text-align: right; }
   .editor { padding: 19px 12px 72px; }
   .panel__heading { align-items: center; margin-bottom: 14px; padding-bottom: 14px; }
-  .panel__heading h2 { font-size: 1.65rem; }
-  .panel__heading .eyebrow { font-size: .54rem; }
+  .panel__heading h2 { font-size: 1.55rem; overflow-wrap: anywhere; }
+  .panel__heading .eyebrow { display: none; }
+  .panel__heading .small-action { padding: 8px 9px; }
   .panel > .helper { margin-top: 0; font-size: .68rem; }
   .form-grid { padding: 13px; border-radius: 15px; }
   .dashboard-shortcuts { margin-top: 23px; }
   .dashboard-shortcuts__heading > span { display: none; }
   .dashboard-shortcuts__grid { grid-template-columns: 1fr; }
   .dashboard-shortcuts button { padding: 13px; }
-  .journey-summary { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; margin-top: 15px; }
+  .journey-summary { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; margin-top: 0; }
   .journey-summary article { padding: 11px 12px; border-radius: 11px; }
+  .journey-summary small { overflow-wrap: anywhere; }
   .journey-summary strong { font-size: 1.55rem; }
   .journey-panel { padding: 12px; border-radius: 14px; }
   .journey-panel__heading { align-items: center; }
   .journey-panel__heading h3 { font-size: 1.35rem; }
   .journey-panel__heading > span { max-width: 85px; text-align: right; }
-  .journey-toolbar { margin-top: 12px; }
+  .journey-toolbar { width: 100%; min-width: 0; grid-template-columns: minmax(0,1fr); margin-top: 12px; }
+  .journey-toolbar label,.journey-toolbar input,.journey-toolbar select { min-width: 0; max-width: 100%; }
   .journey-row { grid-template-columns: minmax(0,1fr) auto; gap: 8px 12px; padding: 12px; }
   .journey-row__identity { grid-column: 1; }
   .journey-row__activity { grid-column: 1/-1; padding-top: 9px; border-top: 1px solid var(--border); }
