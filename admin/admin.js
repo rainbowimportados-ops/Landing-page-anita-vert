@@ -217,20 +217,47 @@ document.querySelector('#logout').addEventListener('click', async () => {
   showLogin();
 });
 
+const sectionDetails = {
+  'visao-geral': { title: 'Visão geral', context: 'Desempenho do cartão' },
+  empresa: { title: 'Dados da empresa', context: 'Configuração do cartão' },
+  unidades: { title: 'Unidades', context: 'Configuração do atendimento' },
+  links: { title: 'WhatsApp e contatos', context: 'Configuração do atendimento' },
+  formacoes: { title: 'Formações e cursos', context: 'Conteúdo do cartão' },
+  contatos: { title: 'Contatos recebidos', context: 'Dados e relacionamento' },
+  campanhas: { title: 'Campanhas e promoções', context: 'Conteúdo do cartão' },
+  depoimentos: { title: 'Depoimentos', context: 'Conteúdo do cartão' },
+  resultados: { title: 'Resultados e trabalhos', context: 'Conteúdo do cartão' },
+};
+
+function activatePanel(section, shouldScroll = false) {
+  const button = document.querySelector(`.nav-link[data-section="${section}"]`);
+  const panel = document.querySelector(`[data-panel="${section}"]`);
+  if (!button || !panel) return;
+  document.querySelectorAll('.nav-link, .panel').forEach((element) => element.classList.remove('is-active'));
+  button.classList.add('is-active');
+  panel.classList.add('is-active');
+  adminApp.dataset.activeSection = section;
+  if (section === 'links' && content) renderUnitContacts();
+  const details = sectionDetails[section];
+  const title = document.querySelector('#workspace-title');
+  const context = document.querySelector('#workspace-context');
+  const mobileNav = document.querySelector('#mobile-section-nav');
+  if (title && details) title.textContent = details.title;
+  if (context && details) context.textContent = details.context;
+  if (mobileNav) mobileNav.value = section;
+  if (shouldScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 document.querySelectorAll('.nav-link').forEach((button) => {
-  button.addEventListener('click', () => {
-    document.querySelectorAll('.nav-link, .panel').forEach((element) => element.classList.remove('is-active'));
-    button.classList.add('is-active');
-    document.querySelector(`[data-panel="${button.dataset.section}"]`).classList.add('is-active');
-    if (button.dataset.section === 'links' && content) renderUnitContacts();
-    const mobileNav = document.querySelector('#mobile-section-nav');
-    if (mobileNav) mobileNav.value = button.dataset.section;
-  });
+  button.addEventListener('click', () => activatePanel(button.dataset.section));
 });
 
 document.querySelector('#mobile-section-nav')?.addEventListener('change', (event) => {
-  document.querySelector(`.nav-link[data-section="${event.target.value}"]`)?.click();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  activatePanel(event.target.value, true);
+});
+
+document.querySelectorAll('[data-jump-panel]').forEach((button) => {
+  button.addEventListener('click', () => activatePanel(button.dataset.jumpPanel, true));
 });
 
 function fillCompany() {
@@ -605,6 +632,16 @@ function renderVisitorJourneys() {
   const list = document.querySelector('#journey-list');
   if (!list) return;
   const journeys = filteredVisitorJourneys();
+  const journeySummary = {
+    total: visitorJourneys.length,
+    viewed: visitorJourneys.filter((journey) => journey.stage === 'viewed').length,
+    clicked: visitorJourneys.filter((journey) => journey.clicks > 0).length,
+    identified: visitorJourneys.filter((journey) => journey.lead || journey.instagram).length,
+  };
+  Object.entries(journeySummary).forEach(([key, value]) => {
+    const metric = document.querySelector(`#journey-summary-${key}`);
+    if (metric) metric.textContent = value.toLocaleString('pt-BR');
+  });
   document.querySelector('#journey-count').textContent = `${journeys.length} ${journeys.length === 1 ? 'visitante' : 'visitantes'}`;
   if (!journeys.length) {
     list.innerHTML = '<div class="empty-state"><strong>Nenhum acesso encontrado</strong><p>Ajuste a busca ou a etapa selecionada.</p></div>';
@@ -623,9 +660,18 @@ function renderVisitorJourney(journey) {
   const phoneDigits = String(lead?.phone || '').replace(/\D/g, '');
   const phoneLink = phoneDigits ? `<a href="https://wa.me/${phoneDigits}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.phone)}</a>` : '';
   const date = new Intl.DateTimeFormat('pt-BR', { dateStyle:'short', timeStyle:'short' }).format(new Date(journey.lastAt));
+  const buttonLabels = {
+    whatsapp: 'WhatsApp',
+    whatsapp_fixo: 'WhatsApp fixo',
+    instagram_clinica: 'Instagram da clínica',
+    instagram_anita: 'Instagram da Dra. Anita',
+    localizacoes: 'Localizações',
+    salvar_contato: 'Salvar contato',
+  };
+  const interactions = journey.buttons.map((button) => buttonLabels[button] || String(button).replaceAll('_', ' ')).join(', ') || 'Nenhum botão acessado';
   return `<article class="journey-row">
     <div class="journey-row__identity"><strong>${escapeHtml(name)}</strong><span class="journey-status${stageClass}">${stageLabels[journey.stage]}</span>${instagramLink}${phoneLink}</div>
-    <div class="journey-row__activity"><span>${journey.views} ${journey.views === 1 ? 'visualização' : 'visualizações'} · ${journey.clicks} ${journey.clicks === 1 ? 'clique' : 'cliques'}</span><small>${escapeHtml(journey.origin)} · ${escapeHtml(journey.device || 'dispositivo não informado')}</small><small>${escapeHtml(journey.buttons.join(', ') || 'Nenhum botão acessado')}</small></div>
+    <div class="journey-row__activity"><span class="journey-row__numbers"><b>${journey.views}</b> ${journey.views === 1 ? 'visualização' : 'visualizações'} <i aria-hidden="true"></i> <b>${journey.clicks}</b> ${journey.clicks === 1 ? 'clique' : 'cliques'}</span><small>${escapeHtml(journey.origin)} · ${escapeHtml(journey.device || 'dispositivo não informado')}</small><small>${escapeHtml(interactions)}</small></div>
     <time datetime="${escapeHtml(journey.lastAt)}">Último acesso<br>${escapeHtml(date)}</time>
   </article>`;
 }
