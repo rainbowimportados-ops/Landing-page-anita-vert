@@ -104,14 +104,16 @@
         <div class="editor-grid">
           <form class="editor" id="content-form">
             <section class="panel is-active" data-panel="visao-geral">
-              <div class="panel__heading"><div><p class="eyebrow">Últimos 30 dias</p><h2>Visão geral</h2></div><span>Medição anônima de acessos</span></div>
+              <div class="panel__heading"><div><p class="eyebrow">Últimos 30 dias</p><h2>Visão geral</h2></div><span>Medição autorizada de acessos</span></div>
               <div class="metric-grid">
                 <article><small>Visualizações</small><strong id="metric-views">—</strong></article>
                 <article><small>Cliques de contato</small><strong id="metric-clicks">—</strong></article>
                 <article><small>WhatsApp</small><strong id="metric-whatsapp">—</strong></article>
                 <article><small>Contatos recebidos</small><strong id="metric-leads">—</strong></article>
+                <article><small>Visitantes autorizados</small><strong id="metric-visitors">—</strong></article>
+                <article><small>Instagram informado</small><strong id="metric-instagram">—</strong></article>
               </div>
-              <div class="analytics-note"><strong>Privacidade e consentimento</strong><p>Nome, telefone e profissão opcional são coletados somente quando o visitante autoriza antes de abrir um botão configurado.</p></div>
+              <div class="analytics-note"><strong>Privacidade e consentimento</strong><p>Visualizações e cliques são registrados somente após autorização. O @Instagram aparece apenas quando a própria pessoa o informa.</p></div>
             </section>
 
             <section class="panel" data-panel="empresa">
@@ -219,7 +221,19 @@
 
             <section class="panel" data-panel="contatos">
               <div class="panel__heading"><div><p class="eyebrow">Atendimento</p><h2>Contatos recebidos</h2></div><button type="button" class="small-action" id="refresh-leads">Atualizar</button></div>
-              <p class="helper">Pessoas que autorizaram o contato antes de abrir um dos links configurados.</p>
+              <p class="helper">Acompanhe quem somente visitou, quem clicou e quem enviou os dados para atendimento.</p>
+              <section class="journey-panel" aria-labelledby="journey-title">
+                <div class="journey-panel__heading">
+                  <div><p class="eyebrow">Jornada do visitante</p><h3 id="journey-title">Acessos e cliques</h3></div>
+                  <span id="journey-count">0 visitantes</span>
+                </div>
+                <div class="journey-toolbar">
+                  <label><span>Buscar</span><input id="journey-search" type="search" placeholder="Nome, Instagram ou origem" autocomplete="off" /></label>
+                  <label><span>Etapa</span><select id="journey-filter"><option value="all">Todas</option><option value="viewed">Somente visualizou</option><option value="clicked">Clicou</option><option value="identified">Enviou contato</option><option value="instagram">Instagram informado</option></select></label>
+                </div>
+                <div class="journey-list" id="journey-list"><div class="empty-state"><strong>Carregando acessos…</strong></div></div>
+              </section>
+              <div class="subheading identified-leads-heading"><h3>Contatos identificados</h3></div>
               <div class="lead-toolbar" aria-label="Ferramentas dos contatos">
                 <label class="lead-search">
                   <span>Buscar contato</span>
@@ -284,7 +298,8 @@
         <div class="lead-dialog__fields" id="lead-dialog-fields">
           <label>Nome<input id="lead-edit-name" maxlength="100" required /></label>
           <label>Telefone<input id="lead-edit-phone" inputmode="tel" maxlength="30" required /></label>
-          <label class="wide">Profissão<input id="lead-edit-profession" maxlength="100" /></label>
+          <label>Instagram<input id="lead-edit-instagram" maxlength="31" placeholder="@usuario" /></label>
+          <label>Profissão<input id="lead-edit-profession" maxlength="100" /></label>
         </div>
         <label class="lead-dialog__tags">Etiquetas <input id="lead-edit-tags" maxlength="300" placeholder="Ex.: retorno, Franca, prioridade" /><small>Separe as etiquetas por vírgulas.</small></label>
         <label class="lead-dialog__mark" id="lead-dialog-mark"><input id="lead-edit-marked" type="checkbox" /> Marcar como importante</label>
