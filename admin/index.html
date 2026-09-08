@@ -220,6 +220,30 @@
             <section class="panel" data-panel="contatos">
               <div class="panel__heading"><div><p class="eyebrow">Atendimento</p><h2>Contatos recebidos</h2></div><button type="button" class="small-action" id="refresh-leads">Atualizar</button></div>
               <p class="helper">Pessoas que autorizaram o contato antes de abrir um dos links configurados.</p>
+              <div class="lead-toolbar" aria-label="Ferramentas dos contatos">
+                <label class="lead-search">
+                  <span>Buscar contato</span>
+                  <input id="lead-search" type="search" placeholder="Nome, telefone ou etiqueta" autocomplete="off" />
+                </label>
+                <label>
+                  <span>Exibir</span>
+                  <select id="lead-filter">
+                    <option value="all">Todos</option>
+                    <option value="marked">Marcados</option>
+                    <option value="unmarked">Não marcados</option>
+                  </select>
+                </label>
+                <button type="button" class="lead-toolbar__button" id="export-leads">Exportar CSV</button>
+              </div>
+              <div class="lead-selection-bar">
+                <label><input id="select-all-leads" type="checkbox" /> <span>Selecionar todos</span></label>
+                <span id="lead-selection-count">0 selecionados</span>
+                <div>
+                  <button type="button" id="tag-selected-leads" disabled>Etiquetar</button>
+                  <button type="button" id="mark-selected-leads" disabled>Marcar</button>
+                  <button type="button" class="is-danger" id="delete-selected-leads" disabled>Excluir</button>
+                </div>
+              </div>
               <div class="leads-list" id="leads-list"><div class="empty-state"><strong>Carregando contatos…</strong></div></div>
             </section>
 
@@ -250,6 +274,27 @@
     </div>
 
     <template id="empty-template"><div class="empty-state"><strong>Nenhum item cadastrado</strong><p>Use o botão acima para adicionar.</p></div></template>
+
+    <dialog class="lead-dialog" id="lead-dialog" aria-labelledby="lead-dialog-title">
+      <form method="dialog" id="lead-dialog-form">
+        <div class="lead-dialog__heading">
+          <div><p class="eyebrow">Gerenciar contato</p><h2 id="lead-dialog-title">Editar contato</h2></div>
+          <button type="button" class="lead-dialog__close" id="close-lead-dialog" aria-label="Fechar">×</button>
+        </div>
+        <div class="lead-dialog__fields" id="lead-dialog-fields">
+          <label>Nome<input id="lead-edit-name" maxlength="100" required /></label>
+          <label>Telefone<input id="lead-edit-phone" inputmode="tel" maxlength="30" required /></label>
+          <label class="wide">Profissão<input id="lead-edit-profession" maxlength="100" /></label>
+        </div>
+        <label class="lead-dialog__tags">Etiquetas <input id="lead-edit-tags" maxlength="300" placeholder="Ex.: retorno, Franca, prioridade" /><small>Separe as etiquetas por vírgulas.</small></label>
+        <label class="lead-dialog__mark" id="lead-dialog-mark"><input id="lead-edit-marked" type="checkbox" /> Marcar como importante</label>
+        <p class="lead-dialog__feedback" id="lead-dialog-feedback" role="status"></p>
+        <div class="lead-dialog__actions">
+          <button type="button" class="button button--ghost" id="cancel-lead-dialog">Cancelar</button>
+          <button type="submit" class="button" id="save-lead-dialog">Salvar</button>
+        </div>
+      </form>
+    </dialog>
     <script type="module" src="/admin/admin.js"></script>
   </body>
 </html>

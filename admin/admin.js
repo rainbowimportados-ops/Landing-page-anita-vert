@@ -31,6 +31,10 @@ let session = null;
 let content = null;
 let dirty = false;
 let loadingAdmin = false;
+let contactLeads = [];
+let formationLeads = [];
+let selectedLeadIds = new Set();
+let leadDialogMode = 'edit';
 
 const blankItems = {
   units: () => ({ id: crypto.randomUUID(), name: 'Nova unidade', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', address: '', phone: '', contactUrl: '', contactButtonLabel: '', whatsappMessage: '', collectLead: true, mapsUrl: '', mapsQuery: '', website: '', active: true }),
@@ -524,29 +528,66 @@ async function loadLeads() {
   const formationList = document.querySelector('#formation-leads-list');
   list.innerHTML = '<div class="empty-state"><strong>Carregando contatos…</strong></div>';
   if (formationList) formationList.innerHTML = '<div class="empty-state"><strong>Carregando interessados…</strong></div>';
-  const { data, error } = await supabase.from('digital_card_leads').select('name,phone,profession,button,unit,created_at,lead_type,is_dentist,has_previous_course,course_title').order('created_at', { ascending: false }).limit(200);
+  const { data, error } = await supabase.from('digital_card_leads').select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at').order('created_at', { ascending: false }).limit(500);
   if (error) {
     list.innerHTML = `<div class="empty-state"><strong>Não foi possível carregar</strong><p>${escapeHtml(error.message)}</p></div>`;
     if (formationList) formationList.innerHTML = list.innerHTML;
     return;
   }
   document.querySelector('#metric-leads').textContent = data.length.toLocaleString('pt-BR');
-  const contactLeads = data.filter((lead) => lead.lead_type !== 'formation');
-  const formationLeads = data.filter((lead) => lead.lead_type === 'formation');
-  if (!contactLeads.length) {
-    list.innerHTML = '<div class="empty-state"><strong>Nenhum contato recebido ainda</strong><p>Os novos contatos aparecerão aqui.</p></div>';
-  } else {
-    list.innerHTML = contactLeads.map(renderLeadCard).join('');
-  }
+  contactLeads = data.filter((lead) => lead.lead_type !== 'formation');
+  formationLeads = data.filter((lead) => lead.lead_type === 'formation');
+  selectedLeadIds = new Set([...selectedLeadIds].filter((id) => contactLeads.some((lead) => lead.id === id)));
+  renderContactList();
   if (formationList) formationList.innerHTML = formationLeads.length
     ? formationLeads.map(renderFormationLeadCard).join('')
     : '<div class="empty-state"><strong>Nenhum interessado ainda</strong><p>Os leads dos cursos aparecerão aqui com suas respostas.</p></div>';
 }
 
-function renderLeadCard(lead) {
+function filteredContactLeads() {
+  const search = document.querySelector('#lead-search').value.trim().toLocaleLowerCase('pt-BR');
+  const filter = document.querySelector('#lead-filter').value;
+  return contactLeads.filter((lead) => {
+    const matchesFilter = filter === 'all' || (filter === 'marked' ? lead.marked : !lead.marked);
+    const searchable = [lead.name, lead.phone, lead.profession, lead.button, lead.unit, ...(lead.tags || [])].join(' ').toLocaleLowerCase('pt-BR');
+    return matchesFilter && (!search || searchable.includes(search));
+  });
+}
+
+function renderContactList() {
+  const list = document.querySelector('#leads-list');
+  const leads = filteredContactLeads();
+  if (!leads.length) {
+    list.innerHTML = contactLeads.length
+      ? '<div class="empty-state"><strong>Nenhum contato encontrado</strong><p>Ajuste a busca ou o filtro.</p></div>'
+      : '<div class="empty-state"><strong>Nenhum contato recebido ainda</strong><p>Os novos contatos aparecerão aqui.</p></div>';
+  } else {
+    list.innerHTML = `<div class="lead-list-heading" aria-hidden="true"><span></span><span>Contato</span><span>Origem</span><span>Recebido em</span><span>Ações</span></div>${leads.map(renderLeadRow).join('')}`;
+  }
+  updateLeadSelectionBar();
+}
+
+function renderLeadRow(lead) {
   const digits = String(lead.phone).replace(/\D/g, '');
   const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lead.created_at));
-  return `<article class="lead-card"><div><small>${escapeHtml(date)}</small><strong>${escapeHtml(lead.name)}</strong><span>${escapeHtml(lead.profession || 'Profissão não informada')}</span></div><div><small>${escapeHtml(lead.button)}${lead.unit ? ` · ${escapeHtml(lead.unit)}` : ''}</small><a href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.phone)} <span>→</span></a></div></article>`;
+  const tags = (lead.tags || []).map((tag) => `<span class="lead-tag">${escapeHtml(tag)}</span>`).join('');
+  return `<article class="lead-row${lead.marked ? ' is-marked' : ''}" data-lead-id="${escapeHtml(lead.id)}">
+    <label class="lead-row__select"><input class="lead-select" type="checkbox" ${selectedLeadIds.has(lead.id) ? 'checked' : ''} aria-label="Selecionar ${escapeHtml(lead.name)}" /></label>
+    <div class="lead-row__contact" data-label="Contato">
+      <strong>${escapeHtml(lead.name)}</strong>
+      <span>${escapeHtml(lead.profession || 'Profissão não informada')}</span>
+      <a href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.phone)}</a>
+      ${tags ? `<div class="lead-tags">${tags}</div>` : ''}
+    </div>
+    <div class="lead-row__source" data-label="Origem"><span>${escapeHtml(lead.button)}</span><small>${escapeHtml(lead.unit || 'Sem unidade')}</small></div>
+    <time class="lead-row__date" data-label="Recebido em" datetime="${escapeHtml(lead.created_at)}">${escapeHtml(date)}</time>
+    <div class="lead-row__actions" data-label="Ações">
+      <button type="button" data-lead-action="mark" aria-label="${lead.marked ? 'Desmarcar' : 'Marcar'} ${escapeHtml(lead.name)}" title="${lead.marked ? 'Desmarcar' : 'Marcar'}">${lead.marked ? '★' : '☆'}</button>
+      <button type="button" data-lead-action="tag" title="Etiquetar">Etiqueta</button>
+      <button type="button" data-lead-action="edit" title="Editar">Editar</button>
+      <button type="button" class="is-danger" data-lead-action="delete" title="Excluir">Excluir</button>
+    </div>
+  </article>`;
 }
 
 function renderFormationLeadCard(lead) {
@@ -559,6 +600,153 @@ function renderFormationLeadCard(lead) {
 
 document.querySelector('#refresh-leads').addEventListener('click', () => void loadLeads());
 document.querySelector('#refresh-formation-leads').addEventListener('click', () => void loadLeads());
+document.querySelector('#lead-search').addEventListener('input', renderContactList);
+document.querySelector('#lead-filter').addEventListener('change', renderContactList);
+
+function updateLeadSelectionBar() {
+  const visible = filteredContactLeads();
+  const visibleSelected = visible.filter((lead) => selectedLeadIds.has(lead.id)).length;
+  const selectAll = document.querySelector('#select-all-leads');
+  selectAll.checked = visible.length > 0 && visibleSelected === visible.length;
+  selectAll.indeterminate = visibleSelected > 0 && visibleSelected < visible.length;
+  document.querySelector('#lead-selection-count').textContent = `${selectedLeadIds.size} ${selectedLeadIds.size === 1 ? 'selecionado' : 'selecionados'}`;
+  ['#tag-selected-leads', '#mark-selected-leads', '#delete-selected-leads'].forEach((selector) => {
+    document.querySelector(selector).disabled = selectedLeadIds.size === 0;
+  });
+}
+
+document.querySelector('#select-all-leads').addEventListener('change', (event) => {
+  filteredContactLeads().forEach((lead) => event.target.checked ? selectedLeadIds.add(lead.id) : selectedLeadIds.delete(lead.id));
+  renderContactList();
+});
+
+document.querySelector('#leads-list').addEventListener('change', (event) => {
+  if (!event.target.matches('.lead-select')) return;
+  const id = event.target.closest('[data-lead-id]')?.dataset.leadId;
+  if (!id) return;
+  event.target.checked ? selectedLeadIds.add(id) : selectedLeadIds.delete(id);
+  updateLeadSelectionBar();
+});
+
+document.querySelector('#leads-list').addEventListener('click', (event) => {
+  const button = event.target.closest('[data-lead-action]');
+  if (!button) return;
+  const id = button.closest('[data-lead-id]')?.dataset.leadId;
+  const lead = contactLeads.find((item) => item.id === id);
+  if (!lead) return;
+  if (button.dataset.leadAction === 'mark') void setLeadsMarked([id], !lead.marked);
+  if (button.dataset.leadAction === 'tag') openLeadDialog('tag', [id]);
+  if (button.dataset.leadAction === 'edit') openLeadDialog('edit', [id]);
+  if (button.dataset.leadAction === 'delete') void deleteLeads([id]);
+});
+
+async function setLeadsMarked(ids, marked) {
+  const { data, error } = await supabase.from('digital_card_leads').update({ marked, updated_at: new Date().toISOString() }).in('id', ids).select('id');
+  if (error || data?.length !== ids.length) {
+    window.alert(`Não foi possível ${marked ? 'marcar' : 'desmarcar'}: ${error?.message || 'permissão insuficiente.'}`);
+    return;
+  }
+  contactLeads = contactLeads.map((lead) => ids.includes(lead.id) ? { ...lead, marked } : lead);
+  renderContactList();
+}
+
+async function deleteLeads(ids) {
+  const label = ids.length === 1 ? 'este contato' : `estes ${ids.length} contatos`;
+  if (!window.confirm(`Excluir ${label}? Esta ação não pode ser desfeita.`)) return;
+  const { data, error } = await supabase.from('digital_card_leads').delete().in('id', ids).select('id');
+  if (error || data?.length !== ids.length) {
+    window.alert(`Não foi possível excluir: ${error?.message || 'permissão insuficiente.'}`);
+    return;
+  }
+  contactLeads = contactLeads.filter((lead) => !ids.includes(lead.id));
+  ids.forEach((id) => selectedLeadIds.delete(id));
+  document.querySelector('#metric-leads').textContent = (contactLeads.length + formationLeads.length).toLocaleString('pt-BR');
+  renderContactList();
+}
+
+function normalizedTags(value) {
+  return [...new Set(String(value).split(',').map((tag) => tag.trim()).filter(Boolean))].slice(0, 20);
+}
+
+function openLeadDialog(mode, ids) {
+  const dialog = document.querySelector('#lead-dialog');
+  const lead = contactLeads.find((item) => item.id === ids[0]);
+  leadDialogMode = mode;
+  dialog.dataset.ids = ids.join(',');
+  document.querySelector('#lead-dialog-feedback').textContent = '';
+  document.querySelector('#lead-dialog-fields').hidden = mode === 'tag';
+  document.querySelector('#lead-dialog-mark').hidden = mode === 'tag';
+  document.querySelector('#lead-dialog-title').textContent = mode === 'tag' ? `Etiquetar ${ids.length === 1 ? 'contato' : `${ids.length} contatos`}` : 'Editar contato';
+  document.querySelector('#lead-edit-name').value = lead?.name || '';
+  document.querySelector('#lead-edit-phone').value = lead?.phone || '';
+  document.querySelector('#lead-edit-profession').value = lead?.profession || '';
+  document.querySelector('#lead-edit-tags').value = mode === 'tag' && ids.length > 1 ? '' : (lead?.tags || []).join(', ');
+  document.querySelector('#lead-edit-marked').checked = Boolean(lead?.marked);
+  dialog.showModal();
+  (mode === 'tag' ? document.querySelector('#lead-edit-tags') : document.querySelector('#lead-edit-name')).focus();
+}
+
+function closeLeadDialog() {
+  document.querySelector('#lead-dialog').close();
+}
+
+document.querySelector('#close-lead-dialog').addEventListener('click', closeLeadDialog);
+document.querySelector('#cancel-lead-dialog').addEventListener('click', closeLeadDialog);
+document.querySelector('#tag-selected-leads').addEventListener('click', () => openLeadDialog('tag', [...selectedLeadIds]));
+document.querySelector('#mark-selected-leads').addEventListener('click', () => void setLeadsMarked([...selectedLeadIds], true));
+document.querySelector('#delete-selected-leads').addEventListener('click', () => void deleteLeads([...selectedLeadIds]));
+
+document.querySelector('#lead-dialog-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const dialog = document.querySelector('#lead-dialog');
+  const ids = dialog.dataset.ids.split(',').filter(Boolean);
+  const tags = normalizedTags(document.querySelector('#lead-edit-tags').value);
+  const changes = leadDialogMode === 'tag'
+    ? { tags, updated_at: new Date().toISOString() }
+    : {
+        name: document.querySelector('#lead-edit-name').value.trim(),
+        phone: document.querySelector('#lead-edit-phone').value.trim(),
+        profession: document.querySelector('#lead-edit-profession').value.trim() || null,
+        tags,
+        marked: document.querySelector('#lead-edit-marked').checked,
+        updated_at: new Date().toISOString(),
+      };
+  if (leadDialogMode === 'edit' && (!changes.name || !changes.phone)) return;
+  const save = document.querySelector('#save-lead-dialog');
+  save.disabled = true;
+  document.querySelector('#lead-dialog-feedback').textContent = 'Salvando…';
+  const { data, error } = await supabase.from('digital_card_leads').update(changes).in('id', ids).select('id');
+  save.disabled = false;
+  if (error || data?.length !== ids.length) {
+    document.querySelector('#lead-dialog-feedback').textContent = error?.message || 'Não foi possível salvar todas as alterações.';
+    return;
+  }
+  contactLeads = contactLeads.map((lead) => ids.includes(lead.id) ? { ...lead, ...changes } : lead);
+  closeLeadDialog();
+  renderContactList();
+});
+
+function csvCell(value) {
+  return `"${String(value ?? '').replace(/"/g, '""')}"`;
+}
+
+document.querySelector('#export-leads').addEventListener('click', () => {
+  const filtered = filteredContactLeads();
+  const rows = selectedLeadIds.size ? contactLeads.filter((lead) => selectedLeadIds.has(lead.id)) : filtered;
+  if (!rows.length) {
+    window.alert('Não há contatos para exportar.');
+    return;
+  }
+  const header = ['Nome', 'Telefone', 'Profissão', 'Origem', 'Unidade', 'Recebido em', 'Marcado', 'Etiquetas'];
+  const csvRows = rows.map((lead) => [lead.name, lead.phone, lead.profession, lead.button, lead.unit, lead.created_at, lead.marked ? 'Sim' : 'Não', (lead.tags || []).join('; ')]);
+  const csv = '\uFEFF' + [header, ...csvRows].map((row) => row.map(csvCell).join(',')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `contatos-instituto-vert-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+});
 
 preview.addEventListener('load', sendPreview);
 
