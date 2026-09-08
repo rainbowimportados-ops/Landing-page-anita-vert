@@ -46,8 +46,8 @@ h2 { font-size:clamp(2.3rem,6vw,3.7rem); }
 .section-title { display:flex; align-items:end; justify-content:space-between; gap:28px; margin-bottom:28px; }
 .section-title>a { display:inline-flex; min-height:44px; flex:none; align-items:center; padding:8px 0; border-bottom:1px solid var(--nude); color:var(--champagne); font-size:.67rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase; }
 .media-strip { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; overflow:hidden; }
+.media-strip:has(>figure:nth-child(3):last-child) { grid-template-columns:repeat(3,minmax(0,1fr)); }
 .media-strip figure { position:relative; aspect-ratio:4/4.6; margin:0; overflow:hidden; border:1px solid var(--line); border-radius:14px; background:var(--chocolate); }
-.media-strip figure:last-child:nth-child(odd) { grid-column:1/-1; aspect-ratio:16/7; }
 .media-strip img,.media-strip video { width:100%; height:100%; object-fit:cover; }
 .document-card { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center; width:100%; height:100%; padding:22px; background:linear-gradient(145deg,#4a2f1f,#2b1b14); color:var(--ivory); text-decoration:none; }
 .document-card>span:first-child { display:grid; width:52px; height:52px; place-items:center; border:1px solid rgba(234,218,198,.3); border-radius:12px; color:var(--rose); font-size:.62rem; font-weight:600; letter-spacing:.08em; }
@@ -178,8 +178,9 @@ footer strong { color:var(--rose); font-family:var(--serif); font-size:1.35rem; 
   .proof { padding-block:66px 54px; }
   .section-title { align-items:start; flex-direction:column; gap:18px; }
   .media-strip { grid-template-columns:repeat(4,74vw); margin-right:-10px; padding-right:10px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; }
+  .media-strip:has(>figure:nth-child(3):last-child) { grid-template-columns:repeat(3,74vw); }
   .media-strip::-webkit-scrollbar { display:none; }
-  .media-strip figure,.media-strip figure:last-child:nth-child(odd) { grid-column:auto; aspect-ratio:4/4.6; scroll-snap-align:start; }
+  .media-strip figure { scroll-snap-align:start; }
   .units { padding-block:54px; }
   .unit-grid { grid-template-columns:1fr; }
   .campaign-grid,.testimonial-grid { grid-template-columns:1fr; }
