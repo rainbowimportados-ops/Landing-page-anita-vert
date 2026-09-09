@@ -138,6 +138,9 @@ footer strong { color:var(--rose); font-family:var(--serif); font-size:1.35rem; 
 .privacy-dialog::backdrop { background:rgba(20,11,8,.82); backdrop-filter:blur(6px); }
 .privacy-form { display:grid; gap:12px; padding:20px; }
 .privacy-form h2 { color:var(--chocolate); font-size:1.55rem; }
+.privacy-form__instagram { display:grid; gap:6px; color:#654b3e; font:600 .66rem/1.2 var(--sans); }
+.privacy-form__instagram input { width:100%; min-height:44px; padding:9px 11px; border:1px solid rgba(74,47,31,.18); border-radius:9px; background:#fff; color:var(--deep); font:400 16px var(--sans); outline:none; }
+.privacy-form__instagram input:focus { border-color:var(--cacao); box-shadow:0 0 0 3px rgba(106,69,46,.12); }
 .privacy-form__consent { display:grid; grid-template-columns:auto 1fr; gap:9px; align-items:center; padding:11px 12px; border-radius:10px; background:#eee4da; color:#654b3e; font:500 .69rem/1.35 var(--sans); cursor:pointer; }
 .privacy-form__consent input { width:18px; height:18px; margin:0; accent-color:var(--cacao); }
 .privacy-form__consent input:focus-visible { outline:3px solid rgba(106,69,46,.2); outline-offset:2px; }
