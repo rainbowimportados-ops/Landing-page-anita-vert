@@ -188,15 +188,14 @@
 
     <dialog class="privacy-dialog" id="privacy-dialog" aria-labelledby="privacy-dialog-title">
       <form class="privacy-form" id="privacy-form">
-        <span class="privacy-form__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.2c0 4.7 3.1 8.2 7.5 9.8 4.4-1.6 7.5-5.1 7.5-9.8V6L12 3Z"/><path d="m9.2 12 1.8 1.8 3.9-4.1"/></svg></span>
-        <p class="eyebrow">Sua privacidade</p>
-        <h2 id="privacy-dialog-title">Podemos registrar sua visita?</h2>
-        <p>Com sua autorização, registramos as páginas e os botões acessados para melhorar o atendimento. O Instagram não informa automaticamente quem você é.</p>
-        <label>Seu @ do Instagram <small>opcional</small><input id="privacy-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" placeholder="@seuusuario" /></label>
-        <p class="privacy-form__note">Você pode continuar sem rastreamento e alterar esta escolha depois em “Privacidade e dados”.</p>
+        <h2 id="privacy-dialog-title">Privacidade</h2>
+        <label class="privacy-form__consent">
+          <input name="trackingConsent" type="checkbox" required />
+          <span>Autorizo registrar meus acessos e cliques.</span>
+        </label>
         <div class="privacy-form__actions">
-          <button class="privacy-form__decline" type="button" data-privacy-decline>Continuar sem rastreamento</button>
-          <button class="privacy-form__accept" type="submit">Autorizar e continuar</button>
+          <button class="privacy-form__decline" type="button" data-privacy-decline>Seguir sem</button>
+          <button class="privacy-form__accept" type="submit">Autorizar</button>
         </div>
       </form>
     </dialog>
