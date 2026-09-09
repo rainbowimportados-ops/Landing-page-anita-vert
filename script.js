@@ -12,7 +12,7 @@ const privacyForm = document.querySelector('#privacy-form');
 const PRIVACY_STORAGE_KEY = 'vert_card_privacy_v1';
 const VISITOR_STORAGE_KEY = 'vert_card_visitor_id';
 const INSTAGRAM_STORAGE_KEY = 'vert_card_instagram';
-const CONSENT_VERSION = '2026-09-v1';
+const CONSENT_VERSION = '2026-09-v2';
 let trackingConsent = false;
 let visitorInstagram = '';
 let pendingLead = null;
@@ -328,9 +328,10 @@ function registrarClique(botao, unidade = null) {
 }
 
 function openPrivacyDialog() {
-  document.querySelector('#privacy-instagram').value = visitorInstagram || storageGet(INSTAGRAM_STORAGE_KEY);
+  const consentField = privacyForm.elements.namedItem('trackingConsent');
+  if (consentField instanceof HTMLInputElement) consentField.checked = trackingConsent;
   privacyDialog.showModal();
-  requestAnimationFrame(() => document.querySelector('#privacy-instagram').focus());
+  requestAnimationFrame(() => consentField?.focus());
 }
 
 function initializePrivacy() {
@@ -345,9 +346,7 @@ function initializePrivacy() {
 privacyForm.addEventListener('submit', (event) => {
   event.preventDefault();
   const wasTracking = trackingConsent;
-  visitorInstagram = normalizeInstagramHandle(new FormData(privacyForm).get('instagram'));
   storageSet(PRIVACY_STORAGE_KEY, 'accepted');
-  if (visitorInstagram) storageSet(INSTAGRAM_STORAGE_KEY, visitorInstagram); else storageRemove(INSTAGRAM_STORAGE_KEY);
   trackingConsent = true;
   privacyDialog.close();
   registrarClique(wasTracking ? 'preferencias_privacidade' : 'consentimento_autorizado');
