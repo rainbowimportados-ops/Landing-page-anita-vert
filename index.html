@@ -189,6 +189,10 @@
     <dialog class="privacy-dialog" id="privacy-dialog" aria-labelledby="privacy-dialog-title">
       <form class="privacy-form" id="privacy-form">
         <h2 id="privacy-dialog-title">Privacidade</h2>
+        <label class="privacy-form__instagram">
+          <span>Seu Instagram</span>
+          <input id="privacy-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" pattern="@?[A-Za-z0-9._]{1,30}" placeholder="@seuusuario" required />
+        </label>
         <label class="privacy-form__consent">
           <input name="trackingConsent" type="checkbox" required />
           <span>Autorizo registrar meus acessos e cliques.</span>

@@ -12,7 +12,7 @@ const privacyForm = document.querySelector('#privacy-form');
 const PRIVACY_STORAGE_KEY = 'vert_card_privacy_v1';
 const VISITOR_STORAGE_KEY = 'vert_card_visitor_id';
 const INSTAGRAM_STORAGE_KEY = 'vert_card_instagram';
-const CONSENT_VERSION = '2026-09-v2';
+const CONSENT_VERSION = '2026-09-v3';
 let trackingConsent = false;
 let visitorInstagram = '';
 let pendingLead = null;
@@ -329,16 +329,18 @@ function registrarClique(botao, unidade = null) {
 
 function openPrivacyDialog() {
   const consentField = privacyForm.elements.namedItem('trackingConsent');
+  const instagramField = privacyForm.elements.namedItem('instagram');
   if (consentField instanceof HTMLInputElement) consentField.checked = trackingConsent;
+  if (instagramField instanceof HTMLInputElement) instagramField.value = visitorInstagram || storageGet(INSTAGRAM_STORAGE_KEY);
   privacyDialog.showModal();
-  requestAnimationFrame(() => consentField?.focus());
+  requestAnimationFrame(() => instagramField?.focus());
 }
 
 function initializePrivacy() {
   if (new URLSearchParams(window.location.search).get('preview') === 'admin') return;
   const choice = storageGet(PRIVACY_STORAGE_KEY);
   visitorInstagram = normalizeInstagramHandle(storageGet(INSTAGRAM_STORAGE_KEY));
-  trackingConsent = choice === 'accepted';
+  trackingConsent = choice === `accepted:${CONSENT_VERSION}`;
   if (trackingConsent) registrarClique('visualizacao_pagina');
   else if (choice !== 'declined') openPrivacyDialog();
 }
@@ -346,7 +348,10 @@ function initializePrivacy() {
 privacyForm.addEventListener('submit', (event) => {
   event.preventDefault();
   const wasTracking = trackingConsent;
-  storageSet(PRIVACY_STORAGE_KEY, 'accepted');
+  visitorInstagram = normalizeInstagramHandle(new FormData(privacyForm).get('instagram'));
+  if (!visitorInstagram) return;
+  storageSet(PRIVACY_STORAGE_KEY, `accepted:${CONSENT_VERSION}`);
+  storageSet(INSTAGRAM_STORAGE_KEY, visitorInstagram);
   trackingConsent = true;
   privacyDialog.close();
   registrarClique(wasTracking ? 'preferencias_privacidade' : 'consentimento_autorizado');
