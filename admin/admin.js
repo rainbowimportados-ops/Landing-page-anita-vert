@@ -219,6 +219,7 @@ document.querySelector('#logout').addEventListener('click', async () => {
 
 const sectionDetails = {
   'visao-geral': { title: 'Visão geral', context: 'Desempenho do cartão' },
+  acessos: { title: 'Instagram e acessos', context: 'Jornada dos visitantes' },
   empresa: { title: 'Dados da empresa', context: 'Configuração do cartão' },
   unidades: { title: 'Unidades', context: 'Configuração do atendimento' },
   links: { title: 'WhatsApp e contatos', context: 'Configuração do atendimento' },
@@ -542,23 +543,73 @@ function sendPreview() {
 async function loadMetrics() {
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const [clickResult, leadResult] = await Promise.all([
-    supabase.from('digital_card_clicks').select('botao,visitor_id,instagram_handle').gte('created_at', since),
-    supabase.from('digital_card_leads').select('visitor_id,instagram_handle').gte('created_at', since),
+    supabase.from('digital_card_clicks').select('botao,visitor_id,instagram_handle,created_at,origem,dispositivo,unidade').gte('created_at', since),
+    supabase.from('digital_card_leads').select('visitor_id,instagram_handle,age_range,gender,created_at').gte('created_at', since),
   ]);
   if (clickResult.error || leadResult.error) return;
   const data = clickResult.data || [];
+  const leads = leadResult.data || [];
   const views = data.filter((row) => row.botao === 'visualizacao_pagina').length;
   const interactions = data.filter((row) => !['visualizacao_pagina', 'consentimento_autorizado', 'preferencias_privacidade'].includes(row.botao));
   const clicks = interactions.length;
-  const whatsapp = data.filter((row) => row.botao.startsWith('whatsapp')).length;
   const visitors = new Set(data.map((row) => row.visitor_id).filter(Boolean)).size;
-  const instagramProfiles = [...data, ...(leadResult.data || [])].filter((row) => row.instagram_handle).map((row) => row.visitor_id || row.instagram_handle);
-  const instagram = new Set(instagramProfiles).size;
   document.querySelector('#metric-views').textContent = views.toLocaleString('pt-BR');
   document.querySelector('#metric-clicks').textContent = clicks.toLocaleString('pt-BR');
-  document.querySelector('#metric-whatsapp').textContent = whatsapp.toLocaleString('pt-BR');
   document.querySelector('#metric-visitors').textContent = visitors.toLocaleString('pt-BR');
-  document.querySelector('#metric-instagram').textContent = instagram.toLocaleString('pt-BR');
+  document.querySelector('#metric-leads').textContent = leads.length.toLocaleString('pt-BR');
+  renderOverviewInsights(data, leads, interactions);
+}
+
+const BUTTON_LABELS = {
+  whatsapp: 'WhatsApp', whatsapp_fixo: 'WhatsApp fixo', whatsapp_agendar: 'WhatsApp · agendar',
+  instagram_clinica: 'Instagram da clínica', instagram_anita: 'Instagram da Dra. Anita',
+  localizacoes: 'Localizações', salvar_contato: 'Salvar contato', curso_presencial: 'Curso presencial',
+};
+
+function readableButton(button = '') {
+  return BUTTON_LABELS[button] || String(button).replaceAll('_', ' ').replace(/^./, (letter) => letter.toUpperCase());
+}
+
+function renderRanking(id, entries, emptyMessage = 'Sem dados no período') {
+  const target = document.querySelector(`#${id}`);
+  if (!target) return;
+  const total = entries.reduce((sum, [, count]) => sum + count, 0);
+  const max = Math.max(1, ...entries.map(([, count]) => count));
+  target.innerHTML = entries.length ? entries.map(([label, count]) => `<div class="ranking-row"><div><span>${escapeHtml(label)}</span><strong>${count.toLocaleString('pt-BR')}</strong></div><i style="--value:${Math.round((count / max) * 100)}%"></i><small>${total ? Math.round((count / total) * 100) : 0}%</small></div>`).join('') : `<p class="overview-empty">${escapeHtml(emptyMessage)}</p>`;
+}
+
+function countBy(rows, key, fallback = 'Não informado') {
+  const counts = new Map();
+  rows.forEach((row) => { const value = row[key] || fallback; counts.set(value, (counts.get(value) || 0) + 1); });
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+function renderOverviewInsights(clicks, leads, interactions) {
+  const journeys = aggregateVisitorJourneys(clicks, leads);
+  const viewed = journeys.filter((journey) => journey.stage === 'viewed').length;
+  const clicked = journeys.filter((journey) => journey.clicks > 0 && !journey.lead).length;
+  const contacted = journeys.filter((journey) => journey.lead).length;
+  document.querySelector('#overview-viewed').textContent = viewed.toLocaleString('pt-BR');
+  document.querySelector('#overview-clicked').textContent = clicked.toLocaleString('pt-BR');
+  document.querySelector('#overview-contacted').textContent = contacted.toLocaleString('pt-BR');
+
+  const buttons = new Map();
+  interactions.forEach((row) => buttons.set(readableButton(row.botao), (buttons.get(readableButton(row.botao)) || 0) + 1));
+  renderRanking('overview-buttons', [...buttons.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5));
+
+  const periods = new Map([['Manhã · 06h–11h', 0], ['Tarde · 12h–17h', 0], ['Noite · 18h–23h', 0], ['Madrugada · 00h–05h', 0]]);
+  clicks.filter((row) => row.botao === 'visualizacao_pagina').forEach((row) => {
+    const hourText = new Intl.DateTimeFormat('pt-BR', { hour:'2-digit', hour12:false, timeZone:'America/Sao_Paulo' }).format(new Date(row.created_at));
+    const hour = Number(hourText.replace(/\D/g, '')) % 24;
+    const label = hour < 6 ? 'Madrugada · 00h–05h' : hour < 12 ? 'Manhã · 06h–11h' : hour < 18 ? 'Tarde · 12h–17h' : 'Noite · 18h–23h';
+    periods.set(label, periods.get(label) + 1);
+  });
+  renderRanking('overview-hours', [...periods.entries()].filter(([, count]) => count > 0).sort((a, b) => b[1] - a[1]));
+
+  const ageLabels = { '18-24':'18 a 24', '25-34':'25 a 34', '35-44':'35 a 44', '45-54':'45 a 54', '55-64':'55 a 64', '65+':'65 ou mais', 'Não informado':'Não informado' };
+  renderRanking('overview-age', countBy(leads, 'age_range').map(([value, count]) => [ageLabels[value] || value, count]), 'Ainda não há contatos no período');
+  const genderLabels = { feminino:'Feminino', masculino:'Masculino', outro:'Outro', prefiro_nao_informar:'Prefere não informar', 'Não informado':'Não informado' };
+  renderRanking('overview-gender', countBy(leads, 'gender').map(([value, count]) => [genderLabels[value] || value, count]), 'Ainda não há contatos no período');
 }
 
 async function loadLeads() {
@@ -569,7 +620,7 @@ async function loadLeads() {
   if (journeyList) journeyList.innerHTML = '<div class="empty-state"><strong>Carregando acessos…</strong></div>';
   if (formationList) formationList.innerHTML = '<div class="empty-state"><strong>Carregando interessados…</strong></div>';
   const [leadResult, clickResult] = await Promise.all([
-    supabase.from('digital_card_leads').select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at,visitor_id,instagram_handle,source_origin').order('created_at', { ascending: false }).limit(500),
+    supabase.from('digital_card_leads').select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at,visitor_id,instagram_handle,source_origin,age_range,gender').order('created_at', { ascending: false }).limit(500),
     supabase.from('digital_card_clicks').select('visitor_id,botao,unidade,origem,dispositivo,instagram_handle,created_at').not('visitor_id', 'is', null).order('created_at', { ascending: false }).limit(5000),
   ]);
   if (leadResult.error || clickResult.error) {
@@ -580,7 +631,6 @@ async function loadLeads() {
     return;
   }
   const data = leadResult.data || [];
-  document.querySelector('#metric-leads').textContent = data.length.toLocaleString('pt-BR');
   contactLeads = data.filter((lead) => lead.lead_type !== 'formation');
   formationLeads = data.filter((lead) => lead.lead_type === 'formation');
   visitorJourneys = aggregateVisitorJourneys(clickResult.data || [], data);
@@ -601,20 +651,24 @@ function aggregateVisitorJourneys(clicks, leads) {
   clicks.forEach((click) => {
     const id = click.visitor_id;
     if (!id) return;
-    const current = grouped.get(id) || { visitorId:id, views:0, clicks:0, buttons:new Set(), origin:'direto', device:'', instagram:'', firstAt:click.created_at, lastAt:click.created_at };
+    const current = grouped.get(id) || { visitorId:id, views:0, clicks:0, buttons:new Set(), origin:click.origem || 'direto', device:click.dispositivo || '', instagram:click.instagram_handle || '', firstAt:click.created_at, lastAt:click.created_at };
     if (click.botao === 'visualizacao_pagina') current.views += 1;
     else if (!['consentimento_autorizado', 'preferencias_privacidade'].includes(click.botao)) { current.clicks += 1; current.buttons.add(click.botao); }
-    current.origin = click.origem || current.origin;
-    current.device = click.dispositivo || current.device;
-    current.instagram = click.instagram_handle || current.instagram;
     if (new Date(click.created_at) < new Date(current.firstAt)) current.firstAt = click.created_at;
-    if (new Date(click.created_at) > new Date(current.lastAt)) current.lastAt = click.created_at;
+    if (new Date(click.created_at) > new Date(current.lastAt)) {
+      current.lastAt = click.created_at;
+      current.origin = click.origem || current.origin;
+      current.device = click.dispositivo || current.device;
+      current.instagram = click.instagram_handle || current.instagram;
+    } else if (!current.instagram && click.instagram_handle) {
+      current.instagram = click.instagram_handle;
+    }
     grouped.set(id, current);
   });
   return [...grouped.values()].map((journey) => {
     const lead = leadByVisitor.get(journey.visitorId) || null;
     const instagram = lead?.instagram_handle || journey.instagram || '';
-    const stage = instagram ? 'instagram' : lead ? 'identified' : journey.clicks > 0 ? 'clicked' : 'viewed';
+    const stage = lead ? 'identified' : journey.clicks > 0 ? 'clicked' : 'viewed';
     return { ...journey, buttons:[...journey.buttons], lead, instagram, stage };
   }).sort((a, b) => new Date(b.lastAt) - new Date(a.lastAt));
 }
@@ -623,8 +677,9 @@ function filteredVisitorJourneys() {
   const search = document.querySelector('#journey-search').value.trim().toLocaleLowerCase('pt-BR');
   const filter = document.querySelector('#journey-filter').value;
   return visitorJourneys.filter((journey) => {
-    const searchable = [journey.lead?.name, journey.lead?.phone, journey.instagram, journey.origin, journey.device, ...journey.buttons].filter(Boolean).join(' ').toLocaleLowerCase('pt-BR');
-    return (filter === 'all' || journey.stage === filter) && (!search || searchable.includes(search));
+    const searchable = [journey.lead?.name, journey.lead?.phone, journey.instagram, journey.origin, journey.device, ...journey.buttons, ...journey.buttons.map(readableButton)].filter(Boolean).join(' ').toLocaleLowerCase('pt-BR');
+    const matchesStage = filter === 'all' || (filter === 'instagram' ? Boolean(journey.instagram) : journey.stage === filter);
+    return matchesStage && (!search || searchable.includes(search));
   });
 }
 
@@ -636,16 +691,14 @@ function renderVisitorJourneys() {
     total: visitorJourneys.length,
     viewed: visitorJourneys.filter((journey) => journey.stage === 'viewed').length,
     clicked: visitorJourneys.filter((journey) => journey.clicks > 0).length,
-    identified: visitorJourneys.filter((journey) => journey.lead || journey.instagram).length,
+    identified: visitorJourneys.filter((journey) => journey.lead).length,
   };
   Object.entries(journeySummary).forEach(([key, value]) => {
     const metric = document.querySelector(`#journey-summary-${key}`);
     if (metric) metric.textContent = value.toLocaleString('pt-BR');
   });
   const journeyCount = document.querySelector('#journey-count');
-  const hasActiveFilter = document.querySelector('#journey-filter').value !== 'all' || Boolean(document.querySelector('#journey-search').value.trim());
-  journeyCount.hidden = !hasActiveFilter;
-  journeyCount.textContent = `${journeys.length} ${journeys.length === 1 ? 'resultado' : 'resultados'}`;
+  journeyCount.textContent = `${journeys.length} ${journeys.length === 1 ? 'pessoa' : 'pessoas'}`;
   if (!journeys.length) {
     list.innerHTML = '<div class="empty-state"><strong>Nenhum acesso encontrado</strong><p>Ajuste a busca ou a etapa selecionada.</p></div>';
     return;
@@ -656,26 +709,23 @@ function renderVisitorJourneys() {
 function renderVisitorJourney(journey) {
   const lead = journey.lead;
   const name = lead?.name || journey.instagram || `Visitante ${journey.visitorId.slice(0, 6).toUpperCase()}`;
-  const stageLabels = { viewed:'Somente visualizou', clicked:'Clicou', identified:'Contato enviado', instagram:'Instagram informado' };
-  const stageClass = journey.stage === 'instagram' ? ' journey-status--instagram' : journey.stage === 'identified' ? ' journey-status--identified' : '';
+  const stageLabels = { viewed:'Só visualizou', clicked:'Clicou', identified:'Enviou contato' };
+  const stageClass = journey.stage === 'identified' ? ' journey-status--identified' : journey.stage === 'clicked' ? ' journey-status--clicked' : '';
   const instagramUser = String(journey.instagram || '').replace(/^@/, '');
   const instagramLink = instagramUser ? `<a href="https://www.instagram.com/${encodeURIComponent(instagramUser)}" target="_blank" rel="noopener noreferrer">${escapeHtml(journey.instagram)}</a>` : '';
   const phoneDigits = String(lead?.phone || '').replace(/\D/g, '');
   const phoneLink = phoneDigits ? `<a href="https://wa.me/${phoneDigits}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.phone)}</a>` : '';
   const date = new Intl.DateTimeFormat('pt-BR', { dateStyle:'short', timeStyle:'short' }).format(new Date(journey.lastAt));
-  const buttonLabels = {
-    whatsapp: 'WhatsApp',
-    whatsapp_fixo: 'WhatsApp fixo',
-    instagram_clinica: 'Instagram da clínica',
-    instagram_anita: 'Instagram da Dra. Anita',
-    localizacoes: 'Localizações',
-    salvar_contato: 'Salvar contato',
-  };
-  const interactions = journey.buttons.map((button) => buttonLabels[button] || String(button).replaceAll('_', ' ')).join(', ') || 'Nenhum botão acessado';
-  return `<article class="journey-row">
-    <div class="journey-row__identity"><strong>${escapeHtml(name)}</strong><span class="journey-status${stageClass}">${stageLabels[journey.stage]}</span>${instagramLink}${phoneLink}</div>
-    <div class="journey-row__activity"><span class="journey-row__numbers"><b>${journey.views}</b> ${journey.views === 1 ? 'visualização' : 'visualizações'} <i aria-hidden="true"></i> <b>${journey.clicks}</b> ${journey.clicks === 1 ? 'clique' : 'cliques'}</span><small>${escapeHtml(journey.origin)} · ${escapeHtml(journey.device || 'dispositivo não informado')}</small><small>${escapeHtml(interactions)}</small></div>
-    <time datetime="${escapeHtml(journey.lastAt)}">Último acesso<br>${escapeHtml(date)}</time>
+  const interactions = journey.buttons.map(readableButton);
+  const lastButton = interactions[0] || '—';
+  return `<article class="journey-row" role="row">
+    <div class="journey-row__identity" role="cell" data-label="Pessoa"><strong>${escapeHtml(name)}</strong>${instagramLink}${phoneLink}</div>
+    <div role="cell" data-label="Etapa"><span class="journey-status${stageClass}">${stageLabels[journey.stage]}</span></div>
+    <div class="journey-number" role="cell" data-label="Acessos"><strong>${journey.views}</strong></div>
+    <div class="journey-number" role="cell" data-label="Cliques"><strong>${journey.clicks}</strong></div>
+    <div class="journey-button" role="cell" data-label="Último botão"><strong>${escapeHtml(lastButton)}</strong>${interactions.length > 1 ? `<small>+ ${interactions.length - 1} outro(s)</small>` : ''}</div>
+    <div class="journey-origin" role="cell" data-label="Origem"><span>${escapeHtml(journey.origin)}</span><small>${escapeHtml(journey.device || 'não informado')}</small></div>
+    <time role="cell" data-label="Último acesso" datetime="${escapeHtml(journey.lastAt)}">${escapeHtml(date)}</time>
   </article>`;
 }
 
@@ -736,6 +786,7 @@ function renderFormationLeadCard(lead) {
 }
 
 document.querySelector('#refresh-leads').addEventListener('click', () => void loadLeads());
+document.querySelector('#refresh-accesses').addEventListener('click', () => { void loadLeads(); void loadMetrics(); });
 document.querySelector('#refresh-formation-leads').addEventListener('click', () => void loadLeads());
 document.querySelector('#lead-search').addEventListener('input', renderContactList);
 document.querySelector('#lead-filter').addEventListener('change', renderContactList);
@@ -799,8 +850,8 @@ async function deleteLeads(ids) {
   }
   contactLeads = contactLeads.filter((lead) => !ids.includes(lead.id));
   ids.forEach((id) => selectedLeadIds.delete(id));
-  document.querySelector('#metric-leads').textContent = (contactLeads.length + formationLeads.length).toLocaleString('pt-BR');
   renderContactList();
+  void loadMetrics();
 }
 
 function normalizedTags(value) {
@@ -820,6 +871,8 @@ function openLeadDialog(mode, ids) {
   document.querySelector('#lead-edit-phone').value = lead?.phone || '';
   document.querySelector('#lead-edit-instagram').value = lead?.instagram_handle || '';
   document.querySelector('#lead-edit-profession').value = lead?.profession || '';
+  document.querySelector('#lead-edit-age').value = lead?.age_range || '';
+  document.querySelector('#lead-edit-gender').value = lead?.gender || '';
   document.querySelector('#lead-edit-tags').value = mode === 'tag' && ids.length > 1 ? '' : (lead?.tags || []).join(', ');
   document.querySelector('#lead-edit-marked').checked = Boolean(lead?.marked);
   dialog.showModal();
@@ -848,6 +901,8 @@ document.querySelector('#lead-dialog-form').addEventListener('submit', async (ev
         phone: document.querySelector('#lead-edit-phone').value.trim(),
         instagram_handle: document.querySelector('#lead-edit-instagram').value.trim() || null,
         profession: document.querySelector('#lead-edit-profession').value.trim() || null,
+        age_range: document.querySelector('#lead-edit-age').value || null,
+        gender: document.querySelector('#lead-edit-gender').value || null,
         tags,
         marked: document.querySelector('#lead-edit-marked').checked,
         updated_at: new Date().toISOString(),
@@ -878,8 +933,8 @@ document.querySelector('#export-leads').addEventListener('click', () => {
     window.alert('Não há contatos para exportar.');
     return;
   }
-  const header = ['Nome', 'Telefone', 'Instagram', 'Profissão', 'Origem', 'Unidade', 'Origem do acesso', 'Recebido em', 'Marcado', 'Etiquetas'];
-  const csvRows = rows.map((lead) => [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.button, lead.unit, lead.source_origin, lead.created_at, lead.marked ? 'Sim' : 'Não', (lead.tags || []).join('; ')]);
+  const header = ['Nome', 'Telefone', 'Instagram', 'Profissão', 'Faixa etária', 'Sexo', 'Origem', 'Unidade', 'Origem do acesso', 'Recebido em', 'Marcado', 'Etiquetas'];
+  const csvRows = rows.map((lead) => [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.age_range, lead.gender, lead.button, lead.unit, lead.source_origin, lead.created_at, lead.marked ? 'Sim' : 'Não', (lead.tags || []).join('; ')]);
   const csv = '\uFEFF' + [header, ...csvRows].map((row) => row.map(csvCell).join(',')).join('\r\n');
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const link = document.createElement('a');
@@ -890,6 +945,19 @@ document.querySelector('#export-leads').addEventListener('click', () => {
   link.remove();
   // O Safari do iPhone precisa de tempo para iniciar o download antes da URL temporária ser liberada.
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+document.querySelector('#export-journeys').addEventListener('click', () => {
+  const rows = filteredVisitorJourneys();
+  if (!rows.length) return window.alert('Não há acessos para exportar.');
+  const header = ['Pessoa', 'Instagram', 'Telefone', 'Etapa', 'Visualizações', 'Cliques', 'Botões', 'Origem', 'Dispositivo', 'Primeiro acesso', 'Último acesso'];
+  const csvRows = rows.map((journey) => [journey.lead?.name || '', journey.instagram, journey.lead?.phone || '', journey.stage === 'identified' ? 'Enviou contato' : journey.stage === 'clicked' ? 'Clicou' : 'Só visualizou', journey.views, journey.clicks, journey.buttons.map(readableButton).join('; '), journey.origin, journey.device, journey.firstAt, journey.lastAt]);
+  const csv = '\uFEFF' + [header, ...csvRows].map((row) => row.map(csvCell).join(',')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `acessos-instituto-vert-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 
 preview.addEventListener('load', sendPreview);
