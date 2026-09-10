@@ -1,9 +1,9 @@
-.metric-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-.metric-card { position:relative; min-height:154px; padding:20px; overflow:hidden; border:1px solid var(--border); border-radius:18px; background:white; box-shadow:0 10px 30px rgba(43,27,20,.035); }
+.metric-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+.metric-card { position:relative; min-height:128px; padding:18px; overflow:hidden; border:1px solid var(--border); border-radius:16px; background:white; box-shadow:0 10px 30px rgba(43,27,20,.035); }
 .metric-card::after { content:""; position:absolute; right:-28px; bottom:-40px; width:92px; height:92px; border-radius:50%; background:rgba(203,182,165,.16); }
 .metric-card__icon { display:grid; width:32px; height:32px; margin-bottom:18px; place-items:center; border-radius:10px; background:#f1e7dc; color:var(--cacao); font-size:.9rem; font-weight:600; }
 .metric-card small { display:block; color:#806a5e; font-size:.64rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
-.metric-card strong { display:block; margin-top:7px; font-family:"Cormorant Garamond",serif; font-size:2.7rem; font-weight:500; line-height:.9; }
+.metric-card strong { display:block; margin-top:12px; font-family:"Cormorant Garamond",serif; font-size:2.5rem; font-weight:500; line-height:.9; }
 .metric-card__caption { display:block; margin-top:10px; color:#927c6e; font-size:.59rem; line-height:1.45; }
 .metric-card--primary { border-color:transparent; background:linear-gradient(145deg,#2b1b14,#4b3024); color:white; }
 .metric-card--primary .metric-card__icon { background:rgba(255,255,255,.1); color:var(--champagne); }
@@ -18,7 +18,7 @@
 @media (max-width:760px) {
   .metric-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
   .metric-card { min-height:132px; padding:14px; border-radius:15px; }
-  .metric-card--primary { grid-column:1/-1; min-height:142px; }
+  .metric-card--primary { grid-column:auto; min-height:132px; }
   .metric-card__icon { width:28px; height:28px; margin-bottom:13px; border-radius:8px; }
   .metric-card strong { font-size:2.15rem; }
   .metric-card__caption { font-size:.54rem; }

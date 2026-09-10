@@ -440,6 +440,8 @@ leadForm.addEventListener('submit', async (event) => {
     phone: String(formData.get('phone') || '').trim(),
     profession: String(formData.get('profession') || '').trim(),
     instagram: normalizeInstagramHandle(formData.get('instagram')),
+    ageRange: String(formData.get('ageRange') || '').trim(),
+    gender: String(formData.get('gender') || '').trim(),
     isDentist: formData.get('isDentist') === 'yes' ? true : formData.get('isDentist') === 'no' ? false : null,
     hasPreviousCourse: formData.get('hasPreviousCourse') === 'yes' ? true : formData.get('hasPreviousCourse') === 'no' ? false : null,
     city: '',
@@ -470,6 +472,8 @@ leadForm.addEventListener('submit', async (event) => {
     course_title: pendingLead.courseTitle || null,
     visitor_id: trackingConsent ? visitorId() : null,
     instagram_handle: lead.instagram || null,
+    age_range: lead.ageRange || null,
+    gender: lead.gender || null,
     source_origin: detectarOrigem(),
   });
   if (error) {
