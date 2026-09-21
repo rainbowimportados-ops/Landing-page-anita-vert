@@ -120,3 +120,31 @@
     @apply absolute left-1/2 top-1/2 h-11 min-h-full w-11 min-w-full -translate-x-1/2 -translate-y-1/2;
   }
 }
+
+/* Cards alinhados; o conteúdo oficial continua acessível sem cortes. */
+.instagram-trilho {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 90%;
+  gap: 20px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  padding: 4px 2px 16px;
+  scrollbar-width: thin;
+}
+.instagram-card { min-width: 0; overflow: hidden; scroll-snap-align: start; }
+.instagram-card-conteudo { height: 560px; overflow: auto; background: white; }
+.instagram-card-conteudo .instagram-media {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+@media (min-width: 640px) {
+  .instagram-trilho { grid-auto-columns: calc((100% - 20px) / 2); }
+}
+@media (min-width: 1024px) {
+  .instagram-trilho { grid-auto-columns: calc((100% - 40px) / 3); }
+}
