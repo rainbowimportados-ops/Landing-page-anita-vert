@@ -2,7 +2,7 @@ import { useState } from 'react'
 import './instagram-perfil.css'
 import { registrarClique } from '../lib/analytics'
 import { useConteudo } from '../lib/ConteudoContexto'
-import { EmbedInstagram } from './EmbedInstagram'
+import { InstagramGrade } from './InstagramGrade'
 import { Reveal } from './Reveal'
 
 function formatarNumero(n: number): string {
@@ -78,34 +78,7 @@ export function InstagramSecao() {
         )}
 
         {(temPosts || temGaleria) && (
-          <div className="instagram-wall mt-8" aria-label="Publicações e casos do Instagram">
-            {temPosts &&
-              instagram.posts!.map((url) => (
-                <article key={url} className="instagram-wall__item">
-                  <EmbedInstagram url={url} />
-                </article>
-              ))}
-
-            {temGaleria &&
-              galeria.map((imagem) => (
-                <figure
-                  key={imagem.url}
-                  className="instagram-wall__item glass-card interactive-card overflow-hidden rounded-card border border-borda bg-fundo"
-                >
-                  <img
-                    src={imagem.url}
-                    alt={imagem.legenda ?? 'Caso clínico do Instituto Vert'}
-                    loading="lazy"
-                    className="aspect-[4/5] w-full object-cover"
-                  />
-                  {imagem.legenda && (
-                    <figcaption className="p-4 text-sm leading-relaxed text-conteudo-suave">
-                      {imagem.legenda}
-                    </figcaption>
-                  )}
-                </figure>
-              ))}
-          </div>
+          <InstagramGrade posts={instagram.posts || []} galeria={galeria} />
         )}
 
         <p className="mt-6 text-xs leading-relaxed text-conteudo-tenue">

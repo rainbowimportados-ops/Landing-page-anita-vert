@@ -37,7 +37,7 @@ export type Instagram = {
   /** URL do perfil da responsável técnica. */
   anita?: string
   perfil?: PerfilInstagram
-  /** URLs de posts, renderizados pelo embed oficial do Instagram. */
+  /** URLs de posts exibidos na grade, com link para a publicação original. */
   posts?: string[]
 }
 

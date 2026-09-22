@@ -382,8 +382,8 @@ export function Editor({ email, aoSair }: { email: string; aoSair: () => void })
 
           <h3 className="mt-8 font-display text-lg text-conteudo">Publicações</h3>
           <p className="lead mt-1">
-            Cole o endereço de cada post. Eles são renderizados pelo próprio Instagram, então
-            acompanham qualquer edição feita por lá.
+            Cole o endereço de cada post. A grade usa as capas disponíveis e abre a publicação
+            original no Instagram. Posts sem capa aparecem com um link para a publicação.
           </p>
           <div className="mt-4 space-y-3">
             {(ajustes.instagram?.posts ?? []).map((url, i) => (

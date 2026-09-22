@@ -18,3 +18,16 @@
 .ig-perfil__rodape>span{font-size:1.25rem}
 .ig-perfil__rodape>a{display:inline-flex;align-items:center;min-height:44px;text-decoration:underline;text-underline-offset:4px}
 @media(max-width:640px){.ig-perfil__corpo{grid-template-columns:80px minmax(0,1fr);gap:16px;padding:24px 18px}.ig-perfil__avatar{width:80px;height:80px;padding:3px}.ig-perfil__avatar>span{font-size:1.5rem}.ig-perfil__usuario{gap:12px}.ig-perfil__usuario>p{font-size:1rem}.ig-perfil__seguir{padding:8px 12px}.ig-perfil__numeros{font-size:.875rem;margin-top:14px}.ig-perfil__atualizacao{padding:0 18px 20px}.ig-perfil__topo{padding:8px 18px}.ig-perfil__bio{font-size:.8rem}}
+.ig-grade{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;margin-top:3px;overflow:hidden;border-radius:0 0 16px 16px}
+.ig-grade__item{position:relative;display:block;width:100%;min-width:0;aspect-ratio:3/4;overflow:hidden;background:rgb(var(--cor-superficie-suave));padding:0;border:0;text-align:center}
+.ig-grade__item img{display:block;width:100%;height:100%;object-fit:cover;transition:filter 180ms}
+.ig-grade__item:hover img{filter:brightness(.9)}
+.ig-grade__item:focus-visible{outline:3px solid rgb(var(--cor-marca));outline-offset:-3px;z-index:1}
+.ig-grade__tipo{position:absolute;top:8px;right:8px;display:grid;place-items:center;min-width:26px;min-height:26px;padding:2px 6px;border-radius:5px;background:rgb(var(--cor-superficie-inversa)/.85);color:rgb(var(--cor-conteudo-inverso));font-size:.75rem;pointer-events:none}
+.ig-grade__sem-capa{display:grid;place-items:center;width:100%;height:100%;padding:12px;color:rgb(var(--cor-conteudo));font-size:.875rem}
+.ig-ampliacao{width:min(900px,calc(100% - 24px));max-height:92svh;padding:0;border:1px solid rgb(var(--cor-borda));border-radius:16px;background:rgb(var(--cor-superficie));color:rgb(var(--cor-conteudo))}
+.ig-ampliacao::backdrop{background:#000b}
+.ig-ampliacao__conteudo{padding:12px}
+.ig-ampliacao__fechar{display:block;min-height:44px;padding:8px 16px;margin:0 0 12px auto;border-radius:8px;background:rgb(var(--cor-marca-forte));color:rgb(var(--cor-conteudo-inverso))}
+.ig-ampliacao img{display:block;width:100%;max-height:72svh;object-fit:contain}
+.ig-ampliacao figcaption{padding:12px 4px;font-size:.875rem}
