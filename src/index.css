@@ -2,51 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
-/*
- * Tokens em três camadas: primitivas (a paleta crua, no tailwind.config.js),
- * semânticas (o que a cor significa, abaixo) e de componente (nas classes).
- * Os componentes usam só as semânticas — trocar a marca é mexer aqui.
- */
 @layer base {
   :root {
     color-scheme: light;
 
-    /* Superfícies, do fundo da página para a frente */
-    --cor-fundo: 251 249 245;
-    --cor-superficie: 255 255 255;
-    --cor-superficie-suave: 241 246 242;
-    --cor-superficie-inversa: 22 58 44;
-    --cor-superficie-inversa-suave: 31 76 57;
-    --cor-superficie-rodape: 14 40 32;
+    --cor-fundo: 247 243 236;
+    --cor-superficie: 255 252 247;
+    --cor-superficie-suave: 239 231 220;
+    --cor-superficie-inversa: 43 27 20;
+    --cor-superficie-inversa-suave: 79 51 37;
+    --cor-superficie-rodape: 30 18 14;
 
-    /* Conteúdo sobre superfícies claras (contraste verificado ≥ 4.5:1) */
-    --cor-conteudo: 22 58 44;
-    --cor-conteudo-suave: 47 82 69;
-    --cor-conteudo-tenue: 71 105 92;
+    --cor-conteudo: 43 27 20;
+    --cor-conteudo-suave: 91 70 57;
+    --cor-conteudo-tenue: 126 105 89;
 
-    /* Conteúdo sobre superfícies escuras */
-    --cor-conteudo-inverso: 251 249 245;
-    --cor-conteudo-inverso-suave: 211 228 216;
-    --cor-conteudo-inverso-tenue: 169 198 180;
+    --cor-conteudo-inverso: 247 243 236;
+    --cor-conteudo-inverso-suave: 225 211 195;
+    --cor-conteudo-inverso-tenue: 190 166 142;
 
-    /* Marca e ações */
-    --cor-marca: 42 97 72;
-    --cor-marca-forte: 31 76 57;
-    --cor-marca-tenue: 221 235 225;
-    --cor-realce: 143 187 160; /* só sobre superfícies escuras */
-    --cor-realce-escuro: 78 138 107; /* o par do realce, para superfícies claras */
+    --cor-marca: 170 133 101;
+    --cor-marca-forte: 43 27 20;
+    --cor-marca-tenue: 235 224 211;
+    --cor-realce: 224 162 132;
+    --cor-realce-escuro: 139 91 64;
 
-    /* Traços */
-    --cor-borda: 221 235 225;
-    --cor-borda-forte: 187 215 196;
-    --cor-borda-inversa: 255 255 255 / 0.14;
+    --cor-borda: 229 216 202;
+    --cor-borda-forte: 199 174 149;
+    --cor-borda-inversa: 255 255 255 / 0.18;
 
-    /* Elevação: três degraus, nada além disso */
-    --sombra-1: 0 1px 2px rgb(14 40 32 / 0.04);
-    --sombra-2: 0 4px 16px -4px rgb(14 40 32 / 0.10);
-    --sombra-3: 0 16px 40px -12px rgb(14 40 32 / 0.18);
+    --sombra-1: 0 1px 2px rgb(43 27 20 / 0.04);
+    --sombra-2: 0 12px 28px -14px rgb(43 27 20 / 0.22);
+    --sombra-3: 0 24px 60px -18px rgb(43 27 20 / 0.28);
 
-    /* Movimento: uma única cadência para a página inteira */
     --tempo-rapido: 160ms;
     --tempo-padrao: 240ms;
     --tempo-entrada: 420ms;
@@ -58,7 +46,6 @@
     -webkit-text-size-adjust: 100%;
   }
 
-  /* §7 reduced-motion: nada se move para quem pediu para não mover. */
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
@@ -72,45 +59,368 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+
+    .comparador:hover .comparador__depois {
+      opacity: 1;
+      animation: none !important;
+    }
   }
 
   body {
     @apply bg-fundo font-sans text-conteudo antialiased;
+    background-image: linear-gradient(90deg, rgb(43 27 20 / 0.025) 1px, transparent 1px);
+    background-size: 5rem 5rem;
   }
 
-  /* Compensa o cabeçalho fixo ao pular por âncora. */
   section[id] {
-    scroll-margin-top: 5rem;
+    scroll-margin-top: 5.5rem;
   }
 
   :focus-visible {
-    @apply outline-none ring-2 ring-marca ring-offset-2 ring-offset-fundo;
+    @apply outline-none ring-2 ring-realce-escuro ring-offset-2 ring-offset-fundo;
   }
 }
 
 @layer components {
+  .glass-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-color: rgb(255 255 255 / 0.42);
+    background: linear-gradient(135deg, rgb(255 255 255 / 0.54), rgb(255 255 255 / 0.2));
+    box-shadow: 0 18px 45px -28px rgb(43 27 20 / 0.5), inset 0 1px 0 rgb(255 255 255 / 0.58);
+    backdrop-filter: blur(18px) saturate(1.14);
+    -webkit-backdrop-filter: blur(18px) saturate(1.14);
+    transition: transform var(--tempo-padrao) var(--curva-saida), border-color var(--tempo-padrao) var(--curva-saida), box-shadow var(--tempo-padrao) var(--curva-saida), background-color var(--tempo-padrao) var(--curva-saida);
+  }
+
+  .glass-card::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    content: '';
+    background: linear-gradient(120deg, rgb(255 255 255 / 0.3), transparent 42%, rgb(224 162 132 / 0.08));
+    pointer-events: none;
+  }
+
+  .glass-card--dark {
+    border-color: rgb(255 255 255 / 0.24);
+    background: linear-gradient(135deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.04));
+    box-shadow: 0 22px 55px -34px rgb(0 0 0 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.24);
+  }
+
+  .interactive-card {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  .glass-icon {
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.62), 0 9px 25px -18px rgb(43 27 20 / 0.55);
+  }
+
+  .hero-scene {
+    background-image: radial-gradient(circle at 82% 20%, rgb(224 162 132 / 0.15), transparent 25rem), linear-gradient(125deg, rgb(43 27 20) 0%, rgb(59 36 26) 58%, rgb(43 27 20) 100%);
+  }
+
+  .hero-scene::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    background-image: linear-gradient(115deg, transparent 0 42%, rgb(255 255 255 / 0.045) 50%, transparent 58%), repeating-linear-gradient(90deg, rgb(255 255 255 / 0.025) 0 1px, transparent 1px 5rem);
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  .hero-media-float,
+  .hero-orb {
+    will-change: transform;
+  }
+
+  .hero-media-float {
+    transform: translateZ(0);
+    transition: transform 220ms var(--curva-saida), box-shadow 220ms var(--curva-saida);
+  }
+
+  .hero-media-float:hover {
+    box-shadow: 0 30px 70px -28px rgb(0 0 0 / 0.66), inset 0 1px 0 rgb(255 255 255 / 0.4);
+  }
+
+  .glass-strip {
+    box-shadow: 0 16px 42px -26px rgb(0 0 0 / 0.62), inset 0 1px 0 rgb(255 255 255 / 0.28);
+    backdrop-filter: blur(16px) saturate(1.14);
+    -webkit-backdrop-filter: blur(16px) saturate(1.14);
+  }
+
+  .glass-strip__item {
+    position: relative;
+    transition: background-color var(--tempo-padrao) var(--curva-saida), transform var(--tempo-padrao) var(--curva-saida);
+  }
+
+  .glass-strip__item::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    background: linear-gradient(120deg, rgb(255 255 255 / 0.1), transparent 50%);
+    pointer-events: none;
+  }
+
+  .confidence-strip {
+    position: relative;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.64), rgb(247 243 236 / 0.4));
+  }
+
+  .confidence-strip__item {
+    border: 0;
+    border-radius: 1rem;
+    background: rgb(255 255 255 / 0.22);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55);
+  }
+
+  .diferencial-item {
+    border-radius: 0 1rem 1rem 0;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    transition: transform var(--tempo-padrao) var(--curva-saida), background-color var(--tempo-padrao) var(--curva-saida), border-color var(--tempo-padrao) var(--curva-saida);
+  }
+
+  .faq-row {
+    border-radius: 0.9rem;
+    transition: background-color var(--tempo-padrao) var(--curva-saida), padding-inline var(--tempo-padrao) var(--curva-saida);
+  }
+
+  .faq-row:hover,
+  .faq-row[open] {
+    background: rgb(255 255 255 / 0.46);
+  }
+
   .container-vert {
     @apply mx-auto w-full max-w-content px-5 sm:px-8;
   }
 
-  /* Ritmo vertical único: todas as seções respiram igual. */
   .secao {
-    @apply py-16 sm:py-20 lg:py-28;
+    @apply py-20 sm:py-24 lg:py-32;
   }
 
   .titulo-secao {
-    @apply font-display text-display-sm text-conteudo;
+    @apply font-display text-display-sm font-normal tracking-[-0.025em] text-conteudo;
+  }
+
+  .instagram-wall {
+    column-count: 3;
+    column-gap: 1.25rem;
+  }
+
+  .instagram-wall__item {
+    display: inline-block;
+    width: 100%;
+    margin: 0 0 1.25rem;
+    break-inside: avoid;
+    vertical-align: top;
+  }
+
+  .instagram-wall__item .instagram-media {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  @media (max-width: 1023px) {
+    .instagram-wall {
+      column-count: 2;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .instagram-wall {
+      column-count: 1;
+    }
+
+    .instagram-wall__item {
+      margin-bottom: 1rem;
+    }
   }
 
   .olho {
-    @apply text-xs font-semibold uppercase tracking-[0.18em] text-marca;
+    @apply text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-realce-escuro;
   }
 
   .lead {
     @apply text-base leading-relaxed text-conteudo-suave;
   }
 
-  /* Alvo de toque de 44px mesmo quando o desenho pede algo menor (§2). */
+  .hero-editorial__media {
+    @apply relative overflow-hidden rounded-[2rem] border border-borda-inversa shadow-3;
+  }
+
+  .hero-editorial__media::after {
+    content: '';
+    @apply pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent;
+  }
+
+  .resultado-card {
+    @apply flex h-full flex-col overflow-hidden rounded-[1.25rem] border border-borda bg-superficie shadow-1;
+  }
+
+  .resultado-card__caption {
+    @apply grid gap-1 border-t border-borda px-5 py-4 text-sm text-conteudo-suave;
+  }
+
+  .resultado-card__label {
+    @apply text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-realce-escuro;
+  }
+
+  .resultado-card--video video {
+    @apply block aspect-[4/5] w-full bg-conteudo object-cover;
+  }
+
+  .result-bento {
+    min-width: 0;
+  }
+
+  .result-bento .comparador {
+    height: 100%;
+    min-height: 100%;
+  }
+
+  .result-bento--caso-1 .comparador,
+  .result-bento--caso-2 .comparador,
+  .result-bento--caso-3 .comparador {
+    aspect-ratio: 1 / 1.12;
+  }
+
+  .result-bento--video .resultado-card--video video {
+    height: 100%;
+    min-height: 100%;
+    aspect-ratio: auto;
+  }
+
+  @media (min-width: 1280px) {
+    .result-bento--caso-1 {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+
+    .result-bento--caso-1 .comparador {
+      aspect-ratio: 1.16 / 1;
+    }
+
+    .result-bento--caso-2,
+    .result-bento--caso-3,
+    .result-bento--video {
+      grid-column: span 1;
+    }
+
+    .result-bento--caso-2 .comparador,
+    .result-bento--caso-3 .comparador,
+    .result-bento--video .resultado-card--video video {
+      aspect-ratio: 1 / 1.04;
+    }
+  }
+
+  .comparador {
+    --comparador-pos: 54%;
+    @apply relative isolate aspect-[4/5] overflow-hidden bg-conteudo;
+  }
+
+  .comparador__imagem {
+    @apply absolute inset-0 h-full w-full object-cover;
+  }
+
+  .comparador__imagem--base {
+    @apply z-0;
+  }
+
+  .comparador__depois {
+    @apply absolute inset-0 z-10 overflow-hidden;
+    clip-path: inset(0 calc(100% - var(--comparador-pos)) 0 0);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .comparador__depois {
+      clip-path: inset(0);
+      opacity: 0;
+      transition: opacity 900ms var(--curva-saida);
+    }
+
+    .comparador__imagem--base {
+      transition: filter 900ms var(--curva-saida), opacity 900ms var(--curva-saida);
+    }
+
+    .comparador__linha,
+    .comparador__alca {
+      opacity: 0;
+      transition: opacity 320ms var(--curva-saida);
+    }
+
+    .comparador:hover .comparador__depois {
+      opacity: 1;
+      animation: comparador-mescla 3.4s ease-in-out infinite;
+    }
+
+    .comparador:hover .comparador__imagem--base {
+      filter: saturate(0.9) brightness(0.96);
+    }
+
+    .comparador:hover .comparador__rotulos {
+      opacity: 0.72;
+    }
+
+    .comparador:focus-within .comparador__depois {
+      clip-path: inset(0 calc(100% - var(--comparador-pos)) 0 0);
+      opacity: 1;
+      animation: none;
+    }
+
+    .comparador:focus-within .comparador__linha,
+    .comparador:focus-within .comparador__alca {
+      opacity: 1;
+    }
+  }
+
+  @keyframes comparador-mescla {
+    0%,
+    100% {
+      opacity: 0.32;
+    }
+
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .comparador__rotulos {
+    @apply pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-between p-4 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-white;
+  }
+
+  .comparador__rotulos span {
+    @apply rounded-full bg-conteudo/70 px-2.5 py-1 backdrop-blur-sm;
+  }
+
+  .comparador__linha {
+    @apply pointer-events-none absolute inset-y-0 z-20 w-px bg-white/90;
+    left: var(--comparador-pos);
+    box-shadow: 0 0 0 1px rgb(43 27 20 / 0.1);
+  }
+
+  .comparador__alca {
+    @apply pointer-events-none absolute top-1/2 z-30 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/90 bg-conteudo/80 text-lg text-white shadow-2 backdrop-blur-sm;
+    left: var(--comparador-pos);
+  }
+
+  .comparador__controle {
+    @apply absolute inset-0 z-40 h-full w-full cursor-ew-resize opacity-0;
+  }
+
+  .comparador:focus-within .comparador__alca {
+    @apply ring-2 ring-white ring-offset-2 ring-offset-conteudo;
+  }
+
+  @property --comparador-pos {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: 54%;
+  }
+
   .alvo-toque {
     @apply relative;
   }

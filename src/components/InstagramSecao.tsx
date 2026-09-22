@@ -32,7 +32,7 @@ export function InstagramSecao() {
 
         {temPerfil && perfil && (
           <Reveal delay={45}>
-            <div className="mt-10 flex flex-col gap-5 rounded-card border border-borda bg-fundo p-6 sm:flex-row sm:items-center">
+            <div className="glass-card mt-10 flex flex-col gap-5 rounded-card border border-borda bg-fundo p-6 sm:flex-row sm:items-center">
               {perfil.foto && (
                 <img
                   src={perfil.foto}
@@ -85,21 +85,21 @@ export function InstagramSecao() {
           </Reveal>
         )}
 
-        {temPosts && (
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {instagram.posts!.map((url, i) => (
-              <Reveal key={url} delay={i * 45}>
-                <EmbedInstagram url={url} />
-              </Reveal>
-            ))}
-          </div>
-        )}
+        {(temPosts || temGaleria) && (
+          <div className="instagram-wall mt-8" aria-label="Publicações e casos do Instagram">
+            {temPosts &&
+              instagram.posts!.map((url) => (
+                <article key={url} className="instagram-wall__item">
+                  <EmbedInstagram url={url} />
+                </article>
+              ))}
 
-        {temGaleria && (
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {galeria.map((imagem, i) => (
-              <Reveal key={imagem.url} delay={i * 45}>
-                <figure className="overflow-hidden rounded-card border border-borda bg-fundo">
+            {temGaleria &&
+              galeria.map((imagem) => (
+                <figure
+                  key={imagem.url}
+                  className="instagram-wall__item glass-card interactive-card overflow-hidden rounded-card border border-borda bg-fundo"
+                >
                   <img
                     src={imagem.url}
                     alt={imagem.legenda ?? 'Caso clínico do Instituto Vert'}
@@ -112,8 +112,7 @@ export function InstagramSecao() {
                     </figcaption>
                   )}
                 </figure>
-              </Reveal>
-            ))}
+              ))}
           </div>
         )}
 

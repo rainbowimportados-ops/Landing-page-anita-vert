@@ -20,7 +20,7 @@ export function Unidades() {
         <div className="mt-12 grid gap-4 md:grid-cols-2">
           {unidades.map((unidade, indice) => (
             <Reveal key={unidade.slug} delay={indice * 45}>
-              <article className="flex h-full flex-col rounded-card border border-borda bg-superficie p-7 shadow-1">
+              <article className="glass-card interactive-card flex h-full flex-col rounded-card border border-borda bg-superficie p-7 shadow-1">
                 <h3 className="font-display text-2xl text-conteudo">{unidade.nome}</h3>
                 <p className="mt-1 text-sm font-medium text-marca">{unidade.cidade}</p>
 

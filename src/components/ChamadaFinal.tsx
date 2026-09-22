@@ -9,7 +9,7 @@ export function ChamadaFinal() {
     <section className="secao bg-fundo">
       <div className="container-vert">
         <Reveal>
-          <div className="rounded-painel border border-borda bg-superficie px-7 py-14 text-center shadow-2 sm:px-12">
+          <div className="glass-card interactive-card rounded-painel border border-borda bg-superficie px-7 py-14 text-center shadow-2 sm:px-12">
             <h2 className="mx-auto max-w-2xl font-display text-display-sm text-conteudo">
               Comece pela avaliação. O resto vem planejado.
             </h2>

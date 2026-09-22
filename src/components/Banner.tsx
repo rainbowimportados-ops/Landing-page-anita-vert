@@ -8,7 +8,7 @@ export function Banner() {
   if (!banner) return null
 
   const conteudo = (
-    <div className="overflow-hidden rounded-painel border border-borda bg-superficie shadow-1">
+    <div className="glass-card overflow-hidden rounded-painel border border-borda bg-superficie shadow-1">
       {banner.imagem && (
         <img
           src={banner.imagem}

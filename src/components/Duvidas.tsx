@@ -19,7 +19,7 @@ export function Duvidas() {
         <Reveal delay={45}>
           <div className="divide-y divide-borda border-y border-borda">
             {faq.map((item) => (
-              <details key={item.pergunta} className="group">
+              <details key={item.pergunta} className="faq-row group">
                 <summary className="flex min-h-[56px] cursor-pointer list-none items-center justify-between gap-4 py-4 text-left font-display text-lg text-conteudo [&::-webkit-details-marker]:hidden">
                   {item.pergunta}
                   <svg

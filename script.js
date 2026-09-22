@@ -1,4 +1,5 @@
 import { loadCardContent, supabase, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from './lib/supabase.js';
+import { COMPARISON_PAIRS } from './comparison-config.js';
 
 document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -189,8 +190,23 @@ function renderPortfolio(items) {
   const strip = document.querySelector('.media-strip'); const active = (items || []).filter((item) => item.active !== false && item.mediaUrl);
   if (!active.length) return; strip.replaceChildren();
   active.forEach((item) => {
+    const pair = item.mediaType === 'image' ? COMPARISON_PAIRS[item.id] : null;
     const figure = document.createElement('figure'); let media;
-    if (item.mediaType === 'video') { media = document.createElement('video'); media.controls = true; media.playsInline = true; media.preload = 'metadata'; if (item.posterUrl) media.poster = safeUrl(item.posterUrl, ''); const source = document.createElement('source'); source.src = safeUrl(item.mediaUrl); source.type = 'video/mp4'; media.append(source); }
+    if (pair) {
+      const role = item.id === 'caso-1' ? 'featured' : item.id === 'caso-2' ? 'tall' : 'detail';
+      figure.className = `comparison-card comparison-card--${role}`; figure.dataset.comparison = '';
+      const comparison = document.createElement('div'); comparison.className = 'comparison'; comparison.style.setProperty('--comparison-position', '54%');
+      const before = document.createElement('img'); before.className = 'comparison__image'; before.src = pair.before; before.alt = `${item.title || 'Caso real'} — antes`; before.loading = 'lazy';
+      const after = document.createElement('div'); after.className = 'comparison__after'; after.setAttribute('aria-hidden', 'true');
+      const afterImage = document.createElement('img'); afterImage.className = 'comparison__image'; afterImage.src = pair.after; afterImage.alt = ''; afterImage.loading = 'lazy'; after.append(afterImage);
+      const labels = document.createElement('div'); labels.className = 'comparison__labels'; labels.setAttribute('aria-hidden', 'true'); labels.innerHTML = '<span>Antes</span><span>Depois</span>';
+      const line = document.createElement('span'); line.className = 'comparison__line'; line.setAttribute('aria-hidden', 'true');
+      const handle = document.createElement('span'); handle.className = 'comparison__handle'; handle.setAttribute('aria-hidden', 'true'); handle.textContent = '↔';
+      const control = document.createElement('input'); control.className = 'comparison__control'; control.type = 'range'; control.min = '0'; control.max = '100'; control.step = '1'; control.value = '54'; control.setAttribute('aria-label', `Comparar ${item.title || 'resultado real'}`); control.setAttribute('aria-describedby', `comparison-help-${item.id}`);
+      const help = document.createElement('span'); help.id = `comparison-help-${item.id}`; help.className = 'sr-only'; help.textContent = 'Arraste para comparar. Use as setas do teclado para revelar mais ou menos do depois.';
+      comparison.append(before, after, labels, line, handle, control, help); media = comparison;
+    }
+    else if (item.mediaType === 'video') { media = document.createElement('video'); media.controls = true; media.playsInline = true; media.preload = 'metadata'; if (item.posterUrl) media.poster = safeUrl(item.posterUrl, ''); const source = document.createElement('source'); source.src = safeUrl(item.mediaUrl); source.type = 'video/mp4'; media.append(source); }
     else if (item.mediaType === 'document') {
       media = trackableLink(item.mediaUrl, 'documento_resultado');
       media.className = 'document-card';
@@ -210,6 +226,13 @@ function renderPortfolio(items) {
     if (item.details) { const details = document.createElement('small'); details.textContent = item.details; caption.append(details); }
     figure.append(media, caption); strip.append(figure);
   });
+  if (!active.some((item) => item.mediaType === 'video')) {
+    const figure = document.createElement('figure'); figure.className = 'result-video result-video--wide';
+    const video = document.createElement('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.poster = '/assets/video-poster.webp'; video.setAttribute('aria-label', 'Vídeo de resultado real');
+    const source = document.createElement('source'); source.src = '/assets/resultado.mp4'; source.type = 'video/mp4'; video.append(source);
+    const caption = document.createElement('figcaption'); caption.innerHTML = '<strong>Resultado em vídeo</strong><span>Reprodução manual, sem áudio automático</span>';
+    figure.append(video, caption); strip.append(figure);
+  }
 }
 
 function renderCards(sectionId, listId, items, kind) {
@@ -300,7 +323,7 @@ function renderContent(content) {
   const floating = document.querySelector('.floating-whatsapp');
   const floatingLabel = floating.querySelector('span:last-child');
   if (floatingLabel) floatingLabel.textContent = company.contactButtonLabel || 'Falar no WhatsApp';
-  bindTracking();
+  bindTracking(); bindComparators();
 }
 
 function detectarDispositivo() { return window.matchMedia('(max-width: 760px)').matches ? 'celular' : 'computador'; }
@@ -372,6 +395,60 @@ privacyDialog.addEventListener('cancel', (event) => event.preventDefault());
 function bindTracking() {
   document.querySelectorAll('[data-track]:not([data-tracking-bound])').forEach((link) => { link.dataset.trackingBound = 'true'; link.addEventListener('click', () => { if (link.dataset.collectLead !== 'true') registrarClique(link.dataset.track, link.dataset.unit || null); }); });
   document.querySelectorAll('a[target="_blank"]').forEach((link) => link.setAttribute('aria-label', `${link.textContent.trim()} — abre em uma nova aba`));
+}
+
+function bindComparators() {
+  document.querySelectorAll('[data-comparison]:not([data-comparison-bound])').forEach((card) => {
+    card.dataset.comparisonBound = 'true';
+    const comparison = card.querySelector('.comparison');
+    const control = card.querySelector('.comparison__control');
+    if (!comparison || !control) return;
+
+    const update = () => comparison.style.setProperty('--comparison-position', `${control.value}%`);
+    control.addEventListener('input', update);
+    control.addEventListener('change', update);
+  });
+}
+
+function initializeScrollMotion() {
+  const header = document.querySelector('.card-header');
+  const revealTargets = [...document.querySelectorAll('main > section:not(.profile), footer')];
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reducedMotion) return;
+
+  document.body.classList.add('js-motion');
+  revealTargets.forEach((target, index) => {
+    target.classList.add('scroll-reveal');
+    target.style.setProperty('--reveal-delay', `${Math.min(index * 28, 140)}ms`);
+  });
+
+  const atualizarProgresso = () => {
+    const maximo = document.documentElement.scrollHeight - window.innerHeight;
+    const progresso = maximo > 0 ? Math.min(1, window.scrollY / maximo) : 0;
+    document.documentElement.style.setProperty('--card-progress', progresso.toString());
+    document.documentElement.style.setProperty('--card-progress-y', `${progresso * -2}%`);
+    document.documentElement.style.setProperty('--card-photo-shift', `${progresso * -1.4}%`);
+    header?.classList.toggle('card-header--scrolled', window.scrollY > 40);
+  };
+
+  atualizarProgresso();
+  window.addEventListener('scroll', atualizarProgresso, { passive: true });
+  window.addEventListener('resize', atualizarProgresso, { passive: true });
+
+  if (typeof IntersectionObserver === 'undefined') {
+    revealTargets.forEach((target) => target.classList.add('is-visible'));
+    return;
+  }
+
+  const observador = new IntersectionObserver((entradas) => {
+    entradas.forEach((entrada) => {
+      if (entrada.isIntersecting) {
+        entrada.target.classList.add('is-visible');
+        observador.unobserve(entrada.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
+  revealTargets.forEach((target) => observador.observe(target));
 }
 
 document.addEventListener('click', (event) => {
@@ -493,4 +570,4 @@ leadForm.addEventListener('submit', async (event) => {
 });
 
 window.addEventListener('message', (event) => { if (event.origin === window.location.origin && event.data?.type === 'vert-card-preview') renderContent(event.data.content); });
-bindTracking(); initializePrivacy(); loadCardContent().then(({ content }) => renderContent(content)).catch(() => {});
+bindTracking(); bindComparators(); initializeScrollMotion(); initializePrivacy(); loadCardContent().then(({ content }) => renderContent(content)).catch(() => {});
