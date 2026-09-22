@@ -10,6 +10,7 @@ import { Etapas } from './components/Etapas'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { InstagramSecao } from './components/InstagramSecao'
+import { Resultados } from './components/Resultados'
 import { Rodape } from './components/Rodape'
 import { Servicos } from './components/Servicos'
 import { ProvedorDeConteudo } from './lib/ConteudoContexto'
@@ -32,6 +33,7 @@ export default function App() {
         <Confianca />
         <Banner />
         <Servicos />
+        <Resultados />
         <Diferenciais />
         <Etapas />
         <InstagramSecao />

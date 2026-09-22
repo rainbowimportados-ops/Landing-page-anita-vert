@@ -102,7 +102,7 @@ export const conteudoPadrao: Conteudo = {
   rodapeLegal: rodapeLegalPadrao,
   instagram: { clinica: clinicaPadrao.instagram },
   galeria: [],
-  marca: {},
+  marca: { logo: '/assets/marca/logo-circular-principal.png' },
   banner: null,
 }
 
@@ -141,7 +141,7 @@ export function aplicar(ajustes: Ajustes | null | undefined): Conteudo {
     },
 
     galeria: (ajustes.galeria ?? []).filter((i) => i.url.trim() !== ''),
-    marca: ajustes.marca ?? {},
+    marca: { ...conteudoPadrao.marca, ...(ajustes.marca ?? {}) },
 
     // Banner sem imagem nem título não tem o que mostrar.
     banner:

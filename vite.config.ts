@@ -6,6 +6,10 @@ import react from '@vitejs/plugin-react'
 // em /config.
 export default defineConfig({
   plugins: [react()],
+  server: {
+    host: '0.0.0.0',
+    allowedHosts: true,
+  },
   build: {
     rollupOptions: {
       input: {

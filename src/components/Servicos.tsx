@@ -18,8 +18,8 @@ export function Servicos() {
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {servicos.map((servico, indice) => (
             <Reveal key={servico.titulo} delay={indice * 45}>
-              <article className="group h-full rounded-card border border-borda bg-superficie p-6 transition-[transform,border-color,box-shadow] duration-padrao ease-saida hover-fino:hover:-translate-y-1 hover-fino:hover:border-borda-forte hover-fino:hover:shadow-2">
-                <span className="inline-flex rounded-xl bg-superficie-suave p-3 text-marca transition-colors duration-rapido hover-fino:group-hover:bg-marca-tenue">
+              <article className="glass-card interactive-card group h-full rounded-card border border-borda bg-superficie p-6 transition-[transform,border-color,box-shadow] duration-padrao ease-saida hover-fino:hover:-translate-y-1 hover-fino:hover:border-borda-forte hover-fino:hover:shadow-2">
+                <span className="glass-icon inline-flex rounded-xl bg-superficie-suave p-3 text-marca transition-colors duration-rapido hover-fino:group-hover:bg-marca-tenue">
                   <Icon nome={servico.icone} />
                 </span>
                 <h3 className="mt-5 font-display text-xl text-conteudo">{servico.titulo}</h3>

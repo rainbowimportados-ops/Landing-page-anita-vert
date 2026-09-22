@@ -12,10 +12,10 @@ const pontos = [
 
 export function Confianca() {
   return (
-    <section className="border-b border-borda bg-superficie">
+    <section className="confidence-strip border-b border-borda bg-superficie">
       <div className="container-vert grid gap-px py-2 sm:grid-cols-3">
         {pontos.map(({ Icone, titulo, texto }) => (
-          <div key={titulo} className="flex items-center gap-3 py-4 sm:justify-center sm:py-6">
+          <div key={titulo} className="confidence-strip__item glass-card flex items-center gap-3 py-4 sm:justify-center sm:py-6">
             <Icone className="h-5 w-5 shrink-0 text-marca" />
             <p className="text-sm">
               <span className="font-semibold text-conteudo">{titulo}</span>

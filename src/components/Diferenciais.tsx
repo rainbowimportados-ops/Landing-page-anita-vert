@@ -21,7 +21,7 @@ export function Diferenciais() {
         <div className="grid gap-x-8 gap-y-9 sm:grid-cols-2">
           {diferenciais.map((item, indice) => (
             <Reveal key={item.titulo} delay={indice * 45}>
-              <div className="border-l-2 border-borda-forte pl-5">
+              <div className="diferencial-item interactive-card border-l-2 border-borda-forte pl-5">
                 <h3 className="font-display text-lg text-conteudo">{item.titulo}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-conteudo-suave">{item.texto}</p>
               </div>

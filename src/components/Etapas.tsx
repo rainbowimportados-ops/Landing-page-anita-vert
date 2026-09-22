@@ -17,7 +17,7 @@ export function Etapas() {
               key={etapa.titulo}
               as="li"
               delay={indice * 45}
-              className="rounded-card bg-superficie p-6 shadow-1"
+              className="glass-card interactive-card rounded-card bg-superficie p-6 shadow-1"
             >
               <span className="font-display text-2xl tabular-nums text-realce-escuro">
                 {String(indice + 1).padStart(2, '0')}

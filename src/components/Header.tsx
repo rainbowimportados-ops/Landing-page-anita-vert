@@ -5,9 +5,9 @@ import { BotaoWhatsApp } from './CTA'
 
 const navegacao = [
   { id: 'tratamentos', rotulo: 'Tratamentos' },
+  { id: 'resultados', rotulo: 'Resultados' },
   { id: 'como-funciona', rotulo: 'Como funciona' },
   { id: 'unidades', rotulo: 'Unidades' },
-  { id: 'dentistas', rotulo: 'Para dentistas' },
   { id: 'duvidas', rotulo: 'Dúvidas' },
 ]
 
@@ -16,15 +16,29 @@ export function Header() {
   const [rolou, setRolou] = useState(false)
   const [menuAberto, setMenuAberto] = useState(false)
   const [secaoAtiva, setSecaoAtiva] = useState<string | null>(null)
+  const [progresso, setProgresso] = useState(0)
 
   useEffect(() => {
-    const aoRolar = () => setRolou(window.scrollY > 24)
+    let frame = 0
+    const aoRolar = () => {
+      if (frame) return
+      frame = window.requestAnimationFrame(() => {
+        const maximo = document.documentElement.scrollHeight - window.innerHeight
+        const valor = maximo > 0 ? Math.min(1, window.scrollY / maximo) : 0
+        document.documentElement.style.setProperty('--scroll-y', `${window.scrollY}px`)
+        setRolou(window.scrollY > 24)
+        setProgresso(valor)
+        frame = 0
+      })
+    }
     aoRolar()
     window.addEventListener('scroll', aoRolar, { passive: true })
-    return () => window.removeEventListener('scroll', aoRolar)
+    return () => {
+      window.removeEventListener('scroll', aoRolar)
+      if (frame) window.cancelAnimationFrame(frame)
+    }
   }, [])
 
-  /* §9 nav-state-active: o item da seção visível fica destacado. */
   useEffect(() => {
     const secoes = navegacao
       .map((item) => document.getElementById(item.id))
@@ -40,55 +54,43 @@ export function Header() {
 
         if (visiveis[0]) setSecaoAtiva(visiveis[0].target.id)
       },
-      { rootMargin: '-45% 0px -50% 0px' },
+      { rootMargin: '-42% 0px -50% 0px' },
     )
 
     secoes.forEach((secao) => observador.observe(secao))
     return () => observador.disconnect()
   }, [])
 
-  /*
-   * No topo o cabeçalho é transparente sobre o hero escuro, então tudo dentro
-   * dele precisa das cores inversas. Com a barra clara (rolado ou menu aberto)
-   * volta ao par escuro sobre claro.
-   */
   const sobreHero = !rolou && !menuAberto
+  const marcaClasse = sobreHero ? 'text-conteudo-inverso' : 'text-conteudo'
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-padrao ease-saida ${
-        sobreHero ? 'border-b border-transparent' : 'border-b border-borda bg-fundo/90 backdrop-blur'
+      className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,box-shadow,backdrop-filter] duration-padrao ease-saida ${
+        sobreHero
+          ? 'border-b border-transparent bg-transparent'
+          : 'border-b border-borda/70 bg-fundo/72 shadow-2 backdrop-blur-xl'
       }`}
     >
-      <div className="container-vert flex h-16 items-center justify-between gap-4">
+      <div className="container-vert flex h-[4.5rem] items-center justify-between gap-4">
         <a
           href="#topo"
-          className="-ml-1 inline-flex min-h-[44px] items-center gap-2 rounded-lg px-1"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg px-1"
           aria-label={`${clinica.nome} — início`}
         >
           {marca.logo ? (
             <>
-              <img src={marca.logo} alt="" className="h-8 w-8 rounded-lg object-contain" />
-              {/* Um logotipo enviado pelo painel pode não trazer o nome, então
-                  o texto continua ao lado dele. O lockup oficial já traz. */}
-              <span
-                className={`font-display text-lg tracking-tight transition-colors duration-padrao ${
-                  sobreHero ? 'text-conteudo-inverso' : 'text-conteudo'
-                }`}
-              >
+              <img src={marca.logo} alt="" className="h-9 w-9 rounded-full border border-white/20 bg-superficie-inversa/80 object-cover shadow-1" />
+              <span className={`font-display text-lg tracking-tight ${marcaClasse}`}>
                 Instituto <span className={sobreHero ? 'text-realce' : 'text-marca'}>Vert</span>
               </span>
             </>
           ) : (
-            <MarcaVert
-              className={`h-6 transition-colors duration-padrao sm:h-7 ${
-                sobreHero ? 'text-conteudo-inverso' : 'text-conteudo'
-              }`}
-            />
+            <MarcaVert className={`h-6 sm:h-7 ${marcaClasse}`} />
           )}
         </a>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Seções da página">
+        <nav className="hidden items-center gap-1 xl:flex" aria-label="Seções da página">
           {navegacao.map((item) => {
             const ativo = secaoAtiva === item.id
             return (
@@ -129,10 +131,8 @@ export function Header() {
             aria-expanded={menuAberto}
             aria-controls="menu-mobile"
             aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
-            className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition duration-rapido active:scale-95 lg:hidden ${
-              sobreHero
-                ? 'border-borda-inversa text-conteudo-inverso'
-                : 'border-borda-forte text-conteudo'
+            className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition duration-rapido active:scale-95 xl:hidden ${
+              sobreHero ? 'border-borda-inversa text-conteudo-inverso' : 'border-borda-forte text-conteudo'
             }`}
           >
             <svg
@@ -150,12 +150,14 @@ export function Header() {
         </div>
       </div>
 
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px origin-left bg-gradient-to-r from-realce via-marca to-realce transition-transform duration-rapido ease-saida"
+        style={{ transform: `scaleX(${progresso})` }}
+      />
+
       {menuAberto && (
-        <nav
-          id="menu-mobile"
-          className="border-t border-borda bg-fundo lg:hidden"
-          aria-label="Seções da página"
-        >
+        <nav id="menu-mobile" className="border-t border-borda/70 bg-fundo/72 backdrop-blur-xl xl:hidden" aria-label="Seções da página">
           <div className="container-vert flex flex-col py-1">
             {navegacao.map((item) => (
               <a
