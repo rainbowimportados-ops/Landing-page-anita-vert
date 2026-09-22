@@ -1,6 +1,7 @@
 import { useConteudo } from '../lib/ConteudoContexto'
 import { BotaoAncora, BotaoWhatsApp } from './CTA'
 import { IconSeta } from './Icon'
+import retrato from '../assets/sorrisos/retrato-sorriso.jpg'
 
 const promessas = [
   'Exame clínico e registro fotográfico do seu caso',
@@ -55,8 +56,8 @@ export function Hero() {
               Agendar avaliação
             </BotaoWhatsApp>
 
-            <BotaoAncora href="#tratamentos" className="w-full sm:w-auto">
-              Ver tratamentos
+            <BotaoAncora href="#sorrisos" className="w-full sm:w-auto">
+              Ver antes e depois
               <IconSeta />
             </BotaoAncora>
           </div>
@@ -66,28 +67,33 @@ export function Hero() {
           </p>
         </div>
 
-        {/* Em vez de uma imagem genérica, o que o visitante ganha ao agendar. */}
-        <div className="animate-fade-up rounded-painel border border-borda-inversa bg-superficie-inversa-suave/50 p-6 backdrop-blur-sm [animation-delay:120ms] sm:p-8">
-          <p className="olho text-conteudo-inverso-tenue">O que esperar da avaliação</p>
-          <ul className="mt-5 space-y-4">
-            {promessas.map((item) => (
-              <li key={item} className="flex gap-3 text-sm leading-relaxed text-conteudo-inverso">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="mt-0.5 h-5 w-5 shrink-0 text-realce"
-                  aria-hidden="true"
-                >
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-                {item}
-              </li>
-            ))}
-          </ul>
+        <div>
+          <figure className="hero-sorriso">
+            <img src={retrato} alt="Sorriso de paciente do Instituto Vert após o tratamento" width={1642} height={2048} fetchPriority="high" />
+            <figcaption>Um sorriso real. Uma história única.</figcaption>
+          </figure>
+          <div className="mt-6 rounded-painel border border-borda-inversa bg-superficie-inversa-suave/50 p-6 sm:p-8">
+            <p className="olho text-conteudo-inverso-tenue">O que esperar da avaliação</p>
+            <ul className="mt-5 space-y-4">
+              {promessas.map((item) => (
+                <li key={item} className="flex gap-3 text-sm leading-relaxed text-conteudo-inverso">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mt-0.5 h-5 w-5 shrink-0 text-realce"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </section>

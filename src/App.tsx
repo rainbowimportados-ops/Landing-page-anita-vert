@@ -12,6 +12,7 @@ import { Hero } from './components/Hero'
 import { InstagramSecao } from './components/InstagramSecao'
 import { Rodape } from './components/Rodape'
 import { Servicos } from './components/Servicos'
+import { Sorrisos } from './components/Sorrisos'
 import { ProvedorDeConteudo } from './lib/ConteudoContexto'
 import { Unidades } from './components/Unidades'
 
@@ -30,6 +31,7 @@ export default function App() {
       <main>
         <Hero />
         <Confianca />
+        <Sorrisos />
         <Banner />
         <Servicos />
         <Diferenciais />

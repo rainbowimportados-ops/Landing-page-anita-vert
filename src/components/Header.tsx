@@ -4,6 +4,7 @@ import { MarcaVert } from './MarcaVert'
 import { BotaoWhatsApp } from './CTA'
 
 const navegacao = [
+  { id: 'sorrisos', rotulo: 'Sorrisos' },
   { id: 'tratamentos', rotulo: 'Tratamentos' },
   { id: 'como-funciona', rotulo: 'Como funciona' },
   { id: 'unidades', rotulo: 'Unidades' },
@@ -88,7 +89,7 @@ export function Header() {
           )}
         </a>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Seções da página">
+        <nav className="hidden items-center gap-1 xl:flex" aria-label="Seções da página">
           {navegacao.map((item) => {
             const ativo = secaoAtiva === item.id
             return (
@@ -129,7 +130,7 @@ export function Header() {
             aria-expanded={menuAberto}
             aria-controls="menu-mobile"
             aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
-            className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition duration-rapido active:scale-95 lg:hidden ${
+            className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition duration-rapido active:scale-95 xl:hidden ${
               sobreHero
                 ? 'border-borda-inversa text-conteudo-inverso'
                 : 'border-borda-forte text-conteudo'
@@ -153,7 +154,7 @@ export function Header() {
       {menuAberto && (
         <nav
           id="menu-mobile"
-          className="border-t border-borda bg-fundo lg:hidden"
+          className="border-t border-borda bg-fundo xl:hidden"
           aria-label="Seções da página"
         >
           <div className="container-vert flex flex-col py-1">
