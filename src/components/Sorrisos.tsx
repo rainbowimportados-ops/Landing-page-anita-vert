@@ -3,19 +3,17 @@ import type { PointerEvent } from 'react'
 import frontal from '../assets/sorrisos/sorriso-frontal.jpg'
 import detalhe from '../assets/sorrisos/sorriso-detalhe.jpg'
 import angulo from '../assets/sorrisos/sorriso-angulo.jpg'
-import { BotaoWhatsApp } from './CTA'
-import { useConteudo } from '../lib/ConteudoContexto'
 import './sorrisos.css'
 
 // Montagens originais: antes em cima e depois embaixo, confirmado pelo responsável.
 // A janela apenas revela cada metade; não há retoque, morphing ou geração de dentes.
-const registros = [
+export const registros = [
   { url: frontal, titulo: 'Sorriso de frente', largura: 1642, altura: 2048 },
   { url: detalhe, titulo: 'Detalhes do sorriso', largura: 1642, altura: 2048 },
   { url: angulo, titulo: 'Outro ângulo', largura: 2048, altura: 2048 },
 ]
 
-function Comparador({ registro }: { registro: typeof registros[number] }) {
+export function ComparadorSorriso({ registro }: { registro: typeof registros[number] }) {
   const [posicao, setPosicao] = useState(50)
   const [reproduzindo, setReproduzindo] = useState(false)
   const [carregou, setCarregou] = useState(false)
@@ -90,29 +88,5 @@ function Comparador({ registro }: { registro: typeof registros[number] }) {
         </div>
       </figcaption>
     </figure>
-  )
-}
-
-export function Sorrisos() {
-  const [selecionado, setSelecionado] = useState(0)
-  const { clinica } = useConteudo()
-  return (
-    <section id="sorrisos" className="secao bg-fundo" aria-labelledby="sorrisos-titulo">
-      <div className="container-vert">
-        <div className="sorrisos-cabecalho">
-          <div className="max-w-texto">
-            <p className="olho">Sorrisos reais · Antes e depois</p>
-            <h2 id="sorrisos-titulo" className="titulo-secao mt-3">O sorriso, em cada detalhe.</h2>
-            <p className="lead mt-5">Deslize para acompanhar a diferença nas fotografias reais dos nossos pacientes.</p>
-          </div>
-          <BotaoWhatsApp rastreio="sorrisos_agendar" numero={clinica.whatsappComercial} mensagem="Olá! Vi os sorrisos no site e gostaria de agendar uma avaliação.">Avaliar meu sorriso</BotaoWhatsApp>
-        </div>
-        <div className="sorrisos-escolhas" role="group" aria-label="Escolher fotografia do sorriso">
-          {registros.map((registro, indice) => <button key={registro.url} type="button" aria-pressed={selecionado === indice} onClick={() => setSelecionado(indice)}>{registro.titulo}</button>)}
-        </div>
-        <Comparador key={selecionado} registro={registros[selecionado]} />
-        <p className="mt-5 text-sm leading-relaxed text-conteudo-tenue">Fotografias originais, sem simulação digital do resultado. Cada caso é único; os resultados variam conforme as características e necessidades de cada paciente.</p>
-      </div>
-    </section>
   )
 }

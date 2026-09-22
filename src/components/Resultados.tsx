@@ -1,36 +1,33 @@
-import { resultados } from '../config/resultados'
 import { Reveal } from './Reveal'
-import { Comparador } from './Comparador'
+import { ComparadorSorriso, registros } from './Sorrisos'
 
 export function Resultados() {
   return (
-    <section id="resultados" className="secao bg-fundo">
+    <section id="resultados" className="secao bg-fundo" aria-labelledby="resultados-titulo">
+      <span id="sorrisos" className="block scroll-mt-24" />
       <div className="container-vert">
         <Reveal className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
           <div>
-            <p className="olho">Resultados reais</p>
-            <h2 className="titulo-secao mt-3">Naturalidade em cada detalhe.</h2>
+            <p className="olho">Sorrisos reais · Antes e depois</p>
+            <h2 id="resultados-titulo" className="titulo-secao mt-3">O sorriso, em cada detalhe.</h2>
           </div>
           <p className="lead max-w-texto lg:justify-self-end">
-            Os casos abaixo são comparativos visuais. Arraste a barra para observar o antes e o
-            depois de cada registro, sem prometer que uma imagem representa todos os casos.
+            Deslize sobre as fotografias ou reproduza a transição para acompanhar o antes e
+            depois dos sorrisos reais dos nossos pacientes.
           </p>
         </Reveal>
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {resultados.map((resultado, indice) => (
-              <Reveal key={resultado.id} delay={indice * 45} className={`result-bento result-bento--${resultado.id}`}>
-              <figure className="resultado-card glass-card interactive-card">
-                <Comparador resultado={resultado} />
-                <figcaption className="resultado-card__caption">
-                  <span className="resultado-card__label">{resultado.rotulo}</span>
-                  <span>{resultado.legenda}</span>
-                </figcaption>
-              </figure>
+        <div className="sorrisos-grid mt-10 grid gap-5 sm:grid-cols-2">
+          {registros.map((registro, indice) => (
+              <Reveal key={registro.url} delay={indice * 45} className={`result-bento result-bento--caso-${indice + 1}`}>
+              <div className="resultado-card glass-card sorriso-card">
+                <h3 className="resultado-card__caption resultado-card__label">{registro.titulo}</h3>
+                <ComparadorSorriso registro={registro} />
+              </div>
             </Reveal>
           ))}
 
-          <Reveal delay={resultados.length * 45} className="result-bento result-bento--video">
+          <Reveal delay={registros.length * 45} className="result-bento result-bento--video">
             <figure className="resultado-card resultado-card--video glass-card interactive-card">
               <video
                 controls
@@ -51,7 +48,7 @@ export function Resultados() {
         </div>
 
         <p className="mt-6 max-w-2xl text-xs leading-relaxed text-conteudo-tenue">
-          Cada caso é único. Os resultados podem variar de acordo com as características e
+          Fotografias originais, sem simulação digital do resultado. Cada caso é único. Os resultados podem variar de acordo com as características e
           necessidades de cada paciente.
         </p>
       </div>

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useConteudo } from '../lib/ConteudoContexto'
 import { BotaoAncora, BotaoWhatsApp } from './CTA'
 import { IconSeta } from './Icon'
+import retrato from '../assets/sorrisos/retrato-sorriso.jpg'
 
 const promessas = [
   'Exame clínico e registro fotográfico do seu caso',
@@ -79,7 +80,7 @@ export function Hero() {
               Agendar avaliação
             </BotaoWhatsApp>
             <BotaoAncora href="#resultados" className="w-full sm:w-auto">
-              Ver resultados
+              Ver antes e depois
               <IconSeta />
             </BotaoAncora>
           </div>
@@ -90,20 +91,21 @@ export function Hero() {
           </p>
         </div>
 
-        <div className="hero-editorial__media hero-media-float animate-fade-up [animation-delay:120ms]">
+        <div className="hero-editorial__media hero-media-float hero-sorriso animate-fade-up [animation-delay:120ms]">
           <img
-            src={marca.capa || '/assets/hero.webp'}
-            alt="Paciente sorrindo em um retrato do Instituto Vert"
-            className="aspect-[4/5] w-full object-cover object-center lg:aspect-[5/6]"
+            src={retrato}
+            alt="Sorriso real de paciente do Instituto Vert após o tratamento"
+            width={1642}
+            height={2048}
             fetchPriority="high"
           />
           <div className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-4 p-5 sm:p-7">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-conteudo-inverso-tenue">
-                O que esperar da avaliação
+                Sorrisos reais
               </p>
               <p className="mt-2 max-w-xs font-display text-2xl leading-tight text-conteudo-inverso">
-                Clareza antes de qualquer decisão.
+                Um sorriso real. Uma história única.
               </p>
             </div>
             <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full border border-borda-inversa text-xl text-realce sm:flex" aria-hidden="true">

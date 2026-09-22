@@ -2,7 +2,13 @@
 .sorrisos-escolhas{display:flex;flex-wrap:wrap;gap:.5rem;margin:2rem 0 1.25rem}
 .sorrisos-escolhas button,.sorriso-acoes button{min-height:44px;padding:.65rem 1rem;border:1px solid rgb(var(--cor-borda-forte));border-radius:999px;font-size:.875rem;color:rgb(var(--cor-conteudo));background:rgb(var(--cor-superficie));transition:background-color 160ms}
 .sorrisos-escolhas button[aria-pressed=true]{color:rgb(var(--cor-conteudo-inverso));background:rgb(var(--cor-marca-forte));border-color:rgb(var(--cor-marca-forte))}
-.sorriso-comparador{max-width:880px;margin:0 auto}
+.sorriso-comparador{width:100%;max-width:880px;margin:0 auto}
+.sorrisos-grid .result-bento{grid-column:auto;grid-row:auto}
+.sorrisos-grid .resultado-card--video video{height:auto;min-height:0;aspect-ratio:1642/1024;object-fit:contain}
+.sorriso-card .sorriso-controles{padding:1rem}
+.sorriso-card .sorriso-janela{border-radius:0}
+.sorriso-card .sorriso-acoes{gap:.35rem}
+.sorriso-card .sorriso-acoes button{padding:.6rem .7rem;font-size:.75rem}
 .sorriso-janela{position:relative;overflow:hidden;isolation:isolate;border-radius:20px;background:rgb(var(--cor-superficie-suave));touch-action:pan-y;user-select:none;cursor:ew-resize}
 .sorriso-metade{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .sorriso-metade img{position:absolute;top:0;left:0;width:100%;height:200%;max-width:none;pointer-events:none}
