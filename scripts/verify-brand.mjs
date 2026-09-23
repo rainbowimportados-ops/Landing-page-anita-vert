@@ -13,3 +13,6 @@ for (const file of ['index.html', 'src/components/MarcaVert.tsx', 'src/component
   assert(!/maskImage|mask-image|mix-blend-mode/.test(source), `Logo transformation in ${file}`);
 }
 console.log('Approved brand: four SHA-256 originals verified; no legacy logo or recoloring in public components.');
+
+assert(fs.readFileSync('script.js','utf8').includes("setText('.profile__locations',"), 'CMS identity must target only the location line');
+assert(fs.readFileSync('index.html','utf8').includes('class="profile__locations"'), 'Location hook is required');

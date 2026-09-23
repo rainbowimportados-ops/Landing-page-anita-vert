@@ -48,7 +48,7 @@ h2 { font-size: clamp(2.4rem, 5vw, 4.4rem); }
 .profile__photo > img:not(.profile__watermark) { width: 100%; height: 100%; object-fit: cover; object-position: 50% 36%; transform: scale(1.035) translate3d(0, var(--card-photo-shift), 0); transform-origin: center; transition: transform .4s var(--curve), filter .4s var(--curve); }
 .profile__photo:hover > img:not(.profile__watermark) { filter: saturate(1.08) contrast(1.03); transform: scale(1.06) translate3d(0, var(--card-photo-shift), 0); }
 .profile__gradient { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(31,18,13,.05), rgba(31,18,13,.03) 40%, rgba(31,18,13,.88)); }
-.profile__watermark { position: absolute; z-index: 1; top: 24px; right: 24px; width: 160px; opacity: .88; pointer-events: none; }
+.profile__photo > .profile__watermark { position: absolute; z-index: 1; top: 24px; right: 24px; width: 160px; opacity: .88; pointer-events: none; }
 .profile__identity { position: absolute; z-index: 2; right: 32px; bottom: 30px; left: 32px; }
 .profile__identity p { margin: 0 0 4px; color: var(--sand); font-size: .64rem; letter-spacing: .2em; text-transform: uppercase; }
 .profile__wordmark { width: min(82%, 360px); margin: 8px 0 12px; line-height: 0; }
@@ -237,7 +237,7 @@ footer p { margin: 8px 0 0; }
   .profile__photo { min-height: 440px; }
   .profile__photo > img:not(.profile__watermark) { object-position: 50% 30%; }
   .profile__identity { right: 20px; bottom: 22px; left: 20px; }
-  .profile__watermark { top: 16px; right: 16px; width: 136px; }
+  .profile__photo > .profile__watermark { top: 16px; right: 16px; width: 136px; }
   .profile__wordmark { width: min(94%, 330px); margin-top: 7px; }
   .profile__content { padding: 30px 18px 20px; }
   .intro h2 { font-size: 2.9rem; }
