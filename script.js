@@ -20,8 +20,8 @@ let currentCompany = {};
 let currentUnits = [];
 
 const DEFAULT_LOGOS = {
-  primaryDark: new URL('./assets/logo-principal-marrom.jpeg', import.meta.url).href,
-  primaryLight: new URL('./assets/logo-principal-clara.jpeg', import.meta.url).href,
+  primaryDark: '/assets/marca/logo-vert-dark-transparent.png',
+  primaryLight: '/assets/marca/logo-vert-light-transparent.png',
   horizontal: new URL('./assets/logo-secundaria-marrom.jpeg', import.meta.url).href,
 };
 
@@ -258,13 +258,12 @@ function renderContent(content) {
   const hero = document.querySelector('.profile__photo > img');
   if (hero && company.heroImage) applyImageSource(hero, company.heroImage, new URL('./assets/hero.webp', import.meta.url).href);
   const logoSources = {
-    primaryDark: company.logoPrimaryDark || DEFAULT_LOGOS.primaryDark,
-    primaryLight: company.logoPrimaryLight || DEFAULT_LOGOS.primaryLight,
-    horizontal: company.logoHorizontal || DEFAULT_LOGOS.horizontal,
+    primaryDark: DEFAULT_LOGOS.primaryDark,
+    primaryLight: DEFAULT_LOGOS.primaryLight,
+    horizontal: DEFAULT_LOGOS.horizontal,
   };
-  const logo = document.querySelector('.brand img');
-  const selectedVariant = company.logoVariant || 'primaryDark';
-  const selectedLogo = logoSources[selectedVariant] || logoSources.primaryDark;
+  const logo = document.querySelector('.card-header__brand-mark');
+  const selectedLogo = logoSources.primaryDark;
   applyImageSource(logo, selectedLogo, DEFAULT_LOGOS.primaryDark);
   const cities = units.filter((unit) => unit.active !== false).map((unit) => unit.city).filter(Boolean); setText('.profile__identity span', company.identityLine || cities.join(' • '));
   renderUnits(units); renderCards('campanhas', 'campaign-list', content.campaigns, 'campaign'); renderCards('depoimentos', 'testimonial-list', content.testimonials, 'testimonial'); renderFormations(content.formations, formationSettings, company); renderExtraLinks(content.links); renderWhatsApp(units, company);
