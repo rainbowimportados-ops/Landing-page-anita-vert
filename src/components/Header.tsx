@@ -62,7 +62,6 @@ export function Header() {
   }, [])
 
   const sobreHero = !rolou && !menuAberto
-  const marcaClasse = sobreHero ? 'text-conteudo-inverso' : 'text-conteudo'
 
   return (
     <header
@@ -78,7 +77,7 @@ export function Header() {
           className="inline-flex min-h-[44px] items-center gap-2 rounded-lg px-1"
           aria-label={`${clinica.nome} — início`}
         >
-          <MarcaVert className={`w-36 sm:w-44 ${marcaClasse}`} />
+          <MarcaVert className="official-brand--header" />
         </a>
 
         <nav className="hidden items-center gap-1 xl:flex" aria-label="Seções da página">

@@ -15,16 +15,10 @@ const preview = document.querySelector('#card-preview');
 
 const DEFAULT_IDENTITY_ASSETS = {
   heroImage: new URL('../assets/hero.webp', import.meta.url).href,
-  logoPrimaryDark: new URL('../assets/logo-principal-marrom.jpeg', import.meta.url).href,
-  logoPrimaryLight: new URL('../assets/logo-principal-clara.jpeg', import.meta.url).href,
-  logoHorizontal: new URL('../assets/logo-secundaria-marrom.jpeg', import.meta.url).href,
 };
 
 const IDENTITY_PREVIEW_IDS = {
   heroImage: 'hero-preview',
-  logoPrimaryDark: 'logo-primary-dark-preview',
-  logoPrimaryLight: 'logo-primary-light-preview',
-  logoHorizontal: 'logo-horizontal-preview',
 };
 
 let session = null;
@@ -268,9 +262,6 @@ function fillCompany() {
   });
   const previews = {
     'hero-preview': content.company?.heroImage || DEFAULT_IDENTITY_ASSETS.heroImage,
-    'logo-primary-dark-preview': content.company?.logoPrimaryDark || DEFAULT_IDENTITY_ASSETS.logoPrimaryDark,
-    'logo-primary-light-preview': content.company?.logoPrimaryLight || DEFAULT_IDENTITY_ASSETS.logoPrimaryLight,
-    'logo-horizontal-preview': content.company?.logoHorizontal || DEFAULT_IDENTITY_ASSETS.logoHorizontal,
   };
   Object.entries(previews).forEach(([id, source]) => {
     const image = document.getElementById(id);
@@ -472,6 +463,7 @@ contentForm.addEventListener('change', async (event) => {
   if (event.target.matches('[data-identity-upload]') && event.target.files?.[0]) {
     const file = event.target.files[0];
     const key = event.target.dataset.identityUpload;
+    if (key !== 'heroImage') return; // Official logos cannot be replaced through the CMS.
     if (!file.type.startsWith('image/') || file.size > 20 * 1024 * 1024) {
       setStatus(file.size > 20 * 1024 * 1024 ? 'A imagem ultrapassa o limite de 20 MB.' : 'Selecione um arquivo de imagem compatível.', 'error');
       event.target.value = '';

@@ -237,16 +237,9 @@ export function Editor({ email, aoSair }: { email: string; aoSair: () => void })
         <section>
           <h2 className="titulo-secao">Identidade visual</h2>
           <p className="lead mt-2">
-            Imagens usadas na página. Sem logotipo enviado, vale a marca desenhada em código.
+            As quatro versões oficiais são fixas. O layout escolhe a aplicação adequada sem alterar a identidade. A foto de capa continua editável.
           </p>
           <div className="mt-5 space-y-6">
-            <CampoImagem
-              rotulo="Logotipo"
-              dica="Aparece no cabeçalho. PNG ou SVG com fundo transparente fica melhor."
-              pasta="marca"
-              valor={ajustes.marca?.logo}
-              aoMudar={(url) => setAjustes((a) => ({ ...a, marca: { ...a.marca, logo: url } }))}
-            />
             <CampoImagem
               rotulo="Imagem de capa"
               dica="Fundo do topo da página. É escurecida automaticamente para o texto continuar legível."
