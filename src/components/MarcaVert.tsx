@@ -1,13 +1,9 @@
-import marcaVert from '../assets/marca-vert.png'
+const marcaVert = '/assets/marca/wordmark-horizontal-light.png'
 
 /**
- * Lockup oficial "INSTITUTO VERT", extraído de assets/logo-horizontal-oficial.jpeg.
- *
- * O arquivo oficial é JPEG com fundo marrom chapado, então colá-lo direto
- * viraria um retângulo marrom sobre o hero verde. Aqui a arte entra como
- * máscara CSS e a marca assume `currentColor` — é o que permite o mesmo
- * arquivo servir sobre o hero escuro e sobre o header claro, que era o que
- * o "V" em SVG fazia trocando de cor.
+ * Lockup oficial "INSTITUTO VERT" usado como máscara CSS.
+ * A arte mantém exatamente as proporções e a tipografia recebidas, enquanto
+ * `currentColor` permite a leitura correta sobre hero escuro e header claro.
  */
 export function MarcaVert({ className = '' }: { className?: string }) {
   return (
@@ -15,7 +11,7 @@ export function MarcaVert({ className = '' }: { className?: string }) {
       aria-hidden="true"
       className={`block ${className}`}
       style={{
-        aspectRatio: '8 / 1',
+        aspectRatio: '1444 / 312',
         backgroundColor: 'currentColor',
         WebkitMaskImage: `url(${marcaVert})`,
         maskImage: `url(${marcaVert})`,

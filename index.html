@@ -28,8 +28,7 @@
 
     <header class="card-header shell" id="topo">
       <a class="card-header__brand" href="#contato" aria-label="Instituto Vert — contatos">
-        <img class="card-header__brand-mark" src="/assets/marca/logo-vert-dark-transparent.png" alt="" width="1254" height="1254" />
-        <span>Instituto <strong>Vert</strong></span>
+        <img class="card-header__wordmark" src="/assets/marca/wordmark-horizontal-light.png" alt="Instituto Vert" width="1444" height="312" />
       </a>
       <nav class="card-header__nav" aria-label="Seções da página">
         <a href="#contato">Contato</a>
@@ -42,10 +41,10 @@
         <div class="profile__photo">
           <img src="/assets/hero.webp" alt="Paciente sorrindo" width="1200" height="1800" fetchpriority="high" />
           <div class="profile__gradient" aria-hidden="true"></div>
+          <img class="profile__watermark" src="/assets/marca/logo-vert-dark-transparent.png" alt="" width="1254" height="1254" />
           <div class="profile__identity">
-            <img class="profile__identity-logo" src="/assets/marca/logo-vert-dark-transparent.png" alt="Instituto Vert" width="1254" height="1254" />
             <p>Odontologia estética</p>
-            <h1 id="titulo">Instituto <em>Vert</em></h1>
+            <h1 id="titulo" class="profile__wordmark"><img src="/assets/marca/wordmark-stacked-light.png" alt="Instituto Vert" width="655" height="315" /></h1>
             <span>Franca • Ribeirão Preto</span>
           </div>
         </div>
@@ -66,7 +65,7 @@
           </div>
 
           <div class="quick-links" aria-label="Outros contatos">
-            <a href="https://www.instagram.com/institutovert.br" target="_blank" rel="noopener noreferrer" data-track="instagram"><span class="quick-link__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle class="quick-link__dot" cx="17.5" cy="6.5" r=".8"/></svg></span><strong>Instituto Vert</strong><small>@institutovert.br</small></a>
+            <a href="https://www.instagram.com/institutovert.br" target="_blank" rel="noopener noreferrer" data-track="instagram"><span class="quick-link__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle class="quick-link__dot" cx="17.5" cy="6.5" r=".8"/></svg></span><img class="quick-link__brand" src="/assets/marca/wordmark-stacked-light.png" alt="Instituto Vert" width="655" height="315" /><small>@institutovert.br</small></a>
             <a href="https://www.instagram.com/dra.anitaalmeida" target="_blank" rel="noopener noreferrer" data-track="instagram_anita"><span class="quick-link__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle class="quick-link__dot" cx="17.5" cy="6.5" r=".8"/></svg></span><strong>Dra. Anita</strong><small>@dra.anitaalmeida</small></a>
             <a href="#unidades"><span class="quick-link__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5.2-8 11-8 11S4 15.2 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><strong>Localizações</strong><small>Ver no mapa</small></a>
             <a href="/instituto-vert.vcf" download data-track="salvar_contato"><span class="quick-link__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2.2"/><path d="M5.8 16c.7-1.8 1.8-2.7 3.2-2.7s2.5.9 3.2 2.7M17 8v6M14 11h6"/></svg></span><strong>Salvar contato</strong><small>No celular</small></a>
@@ -105,11 +104,11 @@
       </section>
     </main>
 
-    <footer><div class="shell"><div><span class="footer-mark">INSTITUTO <strong>VERT</strong></span><p>Ciência, beleza e excelência em equilíbrio.</p></div><small>© <span id="year"></span> Instituto Vert<br /><button class="privacy-settings" type="button" data-privacy-settings>Privacidade e dados</button></small></div></footer>
+    <footer><div class="shell"><div><img class="footer__wordmark" src="/assets/marca/wordmark-horizontal-light.png" alt="Instituto Vert" width="1444" height="312" /><p>Ciência, beleza e excelência em equilíbrio.</p></div><small>© <span id="year"></span> Instituto Vert<br /><button class="privacy-settings" type="button" data-privacy-settings>Privacidade e dados</button></small></div></footer>
 
     <button class="floating-whatsapp" id="whatsapp-router-trigger" type="button" data-open-contact-router=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.3-4.7a8.5 8.5 0 1 1 16.2-4.1Z"/><path d="M8.2 7.7c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.5l.8 1.8c.1.3.1.5-.1.7l-.6.8c-.2.2-.1.4 0 .6.5 1 1.3 1.8 2.3 2.3.2.1.4.2.6 0l.8-1c.2-.2.4-.3.7-.2l1.9.9c.3.1.5.3.5.5 0 .3-.1 1.4-.7 2-.6.7-1.5.9-2.4.7-1-.2-2.3-.7-3.9-2.1-1.3-1.2-2.2-2.6-2.5-3.6-.3-.9 0-2.1.9-3.5Z"/></svg><span>Falar no WhatsApp</span></button>
 
-    <dialog class="contact-router" id="contact-router" aria-labelledby="contact-router-title"><div class="contact-router__content"><button class="lead-dialog__close" type="button" data-close-contact-router aria-label="Fechar">×</button><img class="contact-router__brand-mark" src="/assets/marca/logo-vert-light-transparent.png" alt="Instituto Vert" width="1254" height="1254" /><p class="eyebrow">Atendimento direcionado</p><h2 id="contact-router-title">Como podemos ajudar?</h2><p>Escolha uma opção para falar com a equipe certa.</p><div class="contact-router__options" id="contact-router-options"></div></div></dialog>
+    <dialog class="contact-router" id="contact-router" aria-labelledby="contact-router-title"><div class="contact-router__content"><button class="lead-dialog__close" type="button" data-close-contact-router aria-label="Fechar">×</button><img class="contact-router__brand-mark" src="/assets/marca/wordmark-horizontal-dark.png" alt="Instituto Vert" width="1444" height="312" /><p class="eyebrow">Atendimento direcionado</p><h2 id="contact-router-title">Como podemos ajudar?</h2><p>Escolha uma opção para falar com a equipe certa.</p><div class="contact-router__options" id="contact-router-options"></div></div></dialog>
 
     <dialog class="lead-dialog" id="lead-dialog" aria-labelledby="lead-dialog-title"><form class="lead-form" id="lead-form"><button class="lead-dialog__close" type="button" data-close-lead aria-label="Fechar">×</button><p class="eyebrow">Contato rápido</p><h2 id="lead-dialog-title">Antes de continuar</h2><p id="lead-dialog-description">Informe seus dados para receber atendimento personalizado.</p><label>Nome<input id="lead-name" name="name" autocomplete="name" maxlength="100" required /></label><label>Telefone com DDD<input id="lead-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="(16) 99999-9999" required /></label><label>Seu Instagram <small>opcional</small><input id="lead-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" placeholder="@seuusuario" /></label><label id="lead-profession-field">Profissão <small>opcional</small><input id="lead-profession" name="profession" autocomplete="organization-title" maxlength="100" /></label><div class="lead-demographics"><label>Faixa etária <small>opcional</small><select name="ageRange"><option value="">Não informar</option><option>18-24</option><option>25-34</option><option>35-44</option><option>45-54</option><option>55-64</option><option>65+</option></select></label><label>Sexo <small>opcional</small><select name="gender"><option value="">Não informar</option><option value="feminino">Feminino</option><option value="masculino">Masculino</option><option value="outro">Outro</option><option value="prefiro_nao_informar">Prefiro não informar</option></select></label></div><div class="formation-lead-fields" id="formation-lead-fields" hidden><fieldset class="choice-field"><legend>Você é:</legend><div class="choice-field__options"><label><input name="isDentist" type="radio" value="yes" disabled required /><span>Dentista</span></label><label><input name="isDentist" type="radio" value="no" disabled required /><span>Estudante</span></label></div></fieldset><fieldset class="choice-field"><legend>Já fez algum curso na área?</legend><div class="choice-field__options"><label><input name="hasPreviousCourse" type="radio" value="yes" disabled required /><span>Sim</span></label><label><input name="hasPreviousCourse" type="radio" value="no" disabled required /><span>Não</span></label></div></fieldset></div><label class="lead-consent"><input name="consent" type="checkbox" required /><span>Autorizo o Instituto Vert a usar estes dados para responder ao meu contato.</span></label><p class="lead-form__feedback" id="lead-feedback" role="status"></p><button class="lead-form__submit" type="submit">Chamar no WhatsApp</button></form></dialog>
 

@@ -19,12 +19,6 @@ let pendingLead = null;
 let currentCompany = {};
 let currentUnits = [];
 
-const DEFAULT_LOGOS = {
-  primaryDark: '/assets/marca/logo-vert-dark-transparent.png',
-  primaryLight: '/assets/marca/logo-vert-light-transparent.png',
-  horizontal: new URL('./assets/logo-secundaria-marrom.jpeg', import.meta.url).href,
-};
-
 function safeUrl(value, fallback = '#') {
   if (!value) return fallback;
   try {
@@ -254,17 +248,9 @@ function escapeText(value = '') {
 
 function renderContent(content) {
   if (!content) return; const company = content.company || {}; const units = content.units || []; const formationSettings = content.formationSettings || {}; currentCompany = company; currentUnits = units;
-  setText('.profile__identity p', company.category); setText('#titulo', company.name); setText('.intro .eyebrow', company.ctaLabel); setText('#cms-headline', company.headline); setText('#cms-description', company.description); setText('footer p', company.tagline);
+  setText('.profile__identity p', company.category); setText('.intro .eyebrow', company.ctaLabel); setText('#cms-headline', company.headline); setText('#cms-description', company.description); setText('footer p', company.tagline);
   const hero = document.querySelector('.profile__photo > img');
   if (hero && company.heroImage) applyImageSource(hero, company.heroImage, new URL('./assets/hero.webp', import.meta.url).href);
-  const logoSources = {
-    primaryDark: DEFAULT_LOGOS.primaryDark,
-    primaryLight: DEFAULT_LOGOS.primaryLight,
-    horizontal: DEFAULT_LOGOS.horizontal,
-  };
-  const logo = document.querySelector('.card-header__brand-mark');
-  const selectedLogo = logoSources.primaryDark;
-  applyImageSource(logo, selectedLogo, DEFAULT_LOGOS.primaryDark);
   const cities = units.filter((unit) => unit.active !== false).map((unit) => unit.city).filter(Boolean); setText('.profile__identity span', company.identityLine || cities.join(' • '));
   renderUnits(units); renderCards('campanhas', 'campaign-list', content.campaigns, 'campaign'); renderCards('depoimentos', 'testimonial-list', content.testimonials, 'testimonial'); renderFormations(content.formations, formationSettings, company); renderExtraLinks(content.links); renderWhatsApp(units, company);
   const instagram = document.querySelector('.quick-links a[data-track="instagram"]'); if (instagram && company.instagram) { instagram.href = safeUrl(company.instagram); const label = instagram.querySelector('small'); if (label) label.textContent = company.instagramLabel || '@institutovert.br'; }

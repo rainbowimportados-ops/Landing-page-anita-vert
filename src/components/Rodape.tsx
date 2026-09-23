@@ -13,9 +13,9 @@ export function Rodape() {
       <div className="container-vert grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2 lg:col-span-1">
           <img
-            src="/assets/marca/logo-circular-clara.png"
+            src="/assets/marca/wordmark-horizontal-light.png"
             alt={`${clinica.nome} — marca`}
-            className="h-16 w-16 rounded-full border border-borda-inversa/70 object-cover shadow-2"
+            className="h-auto w-48 object-contain"
             loading="lazy"
           />
           <p className="mt-3 max-w-xs text-sm leading-relaxed">
