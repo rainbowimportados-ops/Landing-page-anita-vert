@@ -47,7 +47,7 @@ export type ImagemCaso = {
 }
 
 export type Marca = {
-  /** Substitui o logotipo desenhado em SVG quando enviado. */
+  /** Legacy CMS field; approved brand files are fixed in MarcaVert. */
   logo?: string
   /** Imagem de fundo do hero. */
   capa?: string
@@ -102,7 +102,7 @@ export const conteudoPadrao: Conteudo = {
   rodapeLegal: rodapeLegalPadrao,
   instagram: { clinica: clinicaPadrao.instagram },
   galeria: [],
-  marca: { logo: '/assets/marca/logo-circular-principal.png' },
+  marca: { logo: '/assets/brand-official/circular-light.jpeg' },
   banner: null,
 }
 

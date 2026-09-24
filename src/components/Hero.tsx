@@ -1,3 +1,4 @@
+import { MarcaVert } from './MarcaVert'
 import { useEffect, useRef } from 'react'
 import { useConteudo } from '../lib/ConteudoContexto'
 import { BotaoAncora, BotaoWhatsApp } from './CTA'
@@ -52,14 +53,8 @@ export function Hero() {
 
       <div className="container-vert relative grid gap-12 py-14 sm:py-20 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-20 lg:py-24">
         <div className="hero-copy max-w-xl animate-fade-up">
-          <div className="mb-6 flex items-center gap-3">
-            {marca.logo && (
-              <img
-                src={marca.logo}
-                alt={`${clinica.nome} — marca`}
-                className="h-14 w-14 rounded-full border border-borda-inversa/70 bg-superficie-inversa-suave object-cover shadow-2"
-              />
-            )}
+          <div className="mb-6 flex flex-col items-start gap-3">
+            <MarcaVert variante="stacked" className="official-brand--hero" />
             <p className="olho text-conteudo-inverso-tenue">{clinica.tagline}</p>
           </div>
           <h1 className="mt-5 max-w-2xl font-display text-display-lg font-normal tracking-[-0.035em]">

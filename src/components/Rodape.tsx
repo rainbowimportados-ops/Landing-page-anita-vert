@@ -1,3 +1,4 @@
+import { MarcaVert } from './MarcaVert'
 import { registrarClique } from '../lib/analytics'
 import { useConteudo } from '../lib/ConteudoContexto'
 
@@ -12,12 +13,7 @@ export function Rodape() {
     <footer className="bg-superficie-rodape py-12 text-conteudo-inverso-suave">
       <div className="container-vert grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2 lg:col-span-1">
-          <img
-            src="/assets/marca/logo-circular-clara.png"
-            alt={`${clinica.nome} — marca`}
-            className="h-16 w-16 rounded-full border border-borda-inversa/70 object-cover shadow-2"
-            loading="lazy"
-          />
+          <MarcaVert variante="horizontal" className="official-brand--footer" />
           <p className="mt-3 max-w-xs text-sm leading-relaxed">
             {clinica.tagline} em Franca e Ribeirão Preto.
           </p>

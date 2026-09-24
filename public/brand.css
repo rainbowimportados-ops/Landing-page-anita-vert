@@ -1,0 +1,12 @@
+/* Original JPEGs only. Frames hide surplus background, never any logo strokes. */
+.official-brand { position: relative; display: block; flex: none; overflow: hidden; width: 240px; aspect-ratio: 4.5; background: #302218; }
+.official-brand > img { position: absolute; display: block; left: 50%; top: 50%; width: 100%; max-width: none; height: auto; transform: translate(-50%, -50%); object-fit: contain; filter: none; opacity: 1; }
+.official-brand--stacked { width: 290px; aspect-ratio: 1.95; }
+.official-brand--stacked > img { width: 175%; }
+.official-brand--circular { width: 160px; aspect-ratio: 1; }
+.official-brand--dark { background: #f7ecdc; }
+.official-brand--header { width: clamp(210px, 19vw, 250px); }
+.official-brand--footer { width: 240px; }
+.official-brand--hero { width: clamp(240px, 23vw, 310px); }
+.official-brand--watermark { opacity: .22; pointer-events: none; }
+@media(max-width:700px) { .official-brand--header { width: 216px; } .official-brand--hero { width: 250px; } }
