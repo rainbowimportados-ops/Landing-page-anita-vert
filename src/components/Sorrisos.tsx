@@ -13,78 +13,89 @@ export const registros = [
   { url: angulo, titulo: 'Outro ângulo', largura: 2048, altura: 2048 },
 ]
 
+/**
+ * `divisor` é a posição da linha, em % da largura: à esquerda fica o ANTES,
+ * à direita o DEPOIS (convenção de leitura). 100 = só antes, 0 = só depois.
+ */
 export function ComparadorSorriso({ registro }: { registro: typeof registros[number] }) {
-  const [posicao, setPosicao] = useState(50)
+  const [divisor, setDivisor] = useState(50)
   const [reproduzindo, setReproduzindo] = useState(false)
   const [carregou, setCarregou] = useState(false)
   const [falhou, setFalhou] = useState(false)
   const quadro = useRef(0)
   const id = useId()
+  const bloqueado = !carregou || falhou
   useEffect(() => () => cancelAnimationFrame(quadro.current), [])
 
   function parar() {
     cancelAnimationFrame(quadro.current)
     setReproduzindo(false)
   }
-  function mostrar(valor: number) {
+  function mover(valor: number) {
     parar()
-    setPosicao(Math.max(0, Math.min(100, valor)))
+    setDivisor(Math.max(0, Math.min(100, valor)))
   }
   function arrastar(evento: PointerEvent<HTMLDivElement>) {
     const area = evento.currentTarget.getBoundingClientRect()
-    mostrar((evento.clientX - area.left) / area.width * 100)
+    mover(((evento.clientX - area.left) / area.width) * 100)
   }
+  /** Transição do antes para o depois: a linha corre da direita para a esquerda. */
   function reproduzir() {
     parar()
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setPosicao(100)
+      setDivisor(0)
       return
     }
     setReproduzindo(true)
     const inicio = performance.now()
-    setPosicao(0)
+    setDivisor(100)
     function passo(agora: number) {
       const progresso = Math.min(1, (agora - inicio) / 2400)
-      setPosicao(progresso * progresso * (3 - 2 * progresso) * 100)
+      const suave = progresso * progresso * (3 - 2 * progresso)
+      setDivisor(100 - suave * 100)
       if (progresso < 1) quadro.current = requestAnimationFrame(passo)
       else setReproduzindo(false)
     }
     quadro.current = requestAnimationFrame(passo)
   }
 
+  const antes = Math.round(divisor)
+  const depois = 100 - antes
+
   return (
     <figure className="sorriso-comparador">
       <div className="sorriso-janela" style={{ aspectRatio: `${registro.largura} / ${registro.altura / 2}` }}
         onPointerDown={(e) => {
-          if (e.button !== 0 || !carregou || falhou) return
+          if (e.button !== 0 || bloqueado) return
           e.currentTarget.setPointerCapture(e.pointerId)
           arrastar(e)
         }}
         onPointerMove={(e) => { if (e.currentTarget.hasPointerCapture(e.pointerId)) arrastar(e) }}
         onPointerUp={(e) => { if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId) }}>
-        <div className="sorriso-metade">
-          <img src={registro.url} alt={`${registro.titulo}: antes do tratamento`} width={registro.largura} height={registro.altura} loading="lazy" draggable={false}
+        <div className="sorriso-metade sorriso-depois">
+          <img src={registro.url} alt={`${registro.titulo}: depois do tratamento`} width={registro.largura} height={registro.altura} loading="lazy" draggable={false}
             onLoad={() => setCarregou(true)} onError={() => setFalhou(true)} />
         </div>
-        <div className="sorriso-metade sorriso-depois" style={{ clipPath: `inset(0 ${100 - posicao}% 0 0)` }}>
-          <img src={registro.url} alt={`${registro.titulo}: depois do tratamento`} width={registro.largura} height={registro.altura} loading="lazy" draggable={false} />
+        <div className="sorriso-metade" style={{ clipPath: `inset(0 ${100 - divisor}% 0 0)` }}>
+          <img src={registro.url} alt={`${registro.titulo}: antes do tratamento`} width={registro.largura} height={registro.altura} loading="lazy" draggable={false} />
         </div>
-        <div className="sorriso-divisor" style={{ left: `${posicao}%` }} aria-hidden="true"><span>↔</span></div>
+        <div className="sorriso-divisor" style={{ left: `${divisor}%` }} aria-hidden="true"><span>↔</span></div>
         <div className="sorriso-rotulos" aria-hidden="true">
-          <span style={{ visibility: posicao > 12 ? 'visible' : 'hidden' }}>Depois</span>
-          <span style={{ visibility: posicao < 88 ? 'visible' : 'hidden' }}>Antes</span>
+          <span style={{ visibility: divisor > 12 ? 'visible' : 'hidden' }}>Antes</span>
+          <span style={{ visibility: divisor < 88 ? 'visible' : 'hidden' }}>Depois</span>
         </div>
+        <span className="sorriso-selo">Resultado real · Instituto Vert</span>
       </div>
       {falhou && <p role="status">Não foi possível carregar a foto. Tente atualizar a página.</p>}
       <figcaption className="sorriso-controles">
-        <label htmlFor={id}>Arraste para comparar <span>{Math.round(posicao)}% do depois</span></label>
-        <input id={id} type="range" min="0" max="100" value={posicao} disabled={!carregou || falhou}
-          aria-label={`Revelar depois: ${registro.titulo}`} aria-valuetext={`${Math.round(posicao)} por cento do depois`}
-          onChange={(e) => mostrar(Number(e.target.value))} />
+        <label htmlFor={id}>Arraste para comparar <span>{antes}% antes · {depois}% depois</span></label>
+        <input id={id} type="range" min="0" max="100" value={divisor} disabled={bloqueado}
+          aria-label={`Comparar antes e depois: ${registro.titulo}`} aria-valuetext={`${antes} por cento antes, ${depois} por cento depois`}
+          onChange={(e) => mover(Number(e.target.value))} />
         <div className="sorriso-acoes">
-          <button type="button" onClick={() => mostrar(0)} disabled={!carregou || falhou}>Ver antes</button>
-          <button type="button" onClick={reproduzindo ? parar : reproduzir} disabled={!carregou || falhou}>{reproduzindo ? 'Pausar' : 'Reproduzir transição'}</button>
-          <button type="button" onClick={() => mostrar(100)} disabled={!carregou || falhou}>Ver depois</button>
+          <button type="button" onClick={() => mover(100)} disabled={bloqueado}>Ver antes</button>
+          <button type="button" onClick={reproduzindo ? parar : reproduzir} disabled={bloqueado}>{reproduzindo ? 'Pausar' : 'Reproduzir transição'}</button>
+          <button type="button" onClick={() => mover(0)} disabled={bloqueado}>Ver depois</button>
         </div>
       </figcaption>
     </figure>

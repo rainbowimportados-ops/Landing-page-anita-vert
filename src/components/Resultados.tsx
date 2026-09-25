@@ -1,3 +1,5 @@
+import videoResultado from '../../assets/resultado.mp4'
+import posterVideo from '../../assets/video-poster.webp'
 import { Reveal } from './Reveal'
 import { ComparadorSorriso, registros } from './Sorrisos'
 
@@ -33,10 +35,10 @@ export function Resultados() {
                 controls
                 playsInline
                 preload="metadata"
-                poster="/assets/video-poster.webp"
+                poster={posterVideo}
                 aria-label="Vídeo de resultado real do Instituto Vert"
               >
-                <source src="/assets/resultado.mp4" type="video/mp4" />
+                <source src={videoResultado} type="video/mp4" />
                 Seu navegador não suporta vídeo.
               </video>
               <figcaption className="resultado-card__caption">
