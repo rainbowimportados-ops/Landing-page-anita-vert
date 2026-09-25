@@ -56,7 +56,7 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
     setUnidade(novo.unidade ?? '')
     setErros({})
     setEnviando(false)
-    registrarClique(novo.cta, novo.unidade ?? null)
+    registrarClique(novo.cta, novo.unidade ?? null, 'form_opened')
     dialogo.current?.showModal()
   }, [])
 
@@ -104,7 +104,8 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
       setErros({ [resultado.erro]: resultado.erro === 'nome' ? 'Confira o nome.' : 'Confira o número com DDD.' })
       return
     }
-    registrarClique(`${pedido.cta}_lead`, escolhida)
+    if (resultado.ok) registrarClique(pedido.cta, escolhida, 'lead_created')
+    registrarClique(pedido.cta, escolhida, 'whatsapp_opened')
 
     const numero = dadosUnidade?.whatsapp ?? pedido.numero
     const primeiroNome = nome.split(/\s+/)[0]
@@ -207,7 +208,7 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
             {!eProfissional && (
               <a
                 href={linkWhatsApp(clinica.whatsappAtendimento, 'Olá! Já sou paciente do Instituto Vert e preciso de atendimento.')}
-                onClick={() => registrarClique(`${pedido.cta}_ja_sou_paciente`)}
+                onClick={() => registrarClique('ja_sou_paciente', null, 'whatsapp_opened')}
                 className="-mt-2 text-center text-sm text-conteudo-suave underline decoration-borda-forte underline-offset-4"
               >
                 Já sou paciente — falar com o atendimento

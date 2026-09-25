@@ -543,7 +543,7 @@ function sendPreview() {
 async function loadMetrics() {
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const [clickResult, leadResult] = await Promise.all([
-    supabase.from('digital_card_clicks').select('botao,visitor_id,instagram_handle,created_at,origem,dispositivo,unidade').gte('created_at', since),
+    supabase.from('digital_card_clicks').select('botao,visitor_id,instagram_handle,created_at,origem,dispositivo,unidade').eq('superficie', 'digital_card').in('evento', ['page_view', 'cta_click', 'consent', 'lead_created']).gte('created_at', since),
     supabase.from('digital_card_leads').select('visitor_id,instagram_handle,age_range,gender,created_at').gte('created_at', since),
   ]);
   if (clickResult.error || leadResult.error) return;
@@ -621,7 +621,7 @@ async function loadLeads() {
   if (formationList) formationList.innerHTML = '<div class="empty-state"><strong>Carregando interessados…</strong></div>';
   const [leadResult, clickResult] = await Promise.all([
     supabase.from('digital_card_leads').select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at,visitor_id,instagram_handle,source_origin,age_range,gender').order('created_at', { ascending: false }).limit(500),
-    supabase.from('digital_card_clicks').select('visitor_id,botao,unidade,origem,dispositivo,instagram_handle,created_at').not('visitor_id', 'is', null).order('created_at', { ascending: false }).limit(5000),
+    supabase.from('digital_card_clicks').select('visitor_id,botao,unidade,origem,dispositivo,instagram_handle,created_at').eq('superficie', 'digital_card').in('evento', ['page_view', 'cta_click', 'consent', 'lead_created']).not('visitor_id', 'is', null).order('created_at', { ascending: false }).limit(5000),
   ]);
   if (leadResult.error || clickResult.error) {
     const message = leadResult.error?.message || clickResult.error?.message || 'Erro desconhecido';

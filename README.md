@@ -62,19 +62,34 @@ no navegador: o RLS de `landing_content` exige que o usuário esteja em
 tela apenas reflete essa decisão; um usuário logado fora dessa lista recebe o
 erro do banco ao tentar salvar.
 
-## Medição de cliques
+## Captação e medição
 
-As duas páginas gravam na mesma tabela `public.link_clicks`:
+**Leads.** Landing e cartão usam a mesma função pública do Supabase,
+`site_capturar_lead(p jsonb)`. Ela valida os dados, limita abusos (3 envios
+por telefone e 60 no total a cada 10 min) e grava em:
+
+- `digital_card_leads` — lista que o painel `/admin` já exibe;
+- `crm_contacts` — uma pessoa por telefone normalizado (nunca sobrescreve nome);
+- `crm_leads` — uma oportunidade por pedido, com `intent`, `source_surface`,
+  unidade, `utm`, página e botão de entrada.
+
+"Já sou paciente" (`intent = paciente_atual`) identifica a pessoa, mas não
+cria oportunidade: é atendimento, não aquisição. Se o banco falhar ou demorar
+mais de 4 s, o WhatsApp abre mesmo assim.
+
+**Eventos.** As duas páginas gravam em `public.digital_card_clicks`:
 
 | coluna | conteúdo |
 | --- | --- |
-| `botao` | identificador do botão, ex. `hero_agendar`, `unidade_franca_agendar` |
-| `unidade` | `franca`, `ribeirao-preto` ou `null` quando o CTA é geral |
-| `origem` | `utm_source` da URL, senão o domínio de origem, senão `direto` |
-| `dispositivo` | `mobile`, `tablet` ou `desktop` |
+| `superficie` | `digital_card` ou `landing` |
+| `evento` | `page_view`, `cta_click`, `form_opened`, `lead_created`, `whatsapp_opened`, `consent` |
+| `botao` | detalhe, ex. `hero_agendar`, `whatsapp_paciente` |
+| `unidade`, `origem`, `dispositivo`, `pagina` | contexto, sem dado pessoal |
+| `visitor_id`, `instagram_handle` | só no cartão e só com consentimento |
 
-Nenhum dado pessoal é enviado. A chave usada é a publishable, cuja única
-permissão nessa tabela é `INSERT`.
+Visitas e cliques são contados sempre de forma anônima; o consentimento só
+liga os eventos a uma pessoa. `public.link_clicks` guarda o histórico antigo
+da landing e não recebe mais eventos.
 
 Para separar campanhas, divulgue a URL com `?utm_source=instagram_bio`.
 

@@ -293,9 +293,18 @@ function detectarOrigem() {
  * - só com consentimento: visitor_id e @ do Instagram, que ligam os eventos
  *   a uma jornada.
  */
-function registrarClique(botao, unidade = null) {
+function eventoPadrao(botao) {
+  if (botao === 'visualizacao_pagina') return 'page_view';
+  if (botao === 'consentimento_autorizado' || botao === 'preferencias_privacidade') return 'consent';
+  return 'cta_click';
+}
+
+function registrarClique(botao, unidade = null, evento = null) {
   if (new URLSearchParams(window.location.search).get('preview') === 'admin') return;
   const payload = {
+    superficie: 'digital_card',
+    evento: evento || eventoPadrao(botao),
+    pagina: window.location.pathname.slice(0, 300),
     botao: String(botao).slice(0, 40),
     unidade: unidade ? String(unidade).slice(0, 40) : null,
     origem: detectarOrigem(),
@@ -443,6 +452,7 @@ document.addEventListener('click', (event) => {
   professionField.hidden = isFormation;
   professionInput.disabled = isFormation;
   leadFeedback.textContent = '';
+  registrarClique(pendingLead.track, pendingLead.unit || null, 'form_opened');
   leadDialog.showModal();
   requestAnimationFrame(() => document.querySelector('#lead-name').focus());
 }, true);
@@ -477,37 +487,57 @@ leadForm.addEventListener('submit', async (event) => {
   leadFeedback.textContent = 'Salvando seus dados…';
   let destinationForStorage = pendingLead.destination;
   try { const url = new URL(destinationForStorage); url.search = ''; destinationForStorage = url.href; } catch { destinationForStorage = ''; }
-  const { error } = await supabase.from('digital_card_leads').insert({
-    name: lead.name,
-    phone: lead.phone,
-    profession: lead.profession || null,
-    button: pendingLead.button,
-    unit: pendingLead.unit || null,
-    destination: destinationForStorage || null,
-    consent: formData.get('consent') === 'on',
-    lead_type: pendingLead.leadType,
-    is_dentist: lead.isDentist,
-    has_previous_course: lead.hasPreviousCourse,
-    city: lead.city || null,
-    course_id: pendingLead.courseId || null,
-    course_title: pendingLead.courseTitle || null,
-    visitor_id: trackingConsent ? visitorId() : null,
-    instagram_handle: lead.instagram || null,
-    age_range: lead.ageRange || null,
-    gender: lead.gender || null,
-    source_origin: detectarOrigem(),
-  });
-  if (error) {
-    leadFeedback.textContent = 'Não foi possível continuar agora. Tente novamente.';
-    submit.disabled = false;
-    return;
+  const intencao = pendingLead.leadType === 'formation' ? 'curso' : pendingLead.leadType === 'patient' ? 'paciente_atual' : 'avaliacao';
+  const params = new URLSearchParams(window.location.search);
+  const utm = {};
+  ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach((chave) => { const valor = params.get(chave); if (valor) utm[chave] = valor.slice(0, 100); });
+  if (!utm.utm_source && params.get('origem')) utm.utm_source = `instagram:${params.get('origem')}`.slice(0, 100);
+  let salvo = false;
+  try {
+    // Mesmo motor da landing: grava no painel e no CRM, deduplicando pelo telefone.
+    const envio = supabase.rpc('site_capturar_lead', { p: {
+      superficie: 'digital_card',
+      intencao,
+      tipo_painel: pendingLead.leadType,
+      consentimento: formData.get('consent') === 'on',
+      nome: lead.name,
+      telefone: lead.phone,
+      profissao: lead.profession || null,
+      rotulo: pendingLead.button,
+      unidade: pendingLead.unit || null,
+      destino: destinationForStorage || null,
+      dentista: lead.isDentist,
+      ja_fez_curso: lead.hasPreviousCourse,
+      curso_id: pendingLead.courseId || null,
+      curso_titulo: pendingLead.courseTitle || null,
+      visitor_id: trackingConsent ? visitorId() : null,
+      instagram: lead.instagram || null,
+      faixa_etaria: lead.ageRange || null,
+      genero: lead.gender || null,
+      utm,
+      referrer: detectarOrigem(),
+      pagina: window.location.pathname,
+      cta: pendingLead.track,
+    } });
+    const limite = new Promise((resolve) => window.setTimeout(() => resolve({ data: null, error: { message: 'tempo' } }), 4000));
+    const { data, error } = await Promise.race([envio, limite]);
+    if (!error && data?.ok === false && (data.erro === 'nome' || data.erro === 'telefone')) {
+      leadFeedback.textContent = data.erro === 'nome' ? 'Confira o nome informado.' : 'Informe um telefone válido com DDD.';
+      submit.disabled = false;
+      return;
+    }
+    salvo = !error && data?.ok === true;
+  } catch {
+    salvo = false;
   }
   if (trackingConsent && lead.instagram) {
     visitorInstagram = lead.instagram;
     storageSet(INSTAGRAM_STORAGE_KEY, visitorInstagram);
   }
-  registrarClique(pendingLead.track, pendingLead.unit || null);
+  if (salvo) registrarClique(pendingLead.track, pendingLead.unit || null, 'lead_created');
+  registrarClique(pendingLead.track, pendingLead.unit || null, 'whatsapp_opened');
   const destination = applyPreMessage(pendingLead.destination, pendingLead.message, lead);
+  // Se o banco falhar ou demorar, o atendimento abre mesmo assim.
   leadFeedback.textContent = 'Tudo certo. Abrindo o atendimento…';
   leadForm.reset();
   window.setTimeout(() => { window.location.href = destination; }, 250);
