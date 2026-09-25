@@ -126,11 +126,14 @@ export function Editor({ email, aoSair }: { email: string; aoSair: () => void })
 
         <section>
           <h2 className="titulo-secao">Contato</h2>
+          <p className="mt-2 rounded-card border border-borda bg-superficie-suave p-4 text-sm text-conteudo-suave">
+            Telefone da clínica, Instagram, endereço e WhatsApp das unidades vêm do cadastro do cartão
+            e valem para as duas páginas. Para alterar, use o painel do cartão em{' '}
+            <a href="/admin/" className="underline underline-offset-4">/admin</a>.
+          </p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             {([
-              ['whatsappComercial', 'WhatsApp comercial', '55 + DDD + número'],
-              ['whatsappAtendimento', 'WhatsApp do atendimento', '55 + DDD + número'],
-              ['instagram', 'Instagram (URL)', ''],
+              ['whatsappAtendimento', 'WhatsApp do atendimento (se diferente)', '55 + DDD + número'],
               ['email', 'E-mail de contato', ''],
             ] as const).map(([chave, texto, dica]) => (
               <div key={chave}>
@@ -156,21 +159,12 @@ export function Editor({ email, aoSair }: { email: string; aoSair: () => void })
         </section>
 
         <section>
-          <h2 className="titulo-secao">Unidades</h2>
+          <h2 className="titulo-secao">Horários das unidades</h2>
           <div className="mt-5 space-y-8">
             {unidadesPadrao.map((unidade) => (
               <div key={unidade.slug} className="rounded-card border border-borda bg-superficie p-5">
                 <h3 className="font-display text-lg text-conteudo">{unidade.nome}</h3>
                 <div className="mt-4 space-y-4">
-                  <div>
-                    <label className={rotulo}>Endereço completo</label>
-                    <input
-                      className={campo}
-                      placeholder={unidade.endereco}
-                      value={ajustes.unidades?.[unidade.slug]?.endereco ?? ''}
-                      onChange={(e) => definirUnidade(unidade.slug, 'endereco', e.target.value)}
-                    />
-                  </div>
                   <div>
                     <label className={rotulo}>Horários (um por linha)</label>
                     <textarea
@@ -185,24 +179,6 @@ export function Editor({ email, aoSair }: { email: string; aoSair: () => void })
                           e.target.value.split('\n').filter((l) => l.trim()),
                         )
                       }
-                    />
-                  </div>
-                  <div>
-                    <label className={rotulo}>Link do Google Maps</label>
-                    <input
-                      className={campo}
-                      placeholder="Sem isto, o botão “Como chegar” não aparece"
-                      value={ajustes.unidades?.[unidade.slug]?.mapsUrl ?? ''}
-                      onChange={(e) => definirUnidade(unidade.slug, 'mapsUrl', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className={rotulo}>WhatsApp desta unidade</label>
-                    <input
-                      className={campo}
-                      placeholder={unidade.whatsapp}
-                      value={ajustes.unidades?.[unidade.slug]?.whatsapp ?? ''}
-                      onChange={(e) => definirUnidade(unidade.slug, 'whatsapp', e.target.value)}
                     />
                   </div>
                 </div>

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { aplicar, carregarAjustes, conteudoPadrao, type Conteudo } from './conteudo'
+import { aplicar, carregarAjustes, carregarCartao, conteudoPadrao, type Conteudo } from './conteudo'
 
 const Contexto = createContext<Conteudo>(conteudoPadrao)
 
@@ -17,8 +17,8 @@ export function ProvedorDeConteudo({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let ativo = true
-    carregarAjustes().then((ajustes) => {
-      if (ativo && ajustes) setConteudo(aplicar(ajustes))
+    Promise.all([carregarAjustes(), carregarCartao()]).then(([ajustes, cartao]) => {
+      if (ativo && (ajustes || cartao)) setConteudo(aplicar(ajustes, cartao))
     })
     return () => {
       ativo = false

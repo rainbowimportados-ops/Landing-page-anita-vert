@@ -34,6 +34,14 @@ Construída em React + TypeScript + Tailwind, com o conteúdo centralizado em
 **`src/config/site.ts`** — dados da clínica, unidades, tratamentos, etapas, FAQ
 e a seção para dentistas. Não é preciso mexer nos componentes para trocar copy.
 
+### Fonte única de unidades e contatos
+
+Endereço e WhatsApp das unidades, telefone da clínica e Instagram vêm do
+cadastro do cartão (`digital_card_content`, editado em `/admin`) e valem para
+as duas páginas. "Como chegar" é gerado a partir do endereço, então não
+depende de link colado à mão. Os padrões em `src/config/site.ts` só entram se
+o Supabase estiver fora do ar.
+
 ### Configuração pelo painel (`/config`)
 
 O que está em `src/config/site.ts` é o **padrão**. O painel grava só as

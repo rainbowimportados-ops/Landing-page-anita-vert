@@ -1,16 +1,21 @@
 /**
- * Conteúdo da landing page: padrões do código + ajustes salvos pela clínica.
+ * Conteúdo da landing page, em três camadas (a de cima vence):
  *
- * O que está em src/config/site.ts continua sendo a base. O painel em
- * /config grava apenas as diferenças na tabela public.landing_content, e elas
- * são aplicadas por cima na hora de renderizar. Se o Supabase estiver fora do
- * ar ou a linha não existir, a página abre com os padrões — nunca em branco.
+ * 1. Cadastro do cartão (`digital_card_content`, editado em /admin):
+ *    FONTE ÚNICA de endereço e WhatsApp das unidades, telefone da clínica e
+ *    Instagram — o mesmo dado aparece no cartão e na landing.
+ * 2. Ajustes da landing (`landing_content`, editado em /config): horários,
+ *    FAQ, depoimentos, rodapé legal, Instagram da Dra., galeria, banner.
+ * 3. Padrões do código (src/config/site.ts).
+ *
+ * Se o Supabase estiver fora do ar, a página abre com os padrões — nunca em branco.
  */
 import {
   clinica as clinicaPadrao,
   depoimentos as depoimentosPadrao,
   faq as faqPadrao,
   rodapeLegal as rodapeLegalPadrao,
+  rotaParaEndereco,
   unidades as unidadesPadrao,
   type Depoimento,
   type Unidade,
@@ -94,9 +99,17 @@ export type Conteudo = {
   banner: Banner | null
 }
 
+/** Parte do cadastro do cartão que a landing usa. */
+export type Cartao = {
+  company?: { phone?: string; instagram?: string; whatsappMode?: string }
+  units?: Array<{ id?: string; active?: boolean; address?: string; phone?: string }>
+}
+
+const soDigitos = (valor?: string) => (valor ?? '').replace(/\D/g, '')
+
 export const conteudoPadrao: Conteudo = {
   clinica: clinicaPadrao,
-  unidades: unidadesPadrao,
+  unidades: unidadesPadrao.map((u) => ({ ...u, mapsUrl: rotaParaEndereco(u.endereco) })),
   faq: faqPadrao.filter((item) => item.resposta.trim() !== ''),
   depoimentos: depoimentosPadrao,
   rodapeLegal: rodapeLegalPadrao,
@@ -106,17 +119,35 @@ export const conteudoPadrao: Conteudo = {
   banner: null,
 }
 
-/** Aplica os ajustes sobre os padrões, campo a campo. */
-export function aplicar(ajustes: Ajustes | null | undefined): Conteudo {
-  if (!ajustes) return conteudoPadrao
+/** Aplica cartão e ajustes sobre os padrões, campo a campo. */
+export function aplicar(entrada: Ajustes | null | undefined, cartao?: Cartao | null): Conteudo {
+  const ajustes: Ajustes = entrada ?? {}
+  const telefoneCartao = soDigitos(cartao?.company?.phone)
+  const compartilhado = cartao?.company?.whatsappMode !== 'separate'
+
+  const clinica = { ...clinicaPadrao, ...(ajustes.clinica ?? {}) }
+  if (telefoneCartao) clinica.whatsappComercial = telefoneCartao
+  if (!ajustes.clinica?.whatsappAtendimento && telefoneCartao) clinica.whatsappAtendimento = telefoneCartao
+  if (cartao?.company?.instagram?.trim()) clinica.instagram = cartao.company.instagram.trim()
 
   return {
-    clinica: { ...clinicaPadrao, ...(ajustes.clinica ?? {}) },
+    clinica,
 
-    unidades: unidadesPadrao.map((unidade) => ({
-      ...unidade,
-      ...(ajustes.unidades?.[unidade.slug] ?? {}),
-    })),
+    unidades: unidadesPadrao.map((unidade) => {
+      const doCartao = cartao?.units?.find((u) => u.id === unidade.slug && u.active !== false)
+      const ajuste = ajustes.unidades?.[unidade.slug] ?? {}
+      const endereco = doCartao?.address?.trim() || ajuste.endereco?.trim() || unidade.endereco
+      const whatsapp =
+        (compartilhado ? telefoneCartao : soDigitos(doCartao?.phone)) ||
+        soDigitos(doCartao?.phone) || soDigitos(ajuste.whatsapp) || unidade.whatsapp
+      return {
+        ...unidade,
+        endereco,
+        whatsapp,
+        horarios: ajuste.horarios ?? unidade.horarios,
+        mapsUrl: rotaParaEndereco(endereco),
+      }
+    }),
 
     // Pergunta ainda sem resposta não vai para a página: melhor um FAQ curto
     // e verdadeiro do que um item vazio.
@@ -134,7 +165,7 @@ export function aplicar(ajustes: Ajustes | null | undefined): Conteudo {
     rodapeLegal: ajustes.rodapeLegal?.trim() || rodapeLegalPadrao,
 
     instagram: {
-      clinica: ajustes.instagram?.clinica?.trim() || clinicaPadrao.instagram,
+      clinica: clinica.instagram,
       anita: ajustes.instagram?.anita?.trim() || undefined,
       perfil: ajustes.instagram?.perfil,
       posts: (ajustes.instagram?.posts ?? []).filter((u) => u.trim() !== ''),
@@ -148,6 +179,21 @@ export function aplicar(ajustes: Ajustes | null | undefined): Conteudo {
       ajustes.banner && (ajustes.banner.imagem || ajustes.banner.titulo)
         ? ajustes.banner
         : null,
+  }
+}
+
+/** Lê o cadastro do cartão (fonte única de unidades e contatos). Null em qualquer falha. */
+export async function carregarCartao(): Promise<Cartao | null> {
+  try {
+    const resposta = await fetch(
+      `${SUPABASE_URL}/rest/v1/digital_card_content?slug=eq.${SLUG}&select=content`,
+      { headers: { apikey: CHAVE_PUBLICA, Authorization: `Bearer ${CHAVE_PUBLICA}` } },
+    )
+    if (!resposta.ok) return null
+    const linhas = (await resposta.json()) as Array<{ content: Cartao }>
+    return linhas[0]?.content ?? null
+  } catch {
+    return null
   }
 }
 

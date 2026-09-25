@@ -54,7 +54,7 @@ export function Unidades() {
                     Agendar aqui
                   </BotaoWhatsApp>
 
-                  {unidade.mapsUrl && (
+                  {(
                     <a
                       href={unidade.mapsUrl}
                       target="_blank"

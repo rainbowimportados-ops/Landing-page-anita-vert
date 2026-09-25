@@ -18,8 +18,16 @@ export type Unidade = {
   mensagem: string
   /** Vazio esconde a linha de horários. Preenchível pelo painel. */
   horarios: string[]
-  /** TODO: colar o link "Compartilhar › Copiar link" do Google Maps. */
+  /**
+   * Rota para "Como chegar". Gerada a partir do endereço (sempre leva ao lugar
+   * certo); não depende de link colado à mão.
+   */
   mapsUrl: string
+}
+
+/** Link de rota do Google Maps a partir do endereço. */
+export function rotaParaEndereco(endereco: string): string {
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(endereco)}`
 }
 
 export type Servico = {
@@ -53,7 +61,7 @@ export const clinica = {
   email: '',
   siteUrl: 'https://institutovert.app',
   /** Número comercial, usado quando o visitante ainda não escolheu unidade. */
-  whatsappComercial: '5516988094942',
+  whatsappComercial: '5516999657667',
   /** Número do atendimento, para quem já é paciente. */
   whatsappAtendimento: '5516999657667',
 }
@@ -73,7 +81,7 @@ export const unidades: Unidade[] = [
     nome: 'Vert Franca',
     cidade: 'Franca / SP',
     endereco: 'Rua Capitão Urias Batista de Avelar, 3736 — Vila Chico Júlio, Franca/SP, CEP 14405-217',
-    whatsapp: '5516988094942',
+    whatsapp: '5516999657667',
     mensagem: 'Olá! Vim pelo site e gostaria de agendar uma avaliação na unidade de Franca.',
     horarios: [],
     mapsUrl: '',
@@ -83,7 +91,7 @@ export const unidades: Unidade[] = [
     nome: 'Vert Ribeirão Preto',
     cidade: 'Ribeirão Preto / SP',
     endereco: 'Av. Presidente Vargas, 2001, Sala 98 — Jardim Santa Ângela, Ribeirão Preto/SP, CEP 14020-525',
-    whatsapp: '5516988094942',
+    whatsapp: '5516999657667',
     mensagem:
       'Olá! Vim pelo site e gostaria de agendar uma avaliação na unidade de Ribeirão Preto.',
     horarios: [],
