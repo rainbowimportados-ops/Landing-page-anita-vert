@@ -1,24 +1,44 @@
-import marcaVert from '../assets/marca-vert.png'
+import marcaHorizontal from '../assets/marca-vert.png'
+import marcaEmpilhada from '../assets/marcaVertEmpilhada'
 
 /**
- * Lockup oficial "INSTITUTO VERT", extraído de assets/logo-horizontal-oficial.jpeg.
+ * Logos oficiais do Instituto Vert, sem redesenho.
  *
- * O arquivo oficial é JPEG com fundo marrom chapado, então colá-lo direto
- * viraria um retângulo marrom sobre o hero verde. Aqui a arte entra como
- * máscara CSS e a marca assume `currentColor` — é o que permite o mesmo
- * arquivo servir sobre o hero escuro e sobre o header claro, que era o que
- * o "V" em SVG fazia trocando de cor.
+ * - `horizontal`: "INSTITUTO VERT" em linha, extraído de
+ *   assets/logo-horizontal-oficial.jpeg.
+ * - `empilhada`: "INSTITUTO" sobre "VERT", extraído de
+ *   public/assets/marca/logo-horizontal-clara.png (data URI em marcaVertEmpilhada.ts).
+ *
+ * Os originais são JPEG/PNG com fundo marrom chapado. Aqui cada arte entra
+ * como máscara CSS e assume `currentColor`, o que permite usar a mesma versão
+ * sobre fundo escuro e claro (inversão permitida pelo manual). Nunca combinar
+ * duas versões nem juntar a arte com texto digitado: cada local usa UMA versão
+ * oficial completa.
  */
-export function MarcaVert({ className = '' }: { className?: string }) {
+const versoes = {
+  horizontal: { src: marcaHorizontal, proporcao: '8 / 1' },
+  empilhada: { src: marcaEmpilhada, proporcao: '221 / 100' },
+} as const
+
+export type VersaoMarca = keyof typeof versoes
+
+export function MarcaVert({
+  className = '',
+  versao = 'horizontal',
+}: {
+  className?: string
+  versao?: VersaoMarca
+}) {
+  const { src, proporcao } = versoes[versao]
   return (
     <span
       aria-hidden="true"
       className={`block ${className}`}
       style={{
-        aspectRatio: '8 / 1',
+        aspectRatio: proporcao,
         backgroundColor: 'currentColor',
-        WebkitMaskImage: `url(${marcaVert})`,
-        maskImage: `url(${marcaVert})`,
+        WebkitMaskImage: `url(${src})`,
+        maskImage: `url(${src})`,
         WebkitMaskSize: 'contain',
         maskSize: 'contain',
         WebkitMaskRepeat: 'no-repeat',

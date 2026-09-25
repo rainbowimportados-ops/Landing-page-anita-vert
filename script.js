@@ -286,16 +286,23 @@ function detectarOrigem() {
   try { const origem = new URL(document.referrer).hostname.replace(/^www\./, ''); return origem === window.location.hostname ? 'direto' : origem.slice(0, 120); } catch { return 'direto'; }
 }
 
+/**
+ * Duas camadas de medição:
+ * - sempre: contagem anônima (botão, unidade, origem, dispositivo), sem
+ *   nenhum identificador do visitante;
+ * - só com consentimento: visitor_id e @ do Instagram, que ligam os eventos
+ *   a uma jornada.
+ */
 function registrarClique(botao, unidade = null) {
-  if (!trackingConsent || new URLSearchParams(window.location.search).get('preview') === 'admin') return;
+  if (new URLSearchParams(window.location.search).get('preview') === 'admin') return;
   const payload = {
     botao: String(botao).slice(0, 40),
     unidade: unidade ? String(unidade).slice(0, 40) : null,
     origem: detectarOrigem(),
     dispositivo: detectarDispositivo(),
-    visitor_id: visitorId(),
-    instagram_handle: visitorInstagram || null,
-    consent_version: CONSENT_VERSION,
+    visitor_id: trackingConsent ? visitorId() : null,
+    instagram_handle: trackingConsent ? visitorInstagram || null : null,
+    consent_version: trackingConsent ? CONSENT_VERSION : null,
   };
   void fetch(`${SUPABASE_URL}/rest/v1/digital_card_clicks`, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`, Prefer: 'return=minimal' }, body: JSON.stringify(payload) }).catch(() => {});
 }
@@ -314,21 +321,21 @@ function initializePrivacy() {
   const choice = storageGet(PRIVACY_STORAGE_KEY);
   visitorInstagram = normalizeInstagramHandle(storageGet(INSTAGRAM_STORAGE_KEY));
   trackingConsent = choice === `accepted:${CONSENT_VERSION}`;
-  if (trackingConsent) registrarClique('visualizacao_pagina');
-  else if (choice !== 'declined') openPrivacyDialog();
+  registrarClique('visualizacao_pagina');
+  if (!trackingConsent && choice !== 'declined') openPrivacyDialog();
 }
 
 privacyForm.addEventListener('submit', (event) => {
   event.preventDefault();
   const wasTracking = trackingConsent;
   visitorInstagram = normalizeInstagramHandle(new FormData(privacyForm).get('instagram'));
-  if (!visitorInstagram) return;
   storageSet(PRIVACY_STORAGE_KEY, `accepted:${CONSENT_VERSION}`);
-  storageSet(INSTAGRAM_STORAGE_KEY, visitorInstagram);
+  if (visitorInstagram) storageSet(INSTAGRAM_STORAGE_KEY, visitorInstagram);
+  else storageRemove(INSTAGRAM_STORAGE_KEY);
   trackingConsent = true;
   privacyDialog.close();
+  // A visualização já foi contada de forma anônima ao abrir a página.
   registrarClique(wasTracking ? 'preferencias_privacidade' : 'consentimento_autorizado');
-  if (!wasTracking) registrarClique('visualizacao_pagina');
 });
 
 document.querySelector('[data-privacy-decline]').addEventListener('click', () => {

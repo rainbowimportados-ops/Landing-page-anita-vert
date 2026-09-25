@@ -11,7 +11,7 @@ const promessas = [
 ]
 
 export function Hero() {
-  const { clinica, unidades, marca } = useConteudo()
+  const { clinica, unidades } = useConteudo()
   const sceneRef = useRef<HTMLElement>(null)
   const cidades = unidades.map((unidade) => unidade.cidade.split(' /')[0]).join(' e ')
 
@@ -52,18 +52,9 @@ export function Hero() {
 
       <div className="container-vert relative grid gap-12 py-14 sm:py-20 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-20 lg:py-24">
         <div className="hero-copy max-w-xl animate-fade-up">
-          <div className="mb-6 flex items-center gap-3">
-            {marca.logo && (
-              <img
-                src={marca.logo}
-                alt={`${clinica.nome} — marca`}
-                className="h-14 w-14 rounded-full border border-borda-inversa/70 bg-superficie-inversa-suave object-cover shadow-2"
-              />
-            )}
-            <p className="olho text-conteudo-inverso-tenue">{clinica.tagline}</p>
-          </div>
+          <p className="olho text-conteudo-inverso-tenue">{clinica.tagline}</p>
           <h1 className="mt-5 max-w-2xl font-display text-display-lg font-normal tracking-[-0.035em]">
-            Um sorriso planejado <span className="block text-realce">para o seu rosto.</span>
+            Sorrisos que transformam histórias.
           </h1>
           <p className="mt-6 max-w-texto text-base leading-relaxed text-conteudo-inverso-suave sm:text-lg">
             {clinica.descricao}
@@ -79,8 +70,8 @@ export function Hero() {
             >
               Agendar avaliação
             </BotaoWhatsApp>
-            <BotaoAncora href="#resultados" className="w-full sm:w-auto">
-              Ver antes e depois
+            <BotaoAncora href="#unidades" className="w-full sm:w-auto">
+              Conheça nossas unidades
               <IconSeta />
             </BotaoAncora>
           </div>

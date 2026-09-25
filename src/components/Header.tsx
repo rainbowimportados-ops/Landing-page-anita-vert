@@ -12,7 +12,7 @@ const navegacao = [
 ]
 
 export function Header() {
-  const { clinica, marca } = useConteudo()
+  const { clinica } = useConteudo()
   const [rolou, setRolou] = useState(false)
   const [menuAberto, setMenuAberto] = useState(false)
   const [secaoAtiva, setSecaoAtiva] = useState<string | null>(null)
@@ -78,16 +78,9 @@ export function Header() {
           className="inline-flex min-h-[44px] items-center gap-2 rounded-lg px-1"
           aria-label={`${clinica.nome} — início`}
         >
-          {marca.logo ? (
-            <>
-              <img src={marca.logo} alt="" className="h-9 w-9 rounded-full border border-white/20 bg-superficie-inversa/80 object-cover shadow-1" />
-              <span className={`font-display text-lg tracking-tight ${marcaClasse}`}>
-                Instituto <span className={sobreHero ? 'text-realce' : 'text-marca'}>Vert</span>
-              </span>
-            </>
-          ) : (
-            <MarcaVert className={`h-6 sm:h-7 ${marcaClasse}`} />
-          )}
+          {/* Uma versão oficial por tamanho de tela, nunca combinadas. */}
+          <MarcaVert versao="empilhada" className={`h-9 sm:hidden ${marcaClasse}`} />
+          <MarcaVert className={`hidden h-7 sm:block ${marcaClasse}`} />
         </a>
 
         <nav className="hidden items-center gap-1 xl:flex" aria-label="Seções da página">
