@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 import { linkWhatsApp, registrarClique } from '../lib/analytics'
+import type { Intencao } from '../lib/captura'
+import { useCaptura } from './Captura'
 import { IconWhatsApp } from './Icon'
 
 type Variante = 'primaria' | 'secundaria' | 'clara'
@@ -19,6 +21,8 @@ type Props = {
   unidade?: string | null
   variante?: Variante
   className?: string
+  /** Quando definido, o clique abre o modal de captação antes do WhatsApp. */
+  intencao?: Intencao
   children: ReactNode
 }
 
@@ -35,14 +39,23 @@ export function BotaoWhatsApp({
   unidade = null,
   variante = 'primaria',
   className = '',
+  intencao,
   children,
 }: Props) {
+  const abrirCaptura = useCaptura()
   return (
     <a
       href={linkWhatsApp(numero, mensagem)}
       target="_blank"
       rel="noopener noreferrer"
-      onClick={() => registrarClique(rastreio, unidade)}
+      onClick={(evento) => {
+        if (intencao) {
+          evento.preventDefault()
+          abrirCaptura({ intencao, unidade, cta: rastreio, numero, mensagem })
+          return
+        }
+        registrarClique(rastreio, unidade)
+      }}
       className={`inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition duration-padrao ease-saida active:scale-[0.98] ${estilos[variante]} ${className}`}
     >
       <IconWhatsApp className="h-[18px] w-[18px] shrink-0" />

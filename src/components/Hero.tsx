@@ -63,6 +63,7 @@ export function Hero() {
           <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
             <BotaoWhatsApp
               rastreio="hero_agendar"
+              intencao="avaliacao"
               numero={clinica.whatsappComercial}
               mensagem="Olá! Vim pelo site e gostaria de agendar uma avaliação."
               variante="clara"

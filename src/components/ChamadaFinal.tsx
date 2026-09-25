@@ -21,6 +21,7 @@ export function ChamadaFinal() {
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <BotaoWhatsApp
                 rastreio="chamada_final_agendar"
+                intencao="avaliacao"
                 numero={clinica.whatsappComercial}
                 mensagem="Olá! Vim pelo site e gostaria de agendar uma avaliação."
                 className="w-full sm:w-auto"

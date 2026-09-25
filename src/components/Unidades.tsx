@@ -46,6 +46,7 @@ export function Unidades() {
                 <div className="mt-7 flex flex-wrap gap-3">
                   <BotaoWhatsApp
                     rastreio={`unidade_${unidade.slug}_agendar`}
+                    intencao="avaliacao"
                     numero={unidade.whatsapp}
                     mensagem={unidade.mensagem}
                     unidade={unidade.slug}

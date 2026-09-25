@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useConteudo } from '../lib/ConteudoContexto'
-import { linkWhatsApp, registrarClique } from '../lib/analytics'
+import { linkWhatsApp } from '../lib/analytics'
+import { useCaptura } from './Captura'
 import { IconWhatsApp } from './Icon'
 
 const MENSAGEM = 'Olá! Vim pelo site e gostaria de agendar uma avaliação.'
@@ -11,6 +12,7 @@ const MENSAGEM = 'Olá! Vim pelo site e gostaria de agendar uma avaliação.'
  */
 export function BotaoFlutuante() {
   const { clinica } = useConteudo()
+  const abrirCaptura = useCaptura()
   const [visivel, setVisivel] = useState(false)
 
   useEffect(() => {
@@ -25,7 +27,10 @@ export function BotaoFlutuante() {
       href={linkWhatsApp(clinica.whatsappComercial, MENSAGEM)}
       target="_blank"
       rel="noopener noreferrer"
-      onClick={() => registrarClique('flutuante_whatsapp')}
+      onClick={(evento) => {
+        evento.preventDefault()
+        abrirCaptura({ intencao: 'avaliacao', cta: 'flutuante_whatsapp', numero: clinica.whatsappComercial, mensagem: MENSAGEM })
+      }}
       aria-hidden={!visivel}
       tabIndex={visivel ? undefined : -1}
       className={`floating-cta fixed right-5 z-40 inline-flex min-h-[52px] items-center gap-2 rounded-full bg-marca-forte px-5 py-3.5 text-sm font-semibold text-conteudo-inverso shadow-3 transition duration-padrao ease-saida active:scale-95 hover-fino:hover:bg-conteudo ${

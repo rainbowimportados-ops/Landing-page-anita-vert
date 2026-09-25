@@ -110,6 +110,7 @@ export function Header() {
         <div className="flex items-center gap-2">
           <BotaoWhatsApp
             rastreio="header_agendar"
+            intencao="avaliacao"
             numero={clinica.whatsappComercial}
             mensagem="Olá! Vim pelo site e gostaria de agendar uma avaliação."
             variante={sobreHero ? 'clara' : 'primaria'}

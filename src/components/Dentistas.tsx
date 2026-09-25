@@ -29,6 +29,7 @@ export function Dentistas() {
                 </p>
                 <BotaoWhatsApp
                   rastreio={`dentistas_${indice === 0 ? 'cursos' : 'locacao'}`}
+                  intencao={indice === 0 ? 'curso' : 'locacao'}
                   numero={clinica.whatsappComercial}
                   mensagem={item.mensagem}
                   variante="clara"
