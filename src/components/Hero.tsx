@@ -1,5 +1,6 @@
 import { useConteudo } from '../lib/ConteudoContexto'
-import { ComparadorRosto } from './ComparadorRosto'
+import foto1200 from '../assets/hero/sorriso-vert-1200.webp'
+import foto720 from '../assets/hero/sorriso-vert-720.webp'
 import { BotaoAncora, BotaoWhatsApp } from './CTA'
 import { IconBrilho, IconEquipe, IconEscudo } from './Icon'
 
@@ -52,9 +53,22 @@ export function Hero() {
           </ul>
         </div>
 
-        <div className="animate-fade-up [animation-delay:120ms]">
-          <ComparadorRosto url="/assets/comparadores/rosto-antes-depois.webp" titulo="Resultado real de paciente do Instituto Vert" focoVertical={36} />
-        </div>
+        <figure className="hero-foto animate-fade-up [animation-delay:120ms]">
+          <img
+            src={foto1200}
+            srcSet={`${foto720} 720w, ${foto1200} 1200w`}
+            sizes="(min-width: 1024px) 58vw, 100vw"
+            alt="Mulher sorrindo com os olhos fechados e as mãos no rosto"
+            width={1200}
+            height={1800}
+            fetchPriority="high"
+          />
+          <figcaption className="hero-foto__legenda">
+            Mais que sorrisos,
+            <br />
+            vidas reais.
+          </figcaption>
+        </figure>
       </div>
     </section>
   )
