@@ -1,5 +1,6 @@
 import videoResultado from '../../assets/resultado.mp4'
 import posterVideo from '../../assets/video-poster.webp'
+import { CasoCompleto, DestaqueRosto } from './CasosDestaque'
 import { Reveal } from './Reveal'
 import { ComparadorSorriso, registros } from './Sorrisos'
 
@@ -19,7 +20,15 @@ export function Resultados() {
           </p>
         </Reveal>
 
-        <div className="sorrisos-grid mt-10 grid gap-5 sm:grid-cols-2">
+        <Reveal className="mt-10">
+          <DestaqueRosto />
+        </Reveal>
+
+        <Reveal className="mt-5">
+          <CasoCompleto />
+        </Reveal>
+
+        <div className="sorrisos-grid mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {registros.map((registro, indice) => (
               <Reveal key={registro.url} delay={indice * 45} className={`result-bento result-bento--caso-${indice + 1}`}>
               <div className="resultado-card glass-card sorriso-card">

@@ -2,15 +2,14 @@ import { useEffect, useId, useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
 import frontal from '../assets/sorrisos/sorriso-frontal.jpg'
 import detalhe from '../assets/sorrisos/sorriso-detalhe.jpg'
-import angulo from '../assets/sorrisos/sorriso-angulo.jpg'
 import './sorrisos.css'
 
 // Montagens originais: antes em cima e depois embaixo, confirmado pelo responsável.
 // A janela apenas revela cada metade; não há retoque, morphing ou geração de dentes.
+// "Outro ângulo" saiu daqui: é a paciente do caso completo (CasosDestaque).
 export const registros = [
   { url: frontal, titulo: 'Sorriso de frente', largura: 1642, altura: 2048 },
   { url: detalhe, titulo: 'Detalhes do sorriso', largura: 1642, altura: 2048 },
-  { url: angulo, titulo: 'Outro ângulo', largura: 2048, altura: 2048 },
 ]
 
 /**
