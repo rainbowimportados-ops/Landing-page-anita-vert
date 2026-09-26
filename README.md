@@ -8,6 +8,7 @@ Duas páginas no mesmo build, servidas pelo projeto `instituto-vert` na Vercel.
 | `/agendar` | **Landing page** — página de captação com tratamentos, processo e FAQ |
 | `/config` | Painel de configuração da landing page (login) |
 | `/admin` | Painel administrativo do cartão digital |
+| `/privacidade`, `/termos` | Política de privacidade e termos de uso |
 
 O subdomínio **`vert.institutovert.app`** serve a landing page na raiz — um
 rewrite condicionado ao host manda `/` para `/agendar` — e o painel dela

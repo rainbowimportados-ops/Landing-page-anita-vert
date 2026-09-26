@@ -14,6 +14,7 @@ import { InstagramSecao } from './components/InstagramSecao'
 import { Resultados } from './components/Resultados'
 import { Rodape } from './components/Rodape'
 import { Servicos } from './components/Servicos'
+import { Sobre } from './components/Sobre'
 import { ProvedorDeConteudo } from './lib/ConteudoContexto'
 import { Unidades } from './components/Unidades'
 
@@ -36,6 +37,7 @@ export default function App() {
         <Banner />
         <Servicos />
         <Resultados />
+        <Sobre />
         <Diferenciais />
         <Etapas />
         <InstagramSecao />

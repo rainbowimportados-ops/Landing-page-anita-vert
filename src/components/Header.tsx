@@ -6,8 +6,10 @@ import { BotaoWhatsApp } from './CTA'
 const navegacao = [
   { id: 'tratamentos', rotulo: 'Tratamentos' },
   { id: 'resultados', rotulo: 'Resultados' },
+  { id: 'sobre', rotulo: 'Sobre' },
   { id: 'como-funciona', rotulo: 'Como funciona' },
   { id: 'unidades', rotulo: 'Unidades' },
+  { id: 'cursos', rotulo: 'Cursos' },
   { id: 'duvidas', rotulo: 'Dúvidas' },
 ]
 
@@ -69,7 +71,7 @@ export function Header() {
       className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,box-shadow,backdrop-filter] duration-padrao ease-saida ${
         sobreHero
           ? 'border-b border-transparent bg-transparent'
-          : 'border-b border-borda/70 bg-fundo/72 shadow-2 backdrop-blur-xl'
+          : 'border-b border-borda/70 bg-fundo/[0.78] shadow-2 backdrop-blur-xl backdrop-saturate-150'
       }`}
     >
       <div className="container-vert flex h-[4.5rem] items-center justify-between gap-4">
@@ -151,7 +153,7 @@ export function Header() {
       />
 
       {menuAberto && (
-        <nav id="menu-mobile" className="border-t border-borda/70 bg-fundo/72 backdrop-blur-xl xl:hidden" aria-label="Seções da página">
+        <nav id="menu-mobile" className="border-t border-borda/70 bg-fundo/[0.92] backdrop-blur-xl xl:hidden" aria-label="Seções da página">
           <div className="container-vert flex flex-col py-1">
             {navegacao.map((item) => (
               <a
