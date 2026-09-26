@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import type { PointerEvent } from 'react'
+import type { PointerEvent, ReactNode } from 'react'
 import frontal from '../assets/sorrisos/sorriso-frontal.jpg'
 import detalhe from '../assets/sorrisos/sorriso-detalhe.jpg'
+import { IconImagem, IconPausa, IconPlay } from './Icon'
 import './sorrisos.css'
 
 // Montagens originais: antes em cima e depois embaixo, confirmado pelo responsável.
@@ -12,11 +13,72 @@ export const registros = [
   { url: detalhe, titulo: 'Detalhes do sorriso', largura: 1642, altura: 2048 },
 ]
 
+export type Registro = { url: string; titulo: string; largura: number; altura: number }
+
+/** Barra de controles de vidro sobre a foto, igual para todos os comparadores. */
+export function BarraControles({
+  reproduzindo,
+  bloqueado = false,
+  aoVerAntes,
+  aoReproduzir,
+  aoVerDepois,
+}: {
+  reproduzindo: boolean
+  bloqueado?: boolean
+  aoVerAntes: () => void
+  aoReproduzir: () => void
+  aoVerDepois: () => void
+}) {
+  const parar = (e: PointerEvent) => e.stopPropagation()
+  return (
+    <div className="sorriso-barra" onPointerDown={parar}>
+      <button type="button" onClick={aoVerAntes} disabled={bloqueado}>
+        <IconImagem className="h-[18px] w-[18px]" /> <span>Ver antes</span>
+      </button>
+      <button type="button" onClick={aoReproduzir} disabled={bloqueado}>
+        {reproduzindo ? <IconPausa className="h-[18px] w-[18px]" /> : <IconPlay className="h-[18px] w-[18px]" />}
+        <span className="rotulo-longo">{reproduzindo ? 'Pausar' : 'Reproduzir transição'}</span>
+        <span className="rotulo-curto" aria-hidden="true">{reproduzindo ? 'Pausar' : 'Reproduzir'}</span>
+      </button>
+      <button type="button" onClick={aoVerDepois} disabled={bloqueado}>
+        <IconImagem className="h-[18px] w-[18px]" /> <span>Ver depois</span>
+      </button>
+    </div>
+  )
+}
+
+export function SeloResultado() {
+  return (
+    <span className="sorriso-selo">
+      Resultado real
+      <br />
+      Instituto VERT
+    </span>
+  )
+}
+
+export function RotulosAntesDepois({ antes = true, depois = true }: { antes?: boolean; depois?: boolean }) {
+  return (
+    <div className="sorriso-rotulos" aria-hidden="true">
+      <span style={{ visibility: antes ? 'visible' : 'hidden' }}>Antes</span>
+      <span style={{ visibility: depois ? 'visible' : 'hidden' }}>Depois</span>
+    </div>
+  )
+}
+
 /**
  * `divisor` é a posição da linha, em % da largura: à esquerda fica o ANTES,
  * à direita o DEPOIS (convenção de leitura). 100 = só antes, 0 = só depois.
  */
-export function ComparadorSorriso({ registro }: { registro: typeof registros[number] }) {
+export function ComparadorSorriso({
+  registro,
+  className = '',
+  children,
+}: {
+  registro: Registro
+  className?: string
+  children?: ReactNode
+}) {
   const [divisor, setDivisor] = useState(50)
   const [reproduzindo, setReproduzindo] = useState(false)
   const [carregou, setCarregou] = useState(false)
@@ -62,7 +124,7 @@ export function ComparadorSorriso({ registro }: { registro: typeof registros[num
   const depois = 100 - antes
 
   return (
-    <figure className="sorriso-comparador">
+    <figure className={`sorriso-comparador ${className}`}>
       <div className="sorriso-janela" style={{ aspectRatio: `${registro.largura} / ${registro.altura / 2}` }}
         onPointerDown={(e) => {
           if (e.button !== 0 || bloqueado) return
@@ -78,25 +140,19 @@ export function ComparadorSorriso({ registro }: { registro: typeof registros[num
         <div className="sorriso-metade" style={{ clipPath: `inset(0 ${100 - divisor}% 0 0)` }}>
           <img src={registro.url} alt={`${registro.titulo}: antes do tratamento`} width={registro.largura} height={registro.altura} loading="lazy" draggable={false} />
         </div>
-        <div className="sorriso-divisor" style={{ left: `${divisor}%` }} aria-hidden="true"><span>↔</span></div>
-        <div className="sorriso-rotulos" aria-hidden="true">
-          <span style={{ visibility: divisor > 12 ? 'visible' : 'hidden' }}>Antes</span>
-          <span style={{ visibility: divisor < 88 ? 'visible' : 'hidden' }}>Depois</span>
-        </div>
-        <span className="sorriso-selo">Resultado real · Instituto Vert</span>
+        <div className="sorriso-divisor" style={{ left: `${divisor}%` }} aria-hidden="true"><span>‹ ›</span></div>
+        <RotulosAntesDepois antes={divisor > 12} depois={divisor < 88} />
+        <BarraControles reproduzindo={reproduzindo} bloqueado={bloqueado}
+          aoVerAntes={() => mover(100)} aoReproduzir={reproduzindo ? parar : reproduzir} aoVerDepois={() => mover(0)} />
+        <SeloResultado />
+        {children}
       </div>
-      {falhou && <p role="status">Não foi possível carregar a foto. Tente atualizar a página.</p>}
-      <figcaption className="sorriso-controles">
-        <label htmlFor={id}>Arraste para comparar <span>{antes}% antes · {depois}% depois</span></label>
-        <input id={id} type="range" min="0" max="100" value={divisor} disabled={bloqueado}
-          aria-label={`Comparar antes e depois: ${registro.titulo}`} aria-valuetext={`${antes} por cento antes, ${depois} por cento depois`}
-          onChange={(e) => mover(Number(e.target.value))} />
-        <div className="sorriso-acoes">
-          <button type="button" onClick={() => mover(100)} disabled={bloqueado}>Ver antes</button>
-          <button type="button" onClick={reproduzindo ? parar : reproduzir} disabled={bloqueado}>{reproduzindo ? 'Pausar' : 'Reproduzir transição'}</button>
-          <button type="button" onClick={() => mover(0)} disabled={bloqueado}>Ver depois</button>
-        </div>
-      </figcaption>
+      {falhou && <p role="status" className="mt-2 text-sm">Não foi possível carregar a foto. Tente atualizar a página.</p>}
+      {/* O arraste é visual; teclado e leitores de tela usam este controle. */}
+      <label htmlFor={id} className="sr-only">Comparar antes e depois: {registro.titulo}</label>
+      <input id={id} className="sr-only" type="range" min="0" max="100" value={divisor} disabled={bloqueado}
+        aria-valuetext={`${antes} por cento antes, ${depois} por cento depois`}
+        onChange={(e) => mover(Number(e.target.value))} />
     </figure>
   )
 }

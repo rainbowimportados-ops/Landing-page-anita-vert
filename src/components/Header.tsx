@@ -6,11 +6,10 @@ import { BotaoWhatsApp } from './CTA'
 const navegacao = [
   { id: 'tratamentos', rotulo: 'Tratamentos' },
   { id: 'resultados', rotulo: 'Resultados' },
-  { id: 'sobre', rotulo: 'Sobre' },
-  { id: 'como-funciona', rotulo: 'Como funciona' },
   { id: 'unidades', rotulo: 'Unidades' },
   { id: 'cursos', rotulo: 'Cursos' },
-  { id: 'duvidas', rotulo: 'Dúvidas' },
+  { id: 'sobre', rotulo: 'Sobre' },
+  { id: 'contato', rotulo: 'Contato' },
 ]
 
 export function Header() {
@@ -63,26 +62,24 @@ export function Header() {
     return () => observador.disconnect()
   }, [])
 
-  const sobreHero = !rolou && !menuAberto
-  const marcaClasse = sobreHero ? 'text-conteudo-inverso' : 'text-conteudo'
+  const topo = !rolou && !menuAberto
 
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,box-shadow,backdrop-filter] duration-padrao ease-saida ${
-        sobreHero
-          ? 'border-b border-transparent bg-transparent'
-          : 'border-b border-borda/70 bg-fundo/[0.78] shadow-2 backdrop-blur-xl backdrop-saturate-150'
+        topo
+          ? 'border-b border-transparent bg-fundo/[0.35] backdrop-blur-md'
+          : 'border-b border-borda/70 bg-fundo/[0.82] shadow-2 backdrop-blur-xl backdrop-saturate-150'
       }`}
     >
-      <div className="container-vert flex h-[4.5rem] items-center justify-between gap-4">
+      <div className="container-vert flex h-[5rem] items-center justify-between gap-4">
         <a
           href="#topo"
           className="inline-flex min-h-[44px] items-center gap-2 rounded-lg px-1"
           aria-label={`${clinica.nome} — início`}
         >
-          {/* Uma versão oficial por tamanho de tela, nunca combinadas. */}
-          <MarcaVert versao="empilhada" className={`h-9 sm:hidden ${marcaClasse}`} />
-          <MarcaVert className={`hidden h-7 sm:block ${marcaClasse}`} />
+          {/* Versão circular oficial, sozinha, em todos os tamanhos. */}
+          <MarcaVert versao="circular" className="h-14 text-conteudo sm:h-16" />
         </a>
 
         <nav className="hidden items-center gap-1 xl:flex" aria-label="Seções da página">
@@ -93,14 +90,8 @@ export function Header() {
                 key={item.id}
                 href={`#${item.id}`}
                 aria-current={ativo ? 'true' : undefined}
-                className={`rounded-full px-3 py-2 text-sm transition-colors duration-rapido ${
-                  ativo
-                    ? sobreHero
-                      ? 'bg-superficie-inversa-suave font-medium text-conteudo-inverso'
-                      : 'bg-marca-tenue font-medium text-conteudo'
-                    : sobreHero
-                      ? 'text-conteudo-inverso-suave hover-fino:hover:text-conteudo-inverso'
-                      : 'text-conteudo-suave hover-fino:hover:text-conteudo'
+                className={`relative px-3 py-2 text-[0.8125rem] transition-colors duration-rapido after:absolute after:inset-x-3 after:-bottom-0.5 after:h-px after:origin-left after:bg-conteudo after:transition-transform after:duration-padrao ${
+                  ativo ? 'text-conteudo after:scale-x-100' : 'text-conteudo-suave after:scale-x-0 hover-fino:hover:text-conteudo'
                 }`}
               >
                 {item.rotulo}
@@ -115,8 +106,8 @@ export function Header() {
             intencao="avaliacao"
             numero={clinica.whatsappComercial}
             mensagem="Olá! Vim pelo site e gostaria de agendar uma avaliação."
-            variante={sobreHero ? 'clara' : 'primaria'}
-            className="hidden px-5 sm:inline-flex"
+            icone="seta"
+            className="hidden px-6 sm:inline-flex"
           >
             Agendar avaliação
           </BotaoWhatsApp>
@@ -128,7 +119,7 @@ export function Header() {
             aria-controls="menu-mobile"
             aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
             className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition duration-rapido active:scale-95 xl:hidden ${
-              sobreHero ? 'border-borda-inversa text-conteudo-inverso' : 'border-borda-forte text-conteudo'
+              'border-borda-forte text-conteudo'
             }`}
           >
             <svg

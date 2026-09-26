@@ -13,7 +13,9 @@ const navegacao = [
   { href: '#resultados', rotulo: 'Resultados' },
   { href: '#sobre', rotulo: 'Sobre' },
   { href: '#cursos', rotulo: 'Cursos' },
+  { href: '#unidades', rotulo: 'Unidades' },
   { href: '#duvidas', rotulo: 'Dúvidas' },
+  { href: '#contato', rotulo: 'Contato' },
 ]
 
 export function Rodape() {
@@ -24,10 +26,13 @@ export function Rodape() {
       <div className="container-vert">
         <div className="grid gap-10 border-b border-borda-inversa pb-12 lg:grid-cols-[1.2fr_2fr]">
           <div>
-            <MarcaVert versao="empilhada" className="h-14 text-conteudo-inverso" />
-            <p className="mt-5 max-w-xs text-sm leading-relaxed">
-              {clinica.tagline} em Franca e Ribeirão Preto.
+            <MarcaVert versao="circular" className="h-24 text-conteudo-inverso" />
+            <p className="mt-6 font-display text-2xl italic leading-snug text-conteudo-inverso">
+              Sorrisos que
+              <br />
+              transformam histórias.
             </p>
+            <p className="mt-3 max-w-xs text-sm leading-relaxed">{clinica.tagline} em Franca e Ribeirão Preto.</p>
           </div>
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">

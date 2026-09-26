@@ -1,6 +1,6 @@
 import videoResultado from '../../assets/resultado.mp4'
 import posterVideo from '../../assets/video-poster.webp'
-import { CasoCompleto, DestaqueRosto } from './CasosDestaque'
+import { CasoCompleto } from './CasosDestaque'
 import { Reveal } from './Reveal'
 import { ComparadorSorriso, registros } from './Sorrisos'
 
@@ -21,10 +21,6 @@ export function Resultados() {
         </Reveal>
 
         <Reveal className="mt-10">
-          <DestaqueRosto />
-        </Reveal>
-
-        <Reveal className="mt-5">
           <CasoCompleto />
         </Reveal>
 

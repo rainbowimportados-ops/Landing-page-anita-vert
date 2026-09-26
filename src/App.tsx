@@ -4,6 +4,7 @@ import { BotaoFlutuante } from './components/BotaoFlutuante'
 import { ChamadaFinal } from './components/ChamadaFinal'
 import { Confianca } from './components/Confianca'
 import { Dentistas } from './components/Dentistas'
+import { Detalhes } from './components/Detalhes'
 import { Depoimentos } from './components/Depoimentos'
 import { Diferenciais } from './components/Diferenciais'
 import { Duvidas } from './components/Duvidas'
@@ -33,6 +34,7 @@ export default function App() {
 
       <main>
         <Hero />
+        <Detalhes />
         <Confianca />
         <Banner />
         <Servicos />

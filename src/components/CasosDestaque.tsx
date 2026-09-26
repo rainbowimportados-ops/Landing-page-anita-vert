@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ComparadorRosto } from './ComparadorRosto'
 import { ComparadorSorriso } from './Sorrisos'
 
 // Fotos em public/assets/comparadores: enviadas pela clínica, só redimensionadas
@@ -25,20 +26,6 @@ const sorrisoPerto: Vista[] = [
 /** Montagens com antes à esquerda e depois à direita, como foram fotografadas. */
 const rostoInteiro: Vista[] = [1, 2, 3, 4, 5, 6].map((n) => vista(`caso-rosto-${n}`, 1200, 1500))
 
-/** Antes e depois lado a lado, sem sobrepor: os enquadramentos não coincidem. */
-function LadoALado({ foto, titulo }: { foto: Vista; titulo: string }) {
-  return (
-    <div className="caso-lado-a-lado">
-      <img src={foto.url} alt={`${titulo}: antes à esquerda e depois à direita`} width={foto.largura} height={foto.altura} loading="lazy" />
-      <div className="sorriso-rotulos" aria-hidden="true">
-        <span>Antes</span>
-        <span>Depois</span>
-      </div>
-      <span className="sorriso-selo">Resultado real · Instituto Vert</span>
-    </div>
-  )
-}
-
 function Miniaturas({ vistas, atual, escolher, rotulo }: { vistas: Vista[]; atual: number; escolher: (i: number) => void; rotulo: string }) {
   return (
     <div className="caso-miniaturas" role="group" aria-label={`Escolher vista: ${rotulo}`}>
@@ -48,26 +35,6 @@ function Miniaturas({ vistas, atual, escolher, rotulo }: { vistas: Vista[]; atua
         </button>
       ))}
     </div>
-  )
-}
-
-/** Lote 7: paciente loira, rosto inteiro. */
-export function DestaqueRosto() {
-  const foto = vista('rosto-antes-depois', 1200, 1500)
-  return (
-    <article className="caso-destaque glass-card">
-      <div className="caso-destaque__midia">
-        <LadoALado foto={foto} titulo="Rosto inteiro" />
-      </div>
-      <div className="caso-destaque__texto">
-        <p className="resultado-card__label">Caso em destaque</p>
-        <h3 className="caso-destaque__titulo">O sorriso que muda o rosto inteiro.</h3>
-        <p>
-          Mesma paciente, antes e depois do tratamento. Fotografia original, sem retoque do
-          resultado.
-        </p>
-      </div>
-    </article>
   )
 }
 
@@ -92,7 +59,7 @@ export function CasoCompleto() {
         </section>
         <section aria-label="Rosto inteiro">
           <p className="caso-completo__subtitulo">Rosto inteiro · {rostoInteiro.length} vistas</p>
-          <LadoALado key={vistaRosto.url} foto={vistaRosto} titulo={`Rosto inteiro, vista ${rosto + 1}`} />
+          <ComparadorRosto key={vistaRosto.url} url={vistaRosto.url} titulo={`Rosto inteiro, vista ${rosto + 1}`} />
           <Miniaturas vistas={rostoInteiro} atual={rosto} escolher={setRosto} rotulo="Rosto inteiro" />
         </section>
       </div>

@@ -2,7 +2,8 @@ import { createContext, useCallback, useContext, useId, useRef, useState, type F
 import { useConteudo } from '../lib/ConteudoContexto'
 import { linkWhatsApp, registrarClique } from '../lib/analytics'
 import { enviarLead, telefoneValido, type Intencao } from '../lib/captura'
-import { IconWhatsApp } from './Icon'
+import { IconCheck, IconSeta, IconWhatsApp } from './Icon'
+import { MarcaVert } from './MarcaVert'
 
 export type PedidoCaptura = {
   /** Interesse revelado pelo clique; não é perguntado de novo. */
@@ -49,6 +50,9 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
   const [unidade, setUnidade] = useState<string>('')
   const [erros, setErros] = useState<Erros>({})
   const [enviando, setEnviando] = useState(false)
+  const [perfil, setPerfil] = useState('')
+  /** Depois do envio: confirmação com o link do WhatsApp (abre sozinho em seguida). */
+  const [pronto, setPronto] = useState<{ link: string; salvo: boolean } | null>(null)
   const idBase = useId()
 
   const abrir = useCallback<Abrir>((novo) => {
@@ -56,6 +60,8 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
     setUnidade(novo.unidade ?? '')
     setErros({})
     setEnviando(false)
+    setPerfil('')
+    setPronto(null)
     registrarClique(novo.cta, novo.unidade ?? null, 'form_opened')
     dialogo.current?.showModal()
   }, [])
@@ -64,8 +70,12 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
     dialogo.current?.close()
   }
 
-  function abrirWhatsApp(numero: string, mensagem: string) {
-    window.location.assign(linkWhatsApp(numero, mensagem))
+  function abrirWhatsApp(numero: string, mensagem: string, salvo: boolean) {
+    const link = linkWhatsApp(numero, mensagem)
+    setPronto({ link, salvo })
+    // A confirmação aparece por um instante e o WhatsApp abre sozinho; o botão
+    // da confirmação cobre navegadores que bloqueiam a navegação automática.
+    window.setTimeout(() => window.location.assign(link), 1200)
   }
 
   async function enviar(evento: FormEvent<HTMLFormElement>) {
@@ -74,7 +84,7 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
     const dados = new FormData(evento.currentTarget)
     const nome = String(dados.get('nome') ?? '').trim()
     const telefone = String(dados.get('telefone') ?? '').trim()
-    const profissao = String(dados.get('profissao') ?? '').trim()
+    const profissao = perfil
     const cidade = String(dados.get('cidade') ?? '').trim()
 
     const novosErros: Erros = {}
@@ -110,7 +120,7 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
     const numero = dadosUnidade?.whatsapp ?? pedido.numero
     const primeiroNome = nome.split(/\s+/)[0]
     const complemento = dadosUnidade && !pedido.unidade ? ` Prefiro a unidade de ${dadosUnidade.cidade.split(' /')[0]}.` : ''
-    abrirWhatsApp(numero, `${pedido.mensagem.replace(/^Olá!/, `Olá! Sou ${primeiroNome}.`)}${complemento}`)
+    abrirWhatsApp(numero, `${pedido.mensagem.replace(/^Olá!/, `Olá! Sou ${primeiroNome}.`)}${complemento}`, resultado.ok)
   }
 
   const eProfissional = pedido ? profissional(pedido.intencao) : false
@@ -123,10 +133,27 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
         ref={dialogo}
         aria-labelledby={`${idBase}-titulo`}
         aria-describedby={`${idBase}-descricao`}
-        className="captura w-[min(100%-2rem,28rem)] rounded-2xl border border-borda bg-fundo p-0 text-conteudo shadow-3"
+        className="captura w-[min(100%-2rem,30rem)] rounded-[1.75rem] border border-white/60 p-0 text-conteudo shadow-3"
         onClose={() => setPedido(null)}
       >
-        {pedido && (
+        {pedido && pronto && (
+          <div className="grid justify-items-center gap-4 px-6 py-12 text-center sm:px-10">
+            <span className="grid h-20 w-20 place-items-center rounded-full border border-conteudo/20 bg-superficie shadow-2">
+              <IconCheck className="h-10 w-10 text-conteudo" />
+            </span>
+            <h2 id={`${idBase}-titulo`} className="mt-2 font-display text-4xl font-light">
+              {pronto.salvo ? 'Tudo certo!' : 'Vamos continuar'}
+            </h2>
+            <p id={`${idBase}-descricao`} className="max-w-xs text-sm leading-relaxed text-conteudo-suave">
+              {pronto.salvo ? 'Seus dados foram enviados. ' : ''}Agora você será direcionado para o WhatsApp da equipe.
+            </p>
+            <a href={pronto.link}
+              className="mt-2 inline-flex min-h-[48px] items-center gap-2.5 rounded-xl bg-marca-forte px-7 py-3 text-sm font-medium text-conteudo-inverso hover-fino:hover:bg-conteudo">
+              Abrir WhatsApp <IconSeta className="h-4 w-4" />
+            </a>
+          </div>
+        )}
+        {pedido && !pronto && (
           <form
             onSubmit={enviar}
             onInput={(evento) => {
@@ -135,33 +162,33 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
               if (erros[campo]) setErros(({ [campo]: _removido, ...resto }) => resto)
             }}
             noValidate
-            className="grid gap-5 p-6 sm:p-8"
+            className="relative grid gap-5 p-6 pt-8 sm:p-9"
           >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 id={`${idBase}-titulo`} className="font-display text-3xl leading-tight">
-                  {titulos[pedido.intencao]}
-                </h2>
-                <p id={`${idBase}-descricao`} className="mt-2 text-sm leading-relaxed text-conteudo-suave">
-                  Deixe seu contato e a conversa abre no WhatsApp da equipe, já com o seu nome.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={fechar}
-                className="-mr-2 -mt-2 grid h-11 w-11 shrink-0 place-items-center rounded-full text-xl text-conteudo-tenue hover-fino:hover:bg-superficie-suave"
-                aria-label="Fechar"
-              >
-                ×
-              </button>
+            <button
+              type="button"
+              onClick={fechar}
+              className="absolute right-3 top-3 grid h-11 w-11 place-items-center rounded-full text-2xl font-light text-conteudo-suave hover-fino:hover:bg-superficie-suave"
+              aria-label="Fechar"
+            >
+              ×
+            </button>
+            <div className="grid justify-items-center text-center">
+              <MarcaVert versao="circular" className="h-14 text-conteudo" />
+              <h2 id={`${idBase}-titulo`} className="mt-5 font-display text-4xl font-light leading-tight">
+                {eProfissional ? 'Quase lá!' : 'Vamos conversar?'}
+              </h2>
+              <p id={`${idBase}-descricao`} className="mt-2 max-w-xs text-sm leading-relaxed text-conteudo-suave">
+                Preencha seus dados e fale com nossa equipe pelo WhatsApp
+                {pedido.intencao === 'curso' ? ' sobre os cursos.' : pedido.intencao === 'locacao' ? ' sobre a locação de consultório.' : '.'}
+              </p>
             </div>
 
-            <Campo id={`${idBase}-nome`} rotulo="Nome" erro={erros.nome}>
-              <input id={`${idBase}-nome`} name="nome" autoComplete="name" maxLength={100} required
+            <Campo id={`${idBase}-nome`} rotulo="Nome completo" erro={erros.nome}>
+              <input id={`${idBase}-nome`} name="nome" autoComplete="name" maxLength={100} required placeholder="Seu nome"
                 aria-invalid={!!erros.nome} aria-describedby={erros.nome ? `${idBase}-nome-erro` : undefined} />
             </Campo>
 
-            <Campo id={`${idBase}-telefone`} rotulo="WhatsApp com DDD" erro={erros.telefone}>
+            <Campo id={`${idBase}-telefone`} rotulo="WhatsApp" erro={erros.telefone}>
               <input id={`${idBase}-telefone`} name="telefone" type="tel" inputMode="tel" autoComplete="tel" maxLength={20}
                 placeholder="(16) 99999-9999" required aria-invalid={!!erros.telefone}
                 aria-describedby={erros.telefone ? `${idBase}-telefone-erro` : undefined} />
@@ -169,8 +196,8 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
 
             {perguntarUnidade && (
               <fieldset aria-describedby={erros.unidade ? `${idBase}-unidade-erro` : undefined}>
-                <legend className="text-sm font-medium">Unidade</legend>
-                <div className="mt-2 flex flex-wrap gap-2">
+                <legend className="text-sm font-medium">Onde prefere ser atendido?</legend>
+                <div className="captura__segmentos mt-2">
                   {[...unidades.map((u) => ({ valor: u.slug, texto: u.cidade.split(' /')[0] })), { valor: 'indefinida', texto: 'Ainda não sei' }].map((opcao) => (
                     <label key={opcao.valor} className="captura__opcao">
                       <input type="radio" name="unidade" value={opcao.valor} checked={unidade === opcao.valor}
@@ -184,26 +211,35 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
             )}
 
             {eProfissional && (
-              <div className="grid gap-5 sm:grid-cols-2">
-                <Campo id={`${idBase}-profissao`} rotulo="Profissão">
-                  <input id={`${idBase}-profissao`} name="profissao" autoComplete="organization-title" maxLength={100}
-                    placeholder="Dentista, estudante…" />
-                </Campo>
+              <>
+                <fieldset>
+                  <legend className="text-sm font-medium">Você é?</legend>
+                  <div className="captura__segmentos captura__segmentos--2 mt-2">
+                    {['Dentista', 'Estudante'].map((opcao) => (
+                      <label key={opcao} className="captura__opcao">
+                        <input type="radio" name="perfil" value={opcao} checked={perfil === opcao} onChange={() => setPerfil(opcao)} />
+                        <span>{opcao}</span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
                 <Campo id={`${idBase}-cidade`} rotulo="Cidade">
-                  <input id={`${idBase}-cidade`} name="cidade" autoComplete="address-level2" maxLength={80} />
+                  <input id={`${idBase}-cidade`} name="cidade" autoComplete="address-level2" maxLength={80} placeholder="Onde você atende" />
                 </Campo>
-              </div>
+              </>
             )}
 
-            <p className="text-xs leading-relaxed text-conteudo-tenue">
-              Ao continuar, você autoriza o Instituto Vert a usar estes dados para responder ao seu contato.
-            </p>
-
             <button type="submit" disabled={enviando}
-              className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-marca-forte px-6 py-3 text-sm font-semibold text-conteudo-inverso transition duration-padrao ease-saida active:scale-[0.98] disabled:opacity-70 hover-fino:hover:bg-conteudo">
+              className="inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-xl bg-marca-forte px-6 py-3 text-sm font-medium text-conteudo-inverso shadow-2 transition duration-padrao ease-saida active:scale-[0.98] disabled:opacity-70 hover-fino:hover:bg-conteudo">
               <IconWhatsApp className="h-[18px] w-[18px]" />
               {enviando ? 'Abrindo o WhatsApp…' : 'Continuar no WhatsApp'}
+              {!enviando && <IconSeta className="h-4 w-4" />}
             </button>
+
+            <p className="-mt-1 text-center text-xs leading-relaxed text-conteudo-tenue">
+              Seus dados estão seguros: ao continuar, você autoriza o Instituto Vert a usá-los apenas para responder à
+              sua solicitação. <a href="/privacidade" target="_blank" className="underline underline-offset-2">Política de privacidade</a>
+            </p>
 
             {!eProfissional && (
               <a

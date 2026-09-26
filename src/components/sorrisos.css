@@ -1,40 +1,17 @@
 .sorrisos-cabecalho{display:flex;align-items:end;justify-content:space-between;gap:2rem;flex-wrap:wrap}
 .sorrisos-escolhas{display:flex;flex-wrap:wrap;gap:.5rem;margin:2rem 0 1.25rem}
-.sorrisos-escolhas button,.sorriso-acoes button{min-height:44px;padding:.65rem 1rem;border:1px solid rgb(var(--cor-borda-forte));border-radius:999px;font-size:.875rem;color:rgb(var(--cor-conteudo));background:rgb(var(--cor-superficie));transition:background-color 160ms}
+.sorrisos-escolhas button{min-height:44px;padding:.65rem 1rem;border:1px solid rgb(var(--cor-borda-forte));border-radius:999px;font-size:.875rem;color:rgb(var(--cor-conteudo));background:rgb(var(--cor-superficie));transition:background-color 160ms}
 .sorrisos-escolhas button[aria-pressed=true]{color:rgb(var(--cor-conteudo-inverso));background:rgb(var(--cor-marca-forte));border-color:rgb(var(--cor-marca-forte))}
 .sorriso-comparador{width:100%;max-width:880px;margin:0 auto}
 .sorrisos-grid .result-bento{grid-column:auto;grid-row:auto}
 .sorrisos-grid .resultado-card--video video{height:auto;min-height:0;aspect-ratio:1642/1024;object-fit:contain}
-.sorriso-card .sorriso-controles{padding:1rem}
 .sorriso-card .sorriso-janela{border-radius:0}
-.sorriso-card .sorriso-acoes{gap:.35rem}
-.sorriso-card .sorriso-acoes button{padding:.6rem .7rem;font-size:.75rem}
 .sorriso-janela{position:relative;overflow:hidden;isolation:isolate;border-radius:20px;background:rgb(var(--cor-superficie-suave));touch-action:pan-y;user-select:none;cursor:ew-resize}
 .sorriso-metade{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.sorriso-metade img{position:absolute;top:0;left:0;width:100%;height:200%;max-width:none;pointer-events:none}
+.sorriso-metade img{position:absolute;top:0;left:0;width:100%;height:200%;max-width:none;object-fit:cover;pointer-events:none}
 .sorriso-depois img{top:-100%}
-.sorriso-selo{position:absolute;left:12px;bottom:12px;padding:4px 10px;border-radius:999px;background:rgb(var(--cor-superficie-inversa)/.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:rgb(var(--cor-conteudo-inverso));font-size:.6875rem;letter-spacing:.02em;pointer-events:none}
-.sorriso-divisor{position:absolute;top:0;bottom:0;width:2px;background:rgb(var(--cor-conteudo-inverso));transform:translateX(-50%);pointer-events:none}
-.sorriso-divisor span{position:absolute;top:50%;left:50%;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;transform:translate(-50%,-50%);background:rgb(var(--cor-superficie));color:rgb(var(--cor-conteudo));box-shadow:0 2px 10px #0003;font-size:1.25rem}
-.sorriso-rotulos{position:absolute;inset:16px 16px auto;display:flex;justify-content:space-between;pointer-events:none}
-.sorriso-rotulos span{padding:6px 12px;border-radius:999px;background:rgb(var(--cor-superficie));color:rgb(var(--cor-conteudo));font-size:.75rem;font-weight:600}
-.sorriso-controles{padding-top:1rem}
-.sorriso-controles label{display:flex;justify-content:space-between;flex-wrap:wrap;gap:.3rem;font-size:.875rem}
-.sorriso-controles label span{color:rgb(var(--cor-conteudo-tenue));font-variant-numeric:tabular-nums}
-.sorriso-controles input{display:block;width:100%;height:44px;accent-color:rgb(var(--cor-marca-forte));cursor:ew-resize}
-.sorriso-acoes{display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap}
-.sorriso-acoes button:disabled{opacity:.5;cursor:wait}
-.hero-sorriso{position:relative;overflow:hidden;aspect-ratio:821/1024;border-radius:24px;background:rgb(var(--cor-superficie-inversa-suave))}
-.hero-sorriso img{position:absolute;width:200%;max-width:none;height:auto;left:-100%;top:-14%}
-.hero-sorriso figcaption{position:absolute;left:0;right:0;bottom:0;padding:3rem 1.5rem 1.5rem;background:linear-gradient(transparent,rgb(var(--cor-superficie-inversa)/.95));font-size:.875rem;color:rgb(var(--cor-conteudo-inverso))}
-@media(max-width:480px){.sorriso-rotulos{inset:10px 10px auto}.sorriso-acoes button{padding:.6rem .8rem}.hero-sorriso{max-height:520px}}
-.caso-destaque{display:grid;overflow:hidden;border-radius:1.25rem}
-.caso-destaque__midia{min-width:0}
-.caso-destaque__texto{display:grid;align-content:center;gap:.75rem;padding:1.5rem;color:rgb(var(--cor-conteudo-suave));font-size:.9375rem;line-height:1.6}
+
 .caso-destaque__titulo{font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;letter-spacing:-.02em;font-size:clamp(1.5rem,3vw,2.25rem);line-height:1.15;color:rgb(var(--cor-conteudo))}
-.caso-lado-a-lado{position:relative;overflow:hidden;background:rgb(var(--cor-superficie-suave));border-radius:20px}
-.caso-destaque .caso-lado-a-lado{border-radius:0}
-.caso-lado-a-lado img{display:block;width:100%;height:auto}
 .caso-completo{padding:1.25rem;border-radius:1.25rem}
 .caso-completo__cabecalho{display:grid;gap:.5rem;margin-bottom:1.25rem}
 .caso-completo__grade{display:grid;gap:1.5rem}
@@ -46,7 +23,7 @@
 .caso-miniaturas button[aria-pressed=true]{border-color:rgb(var(--cor-marca-forte));opacity:1}
 .caso-miniaturas button:focus-visible{outline:2px solid rgb(var(--cor-marca-forte));outline-offset:2px}
 .caso-miniaturas img{width:100%;height:100%;object-fit:cover}
-@media(min-width:768px){.caso-destaque{grid-template-columns:1.1fr .9fr}.caso-destaque__texto{padding:2.5rem}.caso-completo{padding:2rem}}
+@media(min-width:768px){.caso-completo{padding:2rem}}
 @media(min-width:1024px){.caso-completo__grade{grid-template-columns:1fr 1fr;align-items:start}}
 @media(prefers-reduced-motion:reduce){.caso-miniaturas button{transition:none}}
 .sobre-retrato{position:relative;overflow:hidden;aspect-ratio:4/5;max-width:520px;margin:0 auto;border-radius:28px;background:radial-gradient(120% 90% at 20% 10%,rgb(var(--cor-superficie-inversa-suave)),rgb(var(--cor-superficie-inversa)));box-shadow:0 40px 80px -48px rgb(0 0 0/.55)}
@@ -54,3 +31,38 @@
 .sobre-retrato__vazio{position:absolute;inset:0;display:grid;place-items:center}
 .sobre-retrato__legenda{position:absolute;left:16px;right:16px;bottom:16px;display:grid;gap:4px;padding:16px 18px;border:1px solid rgb(255 255 255/.22);border-radius:18px;background:linear-gradient(135deg,rgb(255 255 255/.16),rgb(255 255 255/.05));-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%)}
 .cursos-painel{background:linear-gradient(145deg,rgb(255 255 255/.14),rgb(255 255 255/.03))}
+
+/* Comparador no estilo editorial: rótulos, divisor e controles de vidro sobre a foto. */
+.sorriso-rotulos{position:absolute;inset:18px 18px auto;display:flex;justify-content:space-between;pointer-events:none;z-index:2}
+.sorriso-rotulos span{padding:7px 16px;border:1px solid rgb(255 255 255/.28);border-radius:999px;background:rgb(43 27 20/.38);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;font-size:.72rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase}
+.sorriso-divisor{position:absolute;top:0;bottom:0;width:2px;background:rgb(255 255 255/.92);transform:translateX(-50%);pointer-events:none;z-index:2;box-shadow:0 0 12px rgb(0 0 0/.18)}
+.sorriso-divisor span{position:absolute;top:45%;left:50%;display:grid;place-items:center;width:46px;height:46px;border:1px solid rgb(255 255 255/.7);border-radius:50%;transform:translate(-50%,-50%);background:rgb(255 255 255/.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:rgb(var(--cor-conteudo));box-shadow:0 6px 18px rgb(0 0 0/.18);font-size:1.05rem;letter-spacing:.1em}
+.sorriso-barra{position:absolute;left:50%;bottom:18px;z-index:3;display:flex;gap:2px;padding:5px;transform:translateX(-50%);border:1px solid rgb(255 255 255/.4);border-radius:999px;background:rgb(255 255 255/.18);-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);box-shadow:0 10px 30px -12px rgb(0 0 0/.35);cursor:default;max-width:calc(100% - 24px)}
+.sorriso-barra button{display:inline-flex;align-items:center;gap:.45rem;min-height:40px;padding:.45rem .95rem;border-radius:999px;color:#fff;font-size:.8125rem;white-space:nowrap;text-shadow:0 1px 2px rgb(0 0 0/.25);transition:background-color 160ms}
+.sorriso-barra button:hover{background:rgb(255 255 255/.16)}
+.sorriso-barra button:disabled{opacity:.55;cursor:wait}
+.sorriso-selo{position:absolute;right:18px;bottom:22px;z-index:2;color:rgb(255 255 255/.92);font-size:.7rem;line-height:1.35;text-align:right;text-shadow:0 1px 3px rgb(0 0 0/.35);pointer-events:none}
+.sorriso-janela{border-radius:22px;box-shadow:0 30px 60px -36px rgb(43 27 20/.55)}
+/* Em quadros estreitos (celular, cards do grid) a barra vira ícones sobre o texto. */
+.sorriso-janela{container-type:inline-size}
+.sorriso-barra .rotulo-curto{display:none}
+@container (max-width:620px){
+  .sorriso-barra{left:10px;right:10px;bottom:10px;transform:none;max-width:none;justify-content:space-around;border-radius:18px;padding:4px}
+  .sorriso-barra button{flex-direction:column;gap:2px;padding:.4rem .5rem;font-size:.68rem;white-space:normal;text-align:center}
+  .sorriso-barra .rotulo-longo{display:none}
+  .sorriso-barra .rotulo-curto{display:inline}
+  .sorriso-selo{display:none}
+  .sorriso-rotulos{inset:12px 12px auto}
+  .sorriso-rotulos span{padding:5px 11px;font-size:.62rem}
+}
+.sorriso-card .sorriso-janela{border-radius:0;box-shadow:none}
+.rosto-janela{aspect-ratio:11/10;cursor:default}
+.rosto-foto{position:absolute;inset:0;background-repeat:no-repeat;background-size:100% auto}
+.rosto-veu{position:absolute;top:0;bottom:0;width:50%;z-index:1;background:rgb(30 18 14/.62);-webkit-backdrop-filter:blur(6px) grayscale(.4);backdrop-filter:blur(6px) grayscale(.4);opacity:0;transition:opacity 700ms var(--curva-saida);pointer-events:none}
+.rosto-veu--antes{left:0}.rosto-veu--depois{right:0}
+.rosto-veu[data-ativo=true]{opacity:1}
+.rosto-janela .sorriso-divisor{pointer-events:none}
+.rosto-alca{position:absolute;top:45%;left:50%;display:grid;place-items:center;width:46px;height:46px;border:1px solid rgb(255 255 255/.7);border-radius:50%;transform:translate(-50%,-50%);background:rgb(255 255 255/.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:rgb(var(--cor-conteudo));box-shadow:0 6px 18px rgb(0 0 0/.18);font-size:1.05rem;letter-spacing:.1em;pointer-events:auto;cursor:pointer}
+@media(max-width:640px){.rosto-janela{aspect-ratio:1/1}}
+@media(prefers-reduced-motion:reduce){.rosto-veu{transition:none}}
+@media(max-width:640px){.detalhes-comparador .sorriso-janela,.caso-completo .sorriso-janela:not(.rosto-janela){aspect-ratio:4/3!important}}
