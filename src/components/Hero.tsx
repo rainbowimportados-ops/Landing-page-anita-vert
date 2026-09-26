@@ -1,6 +1,6 @@
 import { useConteudo } from '../lib/ConteudoContexto'
-import foto1200 from '../assets/hero/sorriso-vert-1200.webp'
-import foto720 from '../assets/hero/sorriso-vert-720.webp'
+import foto1200 from '../assets/hero/dra-anita-1200.webp'
+import foto720 from '../assets/hero/dra-anita-720.webp'
 import { BotaoAncora, BotaoWhatsApp } from './CTA'
 import { IconBrilho, IconEquipe, IconEscudo } from './Icon'
 
@@ -58,7 +58,7 @@ export function Hero() {
             src={foto1200}
             srcSet={`${foto720} 720w, ${foto1200} 1200w`}
             sizes="(min-width: 1024px) 58vw, 100vw"
-            alt="Mulher sorrindo com os olhos fechados e as mãos no rosto"
+            alt="Dra. Anita Matias de Almeida, do Instituto Vert, sorrindo"
             width={1200}
             height={1800}
             fetchPriority="high"
