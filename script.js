@@ -18,6 +18,52 @@ let visitorInstagram = '';
 let pendingLead = null;
 let currentCompany = {};
 let currentUnits = [];
+let activeUnitId = '';
+
+const UNIT_PHOTOS = {
+  franca: { cover: '/assets/cartao/franca-recepcao.webp', gallery: [] },
+  ribeirao: { cover: '/assets/cartao/ribeirao-recepcao.webp', gallery: [
+    ['/assets/cartao/ribeirao-consultorio.webp', 'Consultório odontológico'],
+    ['/assets/cartao/ribeirao-atendimento.webp', 'Sala de atendimento'],
+    ['/assets/cartao/ribeirao-cadeira.webp', 'Cadeira odontológica'],
+  ] },
+};
+
+function unitPhotos(unit) {
+  return /ribeir/i.test(`${unit.city || ''} ${unit.name || ''} ${unit.id || ''}`) ? UNIT_PHOTOS.ribeirao : UNIT_PHOTOS.franca;
+}
+
+function activeUnits() { return currentUnits.filter((unit) => unit.active !== false); }
+
+const SERVICE_OPTIONS = [
+  { id: 'lentes', label: 'Lentes em resina', message: 'Olá! Sou {nome} e quero saber sobre lentes em resina na unidade {unidade}.', unitChoice: true },
+  { id: 'clinico', label: 'Clínico geral', message: 'Olá! Sou {nome} e quero atendimento clínico geral na unidade {unidade}.', unitChoice: true },
+  { id: 'curso', label: 'Cursos para dentistas', message: 'Olá! Sou {nome} e quero informações sobre os cursos do Instituto Vert. Sou {perfil}. {curso_anterior}', leadType: 'formation' },
+  { id: 'locacao', label: 'Alugar sala em Ribeirão', message: 'Olá! Sou {nome} e quero informações sobre a locação de sala em Ribeirão Preto.', unit: 'Ribeirão Preto' },
+  { id: 'close_friends', label: 'Close Friends', message: 'Olá! Sou {nome} e quero saber como entrar no Close Friends do Instituto Vert.' },
+];
+
+function renderServiceActions(company) {
+  const container = document.getElementById('service-actions');
+  const number = company.phone || activeUnits()[0]?.phone || '5516999657667';
+  container.replaceChildren();
+  SERVICE_OPTIONS.forEach((service, index) => {
+    const link = document.createElement(service.unitChoice ? 'button' : 'a');
+    link.className = 'service-action';
+    if (service.unitChoice) {
+      link.type = 'button';
+      link.dataset.service = service.id;
+    } else {
+      link.href = whatsappUrl(number, service.message);
+      link.target = '_blank'; link.rel = 'noopener noreferrer';
+      link.dataset.track = service.id;
+      const course = service.leadType === 'formation';
+      prepareLeadLink(link, { message: service.message, label: service.label, unit: service.unit || '', leadType: course ? 'formation' : 'contact', courseTitle: course ? 'Cursos para dentistas' : '' });
+    }
+    link.innerHTML = `<span class="service-action__number" aria-hidden="true">0${index + 1}</span><span>${service.label}</span><span class="service-action__arrow" aria-hidden="true">→</span>`;
+    container.append(link);
+  });
+}
 
 const DEFAULT_LOGOS = {
   primaryDark: new URL('./assets/logo-principal-marrom.jpeg', import.meta.url).href,
@@ -133,7 +179,7 @@ function renderWhatsApp(units, company) {
   renderContactRouter(units, company);
 }
 
-function renderContactRouter(units, company) {
+function renderContactRouter(units, company, service = null) {
   const activeUnits = units.filter((unit) => unit.active !== false);
   const sharedNumber = company.phone || activeUnits[0]?.phone;
   const useSharedNumber = (company.whatsappMode || 'shared') === 'shared';
@@ -141,18 +187,19 @@ function renderContactRouter(units, company) {
 
   activeUnits.forEach((unit) => {
     const unitName = unit.city || unit.name || 'Unidade';
-    const message = unit.whatsappMessage || company.whatsappMessage || 'Olá! Meu nome é {nome} e quero agendar uma avaliação em {unidade}.';
+    const message = service?.message || unit.whatsappMessage || company.whatsappMessage || 'Olá! Meu nome é {nome} e quero agendar uma avaliação em {unidade}.';
     const phone = useSharedNumber ? sharedNumber : (unit.phone || sharedNumber);
     const destination = useSharedNumber
       ? whatsappUrl(sharedNumber, personalizeMessage(message, { unit: unitName }))
       : (unit.contactUrl || whatsappUrl(phone, personalizeMessage(message, { unit: unitName })));
     const link = trackableLink(applyPreMessage(destination, message, { unit: unitName }), 'whatsapp_agendar', unit.id);
     link.className = 'contact-router__option';
-    link.innerHTML = `<span><small>Nova consulta</small><strong>${escapeText(unit.contactButtonLabel || `Consulta em ${unitName}`)}</strong></span><b aria-hidden="true">→</b>`;
-    prepareLeadLink(link, { collectLead: unit.collectLead !== false, message, label: `Consulta — ${unitName}`, unit: unitName, leadType: 'appointment' });
+    link.innerHTML = `<span><small>${service ? escapeText(service.label) : 'Nova consulta'}</small><strong>${escapeText(service ? unitName : (unit.contactButtonLabel || `Consulta em ${unitName}`))}</strong></span><b aria-hidden="true">→</b>`;
+    prepareLeadLink(link, { collectLead: unit.collectLead !== false, message, label: `${service?.label || 'Consulta'} — ${unitName}`, unit: unitName, leadType: 'appointment' });
     contactRouterOptions.append(link);
   });
 
+  if (service) return;
   const patientMessage = company.patientMessage || 'Olá! Meu nome é {nome}, já sou paciente do Instituto Vert e preciso de atendimento.';
   const patient = trackableLink(whatsappUrl(sharedNumber, personalizeMessage(patientMessage)), 'whatsapp_paciente');
   patient.className = 'contact-router__option';
@@ -174,15 +221,64 @@ function renderContactRouter(units, company) {
 function renderUnits(units) {
   const grid = document.querySelector('.unit-grid'); grid.replaceChildren();
   units.filter((unit) => unit.active !== false).forEach((unit) => {
-    const card = document.createElement('article'); card.className = 'google-card';
-    const map = document.createElement('div'); map.className = 'google-card__preview';
-    const mapQuery = unit.address || unit.mapsQuery || `${unit.name}, ${unit.city}`;
-    const iframe = document.createElement('iframe'); iframe.src = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`; iframe.title = `Prévia de ${unit.name} no Google Maps`; iframe.loading = 'lazy'; iframe.referrerPolicy = 'no-referrer-when-downgrade'; map.append(iframe);
-    const body = document.createElement('div'); body.className = 'google-card__content'; body.innerHTML = '<span class="google-card__google" aria-label="Google"><i></i> Google</span>';
-    const name = document.createElement('div'); name.innerHTML = '<small>Instituto Vert</small>'; const strong = document.createElement('strong'); strong.textContent = unit.name; name.append(strong); body.append(name);
-    if (unit.address) { const address = document.createElement('small'); address.textContent = unit.address; address.style.marginTop = '8px'; body.append(address); }
-    const link = trackableLink(unit.mapsUrl, 'google_perfil', unit.id); link.innerHTML = 'Ver perfil no Google <span aria-hidden="true">→</span>'; body.append(link); card.append(map, body); grid.append(card);
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'unit-tile'; button.dataset.unitOpen = unit.id;
+    const city = unit.city || unit.name || 'Unidade';
+    button.innerHTML = `<img src="${unitPhotos(unit).cover}" alt="" loading="lazy" /><span><strong>${escapeText(city)}</strong><small>Ver unidade <span aria-hidden="true">→</span></small></span>`;
+    grid.append(button);
   });
+}
+
+function showUnit(unit, updateUrl = true) {
+  if (!unit) return;
+  activeUnitId = unit.id;
+  const city = unit.city || unit.name || 'Unidade';
+  const photos = unitPhotos(unit);
+  document.querySelector('.profile').hidden = true;
+  document.querySelector('.units').hidden = true;
+  document.getElementById('card-extras').hidden = true;
+  document.getElementById('unit-detail').hidden = false;
+  document.getElementById('unit-detail-title').textContent = city;
+  const address = document.getElementById('unit-detail-address');
+  address.textContent = unit.address || '';
+  address.hidden = !unit.address;
+  const cover = document.getElementById('unit-detail-image');
+  cover.src = photos.cover; cover.alt = `Recepção do Instituto Vert em ${city}`;
+  const gallery = document.getElementById('unit-detail-gallery'); gallery.replaceChildren();
+  photos.gallery.forEach(([src, alt]) => {
+    const image = document.createElement('img'); image.src = src; image.alt = alt; image.loading = 'lazy'; gallery.append(image);
+  });
+  gallery.hidden = photos.gallery.length === 0;
+  const actions = document.getElementById('unit-detail-actions'); actions.replaceChildren();
+  const map = trackableLink(unit.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(unit.address || `Instituto Vert ${city}`)}`, 'como_chegar', unit.id);
+  map.textContent = 'Como chegar'; actions.append(map);
+  const shared = (currentCompany.whatsappMode || 'shared') === 'shared';
+  const phone = shared ? currentCompany.phone : (unit.phone || currentCompany.phone);
+  const message = unit.whatsappMessage || currentCompany.whatsappMessage || 'Olá! Sou {nome} e quero agendar uma avaliação em {unidade}.';
+  ['WhatsApp', 'Agendar'].forEach((label) => {
+    const link = trackableLink(unit.contactUrl && !shared ? unit.contactUrl : whatsappUrl(phone, personalizeMessage(message, { unit: city })), label === 'Agendar' ? 'whatsapp_agendar' : 'whatsapp_unidade', unit.id);
+    link.textContent = label;
+    prepareLeadLink(link, { collectLead: unit.collectLead !== false, message, label: `${label} — ${city}`, unit: city, leadType: 'appointment' });
+    actions.append(link);
+  });
+  const other = activeUnits().find((candidate) => candidate.id !== unit.id);
+  const otherButton = document.getElementById('unit-other');
+  otherButton.textContent = other?.city || other?.name || '';
+  otherButton.dataset.unitOpen = other?.id || '';
+  document.querySelector('.unit-detail__other').hidden = !other;
+  if (updateUrl) history.pushState({ unitId: unit.id }, '', `#unidade-${encodeURIComponent(unit.id)}`);
+  registrarClique('ver_unidade', unit.id);
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function showCard(updateUrl = true) {
+  activeUnitId = '';
+  document.querySelector('.profile').hidden = false;
+  document.querySelector('.units').hidden = false;
+  document.getElementById('card-extras').hidden = false;
+  document.getElementById('unit-detail').hidden = true;
+  if (updateUrl) history.replaceState({}, '', '#unidades');
+  window.scrollTo({ top: updateUrl ? document.querySelector('.units').offsetTop : 0, behavior: 'instant' });
 }
 
 function renderCards(sectionId, listId, items, kind) {
@@ -254,9 +350,7 @@ function escapeText(value = '') {
 
 function renderContent(content) {
   if (!content) return; const company = content.company || {}; const units = content.units || []; const formationSettings = content.formationSettings || {}; currentCompany = company; currentUnits = units;
-  setText('.profile__identity p', company.category); setText('#titulo', company.name); setText('.intro .eyebrow', company.ctaLabel); setText('#cms-headline', company.headline); setText('#cms-description', company.description); setText('footer p', company.tagline);
-  const hero = document.querySelector('.profile__photo > img');
-  if (hero && company.heroImage) applyImageSource(hero, company.heroImage, new URL('./assets/hero.webp', import.meta.url).href);
+  setText('.identity-meta p', company.category); setText('#titulo', company.name); setText('.intro .eyebrow', company.ctaLabel); setText('#cms-headline', company.headline); setText('#cms-description', company.description); setText('.card-footer__base p', company.tagline);
   const logoSources = {
     primaryDark: company.logoPrimaryDark || DEFAULT_LOGOS.primaryDark,
     primaryLight: company.logoPrimaryLight || DEFAULT_LOGOS.primaryLight,
@@ -266,13 +360,15 @@ function renderContent(content) {
   const selectedVariant = company.logoVariant || 'primaryDark';
   const selectedLogo = logoSources[selectedVariant] || logoSources.primaryDark;
   applyImageSource(logo, selectedLogo, DEFAULT_LOGOS.primaryDark);
-  const cities = units.filter((unit) => unit.active !== false).map((unit) => unit.city).filter(Boolean); setText('.profile__identity span', company.identityLine || cities.join(' • '));
-  renderUnits(units); renderCards('campanhas', 'campaign-list', content.campaigns, 'campaign'); renderCards('depoimentos', 'testimonial-list', content.testimonials, 'testimonial'); renderFormations(content.formations, formationSettings, company); renderExtraLinks(content.links); renderWhatsApp(units, company);
+  const cities = units.filter((unit) => unit.active !== false).map((unit) => unit.city).filter(Boolean); setText('.identity-meta span', company.identityLine || cities.join(' • '));
+  renderUnits(units); renderCards('campanhas', 'campaign-list', content.campaigns, 'campaign'); renderCards('depoimentos', 'testimonial-list', content.testimonials, 'testimonial'); renderFormations(content.formations, formationSettings, company); renderExtraLinks(content.links); renderWhatsApp(units, company); renderServiceActions(company);
   const instagram = document.querySelector('.quick-links a[data-track="instagram"]'); if (instagram && company.instagram) { instagram.href = safeUrl(company.instagram); const label = instagram.querySelector('small'); if (label) label.textContent = company.instagramLabel || '@institutovert.br'; }
   const anitaInstagram = document.querySelector('.quick-links a[data-track="instagram_anita"]'); if (anitaInstagram && company.anitaInstagram) { anitaInstagram.href = safeUrl(company.anitaInstagram); const label = anitaInstagram.querySelector('small'); if (label) label.textContent = company.anitaInstagramLabel || '@dra.anitaalmeida'; }
   const floating = document.querySelector('.floating-whatsapp');
   const floatingLabel = floating.querySelector('span:last-child');
   if (floatingLabel) floatingLabel.textContent = company.contactButtonLabel || 'Falar no WhatsApp';
+  if (activeUnitId) showUnit(activeUnits().find((unit) => unit.id === activeUnitId), false);
+  else if (location.hash.startsWith('#unidade-')) showUnit(activeUnits().find((unit) => unit.id === decodeURIComponent(location.hash.slice(9))), false);
   bindTracking();
 }
 
@@ -405,6 +501,20 @@ function initializeScrollMotion() {
 }
 
 document.addEventListener('click', (event) => {
+  const unitButton = event.target.closest('[data-unit-open]');
+  if (unitButton) { showUnit(activeUnits().find((unit) => unit.id === unitButton.dataset.unitOpen)); return; }
+  if (event.target.closest('[data-unit-back]')) {
+    if (history.state?.unitId) history.back(); else showCard();
+    return;
+  }
+  const serviceButton = event.target.closest('[data-service]');
+  if (serviceButton) {
+    const service = SERVICE_OPTIONS.find((option) => option.id === serviceButton.dataset.service);
+    renderContactRouter(currentUnits, currentCompany, service);
+    contactRouter.showModal();
+    registrarClique(service.id);
+    return;
+  }
   const routerTrigger = event.target.closest('[data-open-contact-router]');
   if (routerTrigger) {
     event.preventDefault();
@@ -438,7 +548,7 @@ document.addEventListener('click', (event) => {
       ? 'Atendimento para paciente'
       : isAppointment
         ? `Consulta em ${pendingLead.unit}`
-        : currentCompany.leadFormTitle || 'Antes de continuar';
+      : pendingLead.button || currentCompany.leadFormTitle || 'Antes de continuar';
   document.querySelector('#lead-dialog-description').textContent = isFormation
     ? 'Preencha seus dados e responda duas perguntas rápidas.'
     : isPatient
@@ -456,6 +566,13 @@ document.addEventListener('click', (event) => {
   leadDialog.showModal();
   requestAnimationFrame(() => document.querySelector('#lead-name').focus());
 }, true);
+
+window.addEventListener('popstate', () => {
+  const id = location.hash.startsWith('#unidade-') ? decodeURIComponent(location.hash.slice(9)) : '';
+  const unit = activeUnits().find((candidate) => candidate.id === id);
+  if (unit) showUnit(unit, false);
+  else showCard(false);
+});
 
 document.querySelector('[data-close-lead]').addEventListener('click', () => leadDialog.close());
 leadDialog.addEventListener('click', (event) => { if (event.target === leadDialog) leadDialog.close(); });
@@ -544,4 +661,9 @@ leadForm.addEventListener('submit', async (event) => {
 });
 
 window.addEventListener('message', (event) => { if (event.origin === window.location.origin && event.data?.type === 'vert-card-preview') renderContent(event.data.content); });
-bindTracking(); initializeScrollMotion(); initializePrivacy(); loadCardContent().then(({ content }) => renderContent(content)).catch(() => {});
+bindTracking(); initializeScrollMotion(); initializePrivacy(); loadCardContent().then(({ content }) => renderContent(content)).catch(() => {
+  renderContent({ company: { phone: '5516999657667' }, units: [
+    { id: 'franca', name: 'Unidade Franca', city: 'Franca', mapsUrl: 'https://share.google/h4z7z9tEyG4lLo7gp' },
+    { id: 'ribeirao-preto', name: 'Unidade Ribeirão Preto', city: 'Ribeirão Preto', mapsUrl: 'https://share.google/FDO4JcaSOvqew78Sh' },
+  ] });
+});
