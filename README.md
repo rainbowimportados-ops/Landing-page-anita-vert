@@ -94,6 +94,9 @@ do lead (dados, histórico, notas e tarefas), avaliações e agenda comercial,
 relatórios por período e origem, e campanhas com links UTM. O histórico de
 etapas, notas e avaliações é gravado por trigger; tarefas e campanhas ficam em
 `site_lead_tasks` e `site_campaigns`, com acesso restrito à diretoria.
+O cadastro manual chama a mesma `site_capturar_lead` dos formulários, para
+registrar também a pessoa e a oportunidade no CRM existente. Para locação,
+o painel exige dentista ou profissional da saúde.
 
 A agenda registra o horário combinado no lead e **não reserva automaticamente**
 um horário na agenda clínica. A seção de pacientes mostra os interessados que

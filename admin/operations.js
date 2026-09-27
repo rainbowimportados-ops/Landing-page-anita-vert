@@ -192,14 +192,25 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
     try{await updateLead(selectedId,changes);renderDetail();}catch(e){const feedback=form.querySelector('.ops-feedback');if(feedback)feedback.textContent=e.message;}finally{button.disabled=false;}
   });
   document.querySelector('#ops-lead-detail').addEventListener('change',async(event)=>{const id=event.target.dataset.taskToggle;if(!id)return;const {error}=await supabase.from('site_lead_tasks').update({completed_at:event.target.checked?new Date().toISOString():null}).eq('id',id);if(error){window.alert(error.message);event.target.checked=!event.target.checked;}});
+  document.querySelector('#ops-new-lead-form [name="lead_type"]').addEventListener('change',(event)=>{
+    const profession=document.querySelector('#ops-new-lead-form [name="profession"]');
+    const rental=event.target.value==='rental';
+    profession.required=rental;
+    profession.querySelector('option[value="Estudante"]').disabled=rental;
+    if(rental && profession.value==='Estudante')profession.value='';
+  });
   document.querySelector('#ops-new-lead-form').addEventListener('submit',async(event)=>{
     event.preventDefault();const form=event.target,data=new FormData(form),feedback=document.querySelector('#ops-new-lead-feedback');
     const digits=phone(data.get('phone'));if(digits.length<10||digits.length>13){feedback.textContent='Informe um telefone válido com DDD.';return;}
-    const payload={name:String(data.get('name')).trim(),phone:digits,lead_type:data.get('lead_type'),unit:data.get('unit')||null,button:'Cadastro manual',source_origin:'painel',consent:data.get('consent')==='on'};
+    const kind=String(data.get('lead_type'));
+    const profession=String(data.get('profession')||'');
+    if(kind==='rental' && !['Dentista','Profissional da saúde'].includes(profession)){feedback.textContent='A locação é exclusiva para dentistas e profissionais da saúde.';return;}
+    const payload={nome:String(data.get('name')).trim(),telefone:digits,intencao:({appointment:'avaliacao',formation:'curso',rental:'locacao',close_friends:'close_friends'})[kind],tipo_painel:kind,superficie:'digital_card',unidade:data.get('unit')==='Ribeirão Preto'?'ribeirao-preto':data.get('unit')==='Franca'?'franca':null,profissao:profession||null,respostas:kind==='rental'?{perfil:profession}:{},rotulo:'Cadastro manual',referrer:'painel',consentimento:data.get('consent')==='on'};
     const button=form.querySelector('button[type="submit"]');button.disabled=true;feedback.textContent='Salvando…';
-    const {error}=await supabase.from('digital_card_leads').insert(payload);
-    button.disabled=false;if(error){feedback.textContent=error.message;return;}
-    form.reset();feedback.textContent='';document.querySelector('#ops-new-lead').close();await refresh();activatePanel('pipeline',true);
+    const {data:result,error}=await supabase.rpc('site_capturar_lead',{p:payload});
+    button.disabled=false;if(error||!result?.ok){feedback.textContent=error?.message||`Não foi possível salvar: ${result?.erro||'verifique os dados'}.`;return;}
+    form.reset();form.elements.profession.required=false;form.elements.profession.querySelector('option[value="Estudante"]').disabled=false;
+    feedback.textContent='';document.querySelector('#ops-new-lead').close();await refresh();activatePanel('pipeline',true);
   });
   document.querySelector('#ops-campaign-form').addEventListener('submit',async(event)=>{
     event.preventDefault();const form=event.target,data=new FormData(form),feedback=document.querySelector('#ops-campaign-feedback');

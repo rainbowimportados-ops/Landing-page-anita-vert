@@ -120,6 +120,7 @@
           <div class="topbar__title"><p class="eyebrow" id="workspace-context">Painel administrativo</p><h1 id="workspace-title">Visão geral</h1></div>
           <div class="topbar__actions">
             <span class="save-status" id="save-status">Tudo salvo</span>
+            <a class="button button--ghost" href="/" target="_blank" rel="noopener">Ver site</a>
             <a class="button button--ghost" href="/cartao" target="_blank" rel="noopener">Ver cartão</a>
             <button class="button" id="save">Salvar alterações</button>
           </div>
@@ -440,7 +441,7 @@
     </dialog>
     <dialog class="ops-dialog ops-dialog--compact" id="ops-new-lead" aria-labelledby="ops-new-lead-title">
       <form id="ops-new-lead-form"><div class="ops-detail-header"><div><span class="eyebrow">Atendimento</span><h2 id="ops-new-lead-title">Novo lead</h2></div><button type="button" class="ops-close" data-close-dialog="ops-new-lead" aria-label="Fechar">×</button></div>
-        <div class="ops-form-grid"><label>Nome completo<input name="name" required minlength="2" maxlength="100" /></label><label>Telefone com DDD<input name="phone" required inputmode="tel" minlength="10" maxlength="20" /></label><label>Interesse<select name="lead_type"><option value="appointment">Consulta ou avaliação</option><option value="formation">Curso</option><option value="rental">Locação</option><option value="close_friends">Close Friends</option></select></label><label>Unidade<select name="unit"><option value="">Não definida</option><option>Franca</option><option>Ribeirão Preto</option></select></label><label class="wide">O cliente autorizou o contato? <input name="consent" type="checkbox" required /></label></div>
+        <div class="ops-form-grid"><label>Nome completo<input name="name" required minlength="2" maxlength="100" /></label><label>Telefone com DDD<input name="phone" required inputmode="tel" minlength="10" maxlength="20" /></label><label>Interesse<select name="lead_type"><option value="appointment">Consulta ou avaliação</option><option value="formation">Curso</option><option value="rental">Locação</option><option value="close_friends">Close Friends</option></select></label><label>Unidade<select name="unit"><option value="">Não definida</option><option>Franca</option><option>Ribeirão Preto</option></select></label><label>Profissão / perfil<select name="profession"><option value="">Não informado</option><option>Dentista</option><option>Profissional da saúde</option><option value="Estudante">Estudante de Odontologia</option></select></label><label class="wide">O cliente autorizou o contato? <input name="consent" type="checkbox" required /></label></div>
         <p class="ops-feedback" id="ops-new-lead-feedback" role="status"></p><div class="ops-dialog-footer"><button type="button" class="button button--ghost" data-close-dialog="ops-new-lead">Cancelar</button><button type="submit" class="button">Cadastrar lead</button></div></form>
     </dialog>
     <dialog class="ops-dialog ops-dialog--compact" id="ops-campaign-dialog" aria-labelledby="ops-campaign-title">
