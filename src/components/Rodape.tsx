@@ -35,7 +35,7 @@ export function Rodape() {
             <p className="mt-3 max-w-xs text-sm leading-relaxed">{clinica.tagline} em Franca e Ribeirão Preto.</p>
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid min-w-0 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <nav aria-label="Rodapé">
               <h3 className={titulo}>Navegação</h3>
               <ul className="mt-2">
@@ -95,7 +95,7 @@ export function Rodape() {
                 )}
                 {clinica.email && (
                   <li>
-                    <a href={`mailto:${clinica.email}`} onClick={() => registrarClique('rodape_email')} className={classeLink}>
+                    <a href={`mailto:${clinica.email}`} onClick={() => registrarClique('rodape_email')} className="block min-h-[44px] max-w-full break-all py-3 text-sm text-conteudo-inverso-suave underline-offset-4 transition-colors duration-rapido hover-fino:hover:text-conteudo-inverso hover-fino:hover:underline">
                       {clinica.email}
                     </a>
                   </li>
