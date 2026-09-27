@@ -36,7 +36,7 @@ const titulos: Record<Intencao, string> = {
 
 const profissional = (intencao: Intencao) => intencao === 'curso' || intencao === 'locacao'
 
-type Erros = Partial<Record<'nome' | 'telefone' | 'unidade' | 'consent' | 'geral', string>>
+type Erros = Partial<Record<'nome' | 'telefone' | 'unidade' | 'geral', string>>
 
 /**
  * Fluxo de captação da landing: botão → modal → lead salvo → WhatsApp.
@@ -92,7 +92,6 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
     if (!telefoneValido(telefone)) novosErros.telefone = 'Informe o WhatsApp com DDD, por exemplo (16) 99999-9999.'
     if (!profissional(pedido.intencao) && !pedido.unidade && !unidade)
       novosErros.unidade = 'Escolha uma unidade ou "Ainda não sei".'
-    if (dados.get('consent') !== 'on') novosErros.consent = 'Confirme que podemos usar esses dados para responder ao contato.'
     setErros(novosErros)
     if (Object.keys(novosErros).length) return
 
@@ -230,11 +229,9 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
               </>
             )}
 
-            <label className="flex items-start gap-3 text-xs leading-relaxed text-conteudo-suave">
-              <input type="checkbox" name="consent" required className="mt-0.5 h-5 w-5 shrink-0 accent-marca-forte" />
-              <span>Autorizo o Instituto Vert a usar meu nome, telefone e interesse para responder a esta solicitação. <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">Política de privacidade</a>.</span>
-            </label>
-            {erros.consent && <p role="alert" className="captura__erro -mt-3">{erros.consent}</p>}
+            <p className="text-xs leading-relaxed text-conteudo-suave">
+              Ao enviar, você pede que a equipe use os dados informados para responder a esta solicitação. <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">Política de privacidade</a>.
+            </p>
 
             <button type="submit" disabled={enviando}
               className="inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-xl bg-marca-forte px-6 py-3 text-sm font-medium text-conteudo-inverso shadow-2 transition duration-padrao ease-saida active:scale-[0.98] disabled:opacity-70 hover-fino:hover:bg-conteudo">

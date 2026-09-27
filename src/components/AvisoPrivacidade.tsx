@@ -40,7 +40,10 @@ export function AvisoPrivacidade() {
         <p className="olho mt-5">Sua escolha</p>
         <h2 id="aviso-privacidade-titulo" className="mt-2 font-display text-3xl font-light">Privacidade no Instituto Vert</h2>
         <p id="aviso-privacidade-descricao" className="mt-3 text-sm leading-relaxed text-conteudo-suave">
-          Você pode conhecer o site sem autorizar métricas. Se permitir, registramos acessos e cliques para entender o interesse pelos nossos serviços. Seus dados de contato são pedidos somente quando você decide falar com a equipe.
+          Você pode conhecer o site sem autorizar métricas. Se permitir, registramos acessos, origem e cliques para entender o interesse pelos nossos serviços. Nome e WhatsApp são pedidos somente quando você decide falar com a equipe.
+        </p>
+        <p className="mt-3 text-sm leading-relaxed text-conteudo-suave">
+          Ao enviar um formulário, usamos os dados que você informou e a origem do acesso para responder ao pedido. Isso é independente da sua escolha de métricas.
         </p>
         <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm underline underline-offset-4">Ler a política de privacidade</a>
         <div className="aviso-privacidade__acoes">
