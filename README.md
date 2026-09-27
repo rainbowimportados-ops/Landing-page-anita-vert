@@ -89,6 +89,18 @@ superfícies. A diretoria pode filtrar por tipo e etapa, registrar notas e data
 de retorno, editar dados, etiquetar e exportar CSV. A tabela continua protegida
 pelas políticas RLS de `digital_card_admins`.
 
+O painel em `/admin` também oferece pipeline com movimentação de etapas, ficha
+do lead (dados, histórico, notas e tarefas), avaliações e agenda comercial,
+relatórios por período e origem, e campanhas com links UTM. O histórico de
+etapas, notas e avaliações é gravado por trigger; tarefas e campanhas ficam em
+`site_lead_tasks` e `site_campaigns`, com acesso restrito à diretoria.
+
+A agenda registra o horário combinado no lead e **não reserva automaticamente**
+um horário na agenda clínica. A seção de pacientes mostra os interessados que
+enviaram o formulário; prontuário e conversas do WhatsApp continuam no sistema
+clínico. Em “Equipe e acesso”, o painel exibe a conta autorizada, sem conceder
+novos acessos pelo navegador.
+
 "Já sou paciente" (`intent = paciente_atual`) identifica a pessoa, mas não
 cria oportunidade: é atendimento, não aquisição. Se o banco falhar ou demorar
 mais de 4 s, o WhatsApp abre mesmo assim.

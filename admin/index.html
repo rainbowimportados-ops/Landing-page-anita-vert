@@ -66,8 +66,15 @@
         <nav aria-label="Seções do painel">
           <span class="nav-group-label">Atendimento</span>
           <button class="nav-link is-active" data-section="visao-geral"><span aria-hidden="true">⌂</span>Visão geral</button>
-          <button class="nav-link" data-section="contatos"><span aria-hidden="true">◉</span>CRM de contatos</button>
+          <button class="nav-link" data-section="contatos"><span aria-hidden="true">◉</span>Leads</button>
+          <button class="nav-link" data-section="pipeline"><span aria-hidden="true">▥</span>Pipeline</button>
+          <button class="nav-link" data-section="avaliacoes"><span aria-hidden="true">◇</span>Avaliações</button>
+          <button class="nav-link" data-section="pacientes"><span aria-hidden="true">♙</span>Pacientes interessados</button>
+          <button class="nav-link" data-section="agenda"><span aria-hidden="true">▦</span>Agenda</button>
           <button class="nav-link" data-section="acessos"><span aria-hidden="true">◎</span>Instagram e acessos</button>
+          <button class="nav-link" data-section="campanhas-crm"><span aria-hidden="true">✦</span>Campanhas</button>
+          <button class="nav-link" data-section="origens"><span aria-hidden="true">↗</span>Origens</button>
+          <button class="nav-link" data-section="relatorios"><span aria-hidden="true">▤</span>Relatórios</button>
           <span class="nav-group-label">Site e cartão</span>
           <button class="nav-link" data-section="site"><span aria-hidden="true">▣</span>Editar site</button>
           <button class="nav-link" data-section="empresa"><span aria-hidden="true">◇</span>Dados da empresa</button>
@@ -75,22 +82,32 @@
           <button class="nav-link" data-section="links"><span aria-hidden="true">↗</span>WhatsApp e contatos</button>
           <span class="nav-group-label">Conteúdo</span>
           <button class="nav-link" data-section="formacoes"><span aria-hidden="true">▤</span>Formações e cursos</button>
-          <button class="nav-link" data-section="campanhas"><span aria-hidden="true">✦</span>Campanhas e promoções</button>
+          <button class="nav-link" data-section="campanhas"><span aria-hidden="true">✦</span>Promoções do cartão</button>
           <button class="nav-link" data-section="depoimentos"><span aria-hidden="true">“</span>Depoimentos</button>
           <button class="nav-link" data-section="resultados"><span aria-hidden="true">▧</span>Resultados e trabalhos</button>
+          <span class="nav-group-label">Administração</span>
+          <button class="nav-link" data-section="equipe"><span aria-hidden="true">♙</span>Equipe e acesso</button>
         </nav>
         <label class="mobile-section-picker" for="mobile-section-nav">
           <span>Área do painel</span>
           <select id="mobile-section-nav" aria-label="Escolha a área do painel">
             <option value="visao-geral">Visão geral</option>
+            <option value="pipeline">Pipeline</option>
+            <option value="avaliacoes">Avaliações</option>
+            <option value="pacientes">Pacientes interessados</option>
+            <option value="agenda">Agenda</option>
+            <option value="campanhas-crm">Campanhas</option>
+            <option value="origens">Origens</option>
+            <option value="relatorios">Relatórios</option>
+            <option value="equipe">Equipe e acesso</option>
             <option value="site">Editar site</option>
             <option value="acessos">Instagram e acessos</option>
-            <option value="contatos">CRM de contatos</option>
+            <option value="contatos">Leads</option>
             <option value="empresa">Dados da empresa</option>
             <option value="unidades">Unidades</option>
             <option value="links">WhatsApp e contatos</option>
             <option value="formacoes">Formações e cursos</option>
-            <option value="campanhas">Campanhas e promoções</option>
+            <option value="campanhas">Promoções do cartão</option>
             <option value="depoimentos">Depoimentos</option>
             <option value="resultados">Resultados e trabalhos</option>
           </select>
@@ -111,7 +128,8 @@
         <div class="editor-grid">
           <form class="editor" id="content-form">
             <section class="panel is-active" data-panel="visao-geral">
-              <div class="panel__heading"><div><p class="eyebrow">Últimos 30 dias</p><h2>Visão geral</h2></div><span>Acessos autorizados ao cartão</span></div>
+              <div class="panel__heading"><div><p class="eyebrow">Site + cartão · últimos 30 dias</p><h2>Visão geral</h2></div><span>Dados reais de captação e atendimento</span></div>
+              <div class="ops-dashboard" id="ops-dashboard"></div>
               <div class="metric-grid">
                 <article class="metric-card metric-card--primary"><small>Visitantes</small><strong id="metric-visitors">—</strong><span class="metric-card__caption">Pessoas únicas autorizadas</span></article>
                 <article class="metric-card"><small>Visualizações</small><strong id="metric-views">—</strong><span class="metric-card__caption">Aberturas do cartão</span></article>
@@ -271,7 +289,7 @@
             </section>
 
             <section class="panel" data-panel="contatos">
-              <div class="panel__heading"><div><p class="eyebrow">Site + cartão</p><h2>CRM de contatos</h2></div><button type="button" class="small-action" id="refresh-leads">Atualizar</button></div>
+              <div class="panel__heading"><div><p class="eyebrow">Site + cartão</p><h2>Leads</h2></div><div class="ops-heading-actions"><button type="button" class="small-action" data-new-lead>+ Novo lead</button><button type="button" class="small-action" id="refresh-leads">Atualizar</button></div></div>
               <p class="helper">Todos os formulários enviados. Acompanhe a etapa, registre a próxima ação e retome a conversa pelo WhatsApp.</p>
               <div class="crm-summary" id="crm-summary" aria-label="Resumo do atendimento"></div>
               <div class="lead-toolbar" aria-label="Ferramentas dos contatos">
@@ -304,6 +322,54 @@
                 </div>
               </div>
               <div class="leads-list" id="leads-list"><div class="empty-state"><strong>Carregando contatos…</strong></div></div>
+            </section>
+
+            <section class="panel" data-panel="pipeline">
+              <div class="panel__heading"><div><p class="eyebrow">Atendimento</p><h2>Pipeline</h2></div><button type="button" class="small-action" data-new-lead>+ Novo lead</button></div>
+              <p class="helper">Arraste os cartões entre as etapas ou abra um lead para registrar o próximo passo.</p>
+              <div class="ops-toolbar"><input id="pipeline-search" type="search" placeholder="Buscar nome, telefone ou interesse" aria-label="Buscar no pipeline" /><select id="pipeline-unit" aria-label="Filtrar unidade"><option value="all">Todas as unidades</option><option value="Franca">Franca</option><option value="Ribeirão Preto">Ribeirão Preto</option></select></div>
+              <div class="pipeline-board" id="pipeline-board"></div>
+            </section>
+
+            <section class="panel" data-panel="avaliacoes">
+              <div class="panel__heading"><div><p class="eyebrow">Agenda comercial</p><h2>Avaliações</h2></div><button type="button" class="small-action" data-jump-panel="agenda">Ver agenda →</button></div>
+              <div class="ops-list" id="evaluations-list"></div>
+            </section>
+
+            <section class="panel" data-panel="pacientes">
+              <div class="panel__heading"><div><p class="eyebrow">Captação de pacientes</p><h2>Pacientes interessados</h2></div></div>
+              <p class="helper">Pessoas que pediram atendimento pelo site ou cartão. O prontuário clínico é gerenciado no sistema da clínica.</p>
+              <div class="ops-list" id="patients-list"></div>
+            </section>
+
+            <section class="panel" data-panel="agenda">
+              <div class="panel__heading"><div><p class="eyebrow">Avaliações</p><h2>Agenda</h2></div><div class="ops-heading-actions"><button type="button" class="small-action" id="agenda-prev" aria-label="Mês anterior">←</button><strong id="agenda-month"></strong><button type="button" class="small-action" id="agenda-next" aria-label="Próximo mês">→</button></div></div>
+              <p class="helper">Horários registrados nos leads. Confirme disponibilidade com a unidade antes de combinar com o paciente.</p>
+              <div class="agenda-calendar" id="agenda-calendar"></div>
+              <div class="ops-list" id="agenda-list"></div>
+            </section>
+
+            <section class="panel" data-panel="campanhas-crm">
+              <div class="panel__heading"><div><p class="eyebrow">Captação</p><h2>Campanhas</h2></div><button type="button" class="small-action" id="new-campaign">+ Nova campanha</button></div>
+              <p class="helper">Crie links rastreáveis para o site ou cartão. Os leads atribuídos aparecem quando a pessoa envia o formulário pelo link.</p>
+              <div class="ops-list" id="campaign-list"></div>
+            </section>
+
+            <section class="panel" data-panel="origens">
+              <div class="panel__heading"><div><p class="eyebrow">Aquisição</p><h2>Origens</h2></div></div>
+              <p class="helper">Origem informada no acesso ou nos parâmetros de campanha; contatos sem origem identificada aparecem como “Direto/antigo”.</p>
+              <div class="ops-list" id="origins-list"></div>
+            </section>
+
+            <section class="panel" data-panel="relatorios">
+              <div class="panel__heading"><div><p class="eyebrow">Resultados</p><h2>Relatórios</h2></div><button type="button" class="small-action" id="report-export">Exportar CSV</button></div>
+              <div class="ops-toolbar"><label>Período <select id="report-period"><option value="30">Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="365">Últimos 12 meses</option><option value="all">Todo o período</option></select></label></div>
+              <div id="reports-content"></div>
+            </section>
+
+            <section class="panel" data-panel="equipe">
+              <div class="panel__heading"><div><p class="eyebrow">Permissões</p><h2>Equipe e acesso</h2></div></div>
+              <div class="ops-list" id="team-list"></div>
             </section>
 
             <section class="panel" data-panel="site">
@@ -365,6 +431,21 @@
           <button type="submit" class="button" id="save-lead-dialog">Salvar</button>
         </div>
       </form>
+    </dialog>
+    <dialog class="ops-dialog" id="ops-lead-detail" aria-labelledby="ops-detail-title">
+      <div class="ops-detail-header"><div><span class="eyebrow">Ficha do lead</span><h2 id="ops-detail-title"></h2><p id="ops-detail-subtitle"></p></div><button type="button" class="ops-close" data-close-dialog="ops-lead-detail" aria-label="Fechar">×</button></div>
+      <div class="ops-detail-actions" id="ops-detail-actions"></div>
+      <nav class="ops-tabs" aria-label="Detalhes do lead"><button type="button" data-detail-tab="dados" class="is-active">Dados</button><button type="button" data-detail-tab="historico">Histórico</button><button type="button" data-detail-tab="notas">Notas</button><button type="button" data-detail-tab="tarefas">Tarefas</button></nav>
+      <div class="ops-detail-body" id="ops-detail-body"></div>
+    </dialog>
+    <dialog class="ops-dialog ops-dialog--compact" id="ops-new-lead" aria-labelledby="ops-new-lead-title">
+      <form id="ops-new-lead-form"><div class="ops-detail-header"><div><span class="eyebrow">Atendimento</span><h2 id="ops-new-lead-title">Novo lead</h2></div><button type="button" class="ops-close" data-close-dialog="ops-new-lead" aria-label="Fechar">×</button></div>
+        <div class="ops-form-grid"><label>Nome completo<input name="name" required minlength="2" maxlength="100" /></label><label>Telefone com DDD<input name="phone" required inputmode="tel" minlength="10" maxlength="20" /></label><label>Interesse<select name="lead_type"><option value="appointment">Consulta ou avaliação</option><option value="formation">Curso</option><option value="rental">Locação</option><option value="close_friends">Close Friends</option></select></label><label>Unidade<select name="unit"><option value="">Não definida</option><option>Franca</option><option>Ribeirão Preto</option></select></label><label class="wide">O cliente autorizou o contato? <input name="consent" type="checkbox" required /></label></div>
+        <p class="ops-feedback" id="ops-new-lead-feedback" role="status"></p><div class="ops-dialog-footer"><button type="button" class="button button--ghost" data-close-dialog="ops-new-lead">Cancelar</button><button type="submit" class="button">Cadastrar lead</button></div></form>
+    </dialog>
+    <dialog class="ops-dialog ops-dialog--compact" id="ops-campaign-dialog" aria-labelledby="ops-campaign-title">
+      <form id="ops-campaign-form"><div class="ops-detail-header"><div><span class="eyebrow">Captação</span><h2 id="ops-campaign-title">Nova campanha</h2></div><button type="button" class="ops-close" data-close-dialog="ops-campaign-dialog" aria-label="Fechar">×</button></div>
+        <div class="ops-form-grid"><label class="wide">Nome<input name="name" required minlength="2" maxlength="100" placeholder="Ex.: Lentes Setembro" /></label><label>Identificador do link<input name="slug" required pattern="[a-z0-9][a-z0-9_-]{1,59}" placeholder="lentes-setembro" /></label><label>Destino<select name="destination"><option value="landing">Site</option><option value="digital_card">Cartão</option></select></label></div><p class="ops-feedback" id="ops-campaign-feedback" role="status"></p><div class="ops-dialog-footer"><button type="button" class="button button--ghost" data-close-dialog="ops-campaign-dialog">Cancelar</button><button type="submit" class="button">Criar campanha</button></div></form>
     </dialog>
     <script type="module" src="/admin/admin.js"></script>
   </body>

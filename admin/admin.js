@@ -1,4 +1,5 @@
 import { ADMIN_EMAIL, ADMIN_REDIRECT_URL, loadCardContent, supabase } from '../lib/supabase.js';
+import { initOperations } from './operations.js';
 
 const loginScreen = document.querySelector('#login-screen');
 const passwordSetupScreen = document.querySelector('#password-setup-screen');
@@ -36,6 +37,7 @@ let formationLeads = [];
 let visitorJourneys = [];
 let selectedLeadIds = new Set();
 let leadDialogMode = 'edit';
+let operations = null;
 
 const blankItems = {
   units: () => ({ id: crypto.randomUUID(), name: 'Nova unidade', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', address: '', phone: '', contactUrl: '', contactButtonLabel: '', whatsappMessage: '', collectLead: true, mapsUrl: '', mapsQuery: '', website: '', active: true }),
@@ -225,6 +227,14 @@ const sectionDetails = {
   links: { title: 'WhatsApp e contatos', context: 'Configuração do atendimento' },
   formacoes: { title: 'Formações e cursos', context: 'Conteúdo do cartão' },
   contatos: { title: 'CRM de contatos', context: 'Site e cartão · atendimento' },
+  pipeline: { title: 'Pipeline', context: 'Etapas de atendimento' },
+  avaliacoes: { title: 'Avaliações', context: 'Agendamentos de leads' },
+  pacientes: { title: 'Pacientes interessados', context: 'Contatos de pacientes' },
+  agenda: { title: 'Agenda', context: 'Avaliações' },
+  'campanhas-crm': { title: 'Campanhas', context: 'Links de captação' },
+  origens: { title: 'Origens', context: 'Aquisição de leads' },
+  relatorios: { title: 'Relatórios', context: 'Resultados de captação' },
+  equipe: { title: 'Equipe e acesso', context: 'Permissões' },
   site: { title: 'Editar site', context: 'Conteúdo e identidade' },
   campanhas: { title: 'Campanhas e promoções', context: 'Conteúdo do cartão' },
   depoimentos: { title: 'Depoimentos', context: 'Conteúdo do cartão' },
@@ -246,9 +256,10 @@ function activatePanel(section, shouldScroll = false) {
     const frame = document.querySelector('#site-editor-frame');
     if (frame && !frame.src) frame.src = frame.dataset.src;
   }
-  saveButton.hidden = ['site', 'contatos', 'acessos', 'visao-geral'].includes(section);
+  saveButton.hidden = ['site', 'contatos', 'pipeline', 'avaliacoes', 'pacientes', 'agenda', 'campanhas-crm', 'origens', 'relatorios', 'equipe', 'acessos', 'visao-geral'].includes(section);
   saveStatus.hidden = saveButton.hidden;
-  document.querySelector('.preview-pane').hidden = ['site', 'contatos', 'acessos', 'visao-geral'].includes(section);
+  document.querySelector('.preview-pane').hidden = saveButton.hidden;
+  operations?.activate(section);
   if (section === 'links' && content) renderUnitContacts();
   const details = sectionDetails[section];
   const title = document.querySelector('#workspace-title');
@@ -631,7 +642,7 @@ async function loadLeads() {
   if (journeyList) journeyList.innerHTML = '<div class="empty-state"><strong>Carregando acessos…</strong></div>';
   if (formationList) formationList.innerHTML = '<div class="empty-state"><strong>Carregando interessados…</strong></div>';
   const [leadResult, clickResult] = await Promise.all([
-    supabase.from('digital_card_leads').select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at,visitor_id,instagram_handle,source_origin,age_range,gender,answers,pipeline_status,internal_notes,next_followup_at').order('created_at', { ascending: false }).limit(500),
+    loadAllSiteLeads(),
     supabase.from('digital_card_clicks').select('visitor_id,botao,unidade,origem,dispositivo,instagram_handle,created_at').eq('superficie', 'digital_card').in('evento', ['page_view', 'cta_click', 'consent', 'lead_created']).not('visitor_id', 'is', null).order('created_at', { ascending: false }).limit(5000),
   ]);
   if (leadResult.error) {
@@ -649,9 +660,23 @@ async function loadLeads() {
   renderVisitorJourneys();
   renderContactList();
   renderCrmSummary();
+  operations?.setLeads(data);
   if (formationList) formationList.innerHTML = formationLeads.length
     ? formationLeads.map(renderFormationLeadCard).join('')
     : '<div class="empty-state"><strong>Nenhum interessado ainda</strong><p>Os leads dos cursos aparecerão aqui com suas respostas.</p></div>';
+}
+
+async function loadAllSiteLeads() {
+  const rows = [];
+  const pageSize = 500;
+  for (let offset = 0; ; offset += pageSize) {
+    const result = await supabase.from('digital_card_leads')
+      .select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at,visitor_id,instagram_handle,source_origin,age_range,gender,answers,pipeline_status,internal_notes,next_followup_at,appointment_at,assigned_to')
+      .order('created_at', { ascending: false }).order('id', { ascending: false }).range(offset, offset + pageSize - 1);
+    if (result.error) return { data: null, error: result.error };
+    rows.push(...(result.data || []));
+    if ((result.data || []).length < pageSize) return { data: rows, error: null };
+  }
 }
 
 function aggregateVisitorJourneys(clicks, leads) {
@@ -803,6 +828,7 @@ function renderLeadRow(lead) {
       <button type="button" data-lead-action="mark" aria-label="${lead.marked ? 'Desmarcar' : 'Marcar'} ${escapeHtml(lead.name)}" title="${lead.marked ? 'Desmarcar' : 'Marcar'}">${lead.marked ? '★' : '☆'}</button>
       <button type="button" data-lead-action="tag" title="Etiquetar">Etiqueta</button>
       <button type="button" data-lead-action="edit" title="Editar">Editar</button>
+      <button type="button" data-open-lead="${escapeHtml(lead.id)}" title="Abrir ficha">Ficha</button>
       <button type="button" class="is-danger" data-lead-action="delete" title="Excluir">Excluir</button>
     </div>
   </article>`;
@@ -898,6 +924,7 @@ async function deleteLeads(ids) {
   ids.forEach((id) => selectedLeadIds.delete(id));
   renderContactList();
   renderCrmSummary();
+  operations?.setLeads(contactLeads);
   void loadMetrics();
 }
 
@@ -974,6 +1001,7 @@ document.querySelector('#lead-dialog-form').addEventListener('submit', async (ev
   closeLeadDialog();
   renderContactList();
   renderCrmSummary();
+  operations?.setLeads(contactLeads);
 });
 
 function csvCell(value) {
@@ -1083,4 +1111,5 @@ supabase.auth.onAuthStateChange((_event, nextSession) => {
   if (nextSession && adminApp.hidden) setTimeout(() => void openAdmin(nextSession), 0);
 });
 
+operations = initOperations({ supabase, refresh: loadLeads, activatePanel, getSession: () => session });
 start();
