@@ -542,19 +542,20 @@ document.addEventListener('click', (event) => {
   };
   if (contactRouter.open) contactRouter.close();
   leadForm.reset();
+  document.querySelector('#lead-more').open = false;
   document.querySelector('#lead-instagram').value = visitorInstagram || storageGet(INSTAGRAM_STORAGE_KEY);
   const type = pendingLead.leadType;
   const professional = ['formation', 'rental', 'close_friends'].includes(type);
   const title = type === 'formation' ? `Interesse em ${pendingLead.courseTitle}`
     : type === 'rental' ? 'Alugar sala em Ribeirão'
     : type === 'close_friends' ? 'Close Friends'
-    : type === 'patient' ? 'Atendimento para paciente'
-    : type === 'appointment' ? `Consulta em ${pendingLead.unit}`
+    : type === 'patient' ? 'Seu atendimento'
+    : type === 'appointment' ? 'Seu atendimento'
     : pendingLead.button || 'Contato';
-  const description = type === 'formation' ? 'Conte sobre sua experiência para indicarmos o curso ideal.'
-    : type === 'rental' ? 'Conte como pretende usar a sala para enviarmos as opções de locação.'
-    : type === 'close_friends' ? 'Conte sobre sua atuação e seu interesse no conteúdo exclusivo.'
-    : 'Conte o que procura para nossa equipe direcionar seu atendimento.';
+  const description = type === 'formation' ? 'Qual curso combina com você?'
+    : type === 'rental' ? 'Locação para dentistas e profissionais da saúde.'
+    : type === 'close_friends' ? 'O que você gostaria de acompanhar?'
+    : pendingLead.unit ? `${pendingLead.unit} · Só mais um detalhe.` : 'Só mais um detalhe para direcionar você.';
   pendingLead.stepTitle = title;
   pendingLead.stepDescription = description;
   pendingLead.audience = type === 'rental' ? 'Profissionais da saúde'
@@ -577,6 +578,10 @@ document.addEventListener('click', (event) => {
     '#formation-lead-fields': type === 'formation',
     '#rental-lead-fields': type === 'rental',
     '#friends-lead-fields': type === 'close_friends',
+    '#patient-extra-fields': !professional,
+    '#professional-extra-fields': professional,
+    '#formation-extra-fields': type === 'formation',
+    '#rental-extra-fields': type === 'rental',
   };
   Object.entries(sections).forEach(([selector, visible]) => {
     const section = document.querySelector(selector);
@@ -611,10 +616,10 @@ function setLeadStep(step) {
   document.querySelector('#lead-step-one').hidden = !first;
   document.querySelector('#lead-step-two').hidden = first;
   document.querySelector('.lead-progress').setAttribute('aria-valuenow', String(step));
-  document.querySelector('#lead-dialog-eyebrow').textContent = `${step} de 2 · ${pendingLead.audience}`;
+  document.querySelector('#lead-dialog-eyebrow').textContent = first ? 'Contato rápido' : 'Quase pronto';
   document.querySelector('#lead-dialog-title').textContent = first ? 'Vamos conversar?' : pendingLead.stepTitle;
   document.querySelector('#lead-dialog-description').textContent = first
-    ? 'Seu nome e WhatsApp para começar. Na próxima etapa, só algumas perguntas rápidas.'
+    ? 'Seu nome e WhatsApp para nossa equipe falar com você.'
     : pendingLead.stepDescription;
   leadDialog.scrollTo({ top: 0, behavior: 'instant' });
 }
@@ -675,7 +680,7 @@ leadForm.addEventListener('submit', async (event) => {
     unit: String(formData.get('patientUnit') || pendingLead.unit || '').trim(),
   };
   const answers = pendingLead.leadType === 'formation' ? {
-    perfil: lead.profession, cidade: lead.city, ja_fez_curso: formData.get('hasPreviousCourse') === 'yes',
+    perfil: lead.profession, cidade: lead.city, ja_fez_curso: lead.hasPreviousCourse,
     interesse: String(formData.get('courseInterest') || ''),
   } : pendingLead.leadType === 'rental' ? {
     perfil: lead.profession, cidade: lead.city,

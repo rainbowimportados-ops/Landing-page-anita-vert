@@ -90,10 +90,6 @@
         <div class="card-footer__base"><span class="official-wordmark" aria-hidden="true"></span><p>Ciência, beleza e excelência em equilíbrio.</p><small>© <span id="year"></span> Instituto Vert · <button class="privacy-settings" type="button" data-privacy-settings>Privacidade e dados</button></small></div>
       </footer>
     </div>
-    <a class="save-contact-shortcut" href="/instituto-vert.vcf" download="Instituto Vert.vcf" data-track="salvar_contato" aria-label="Salvar Instituto Vert nos contatos do celular">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="14" height="18" rx="2"/><circle cx="11" cy="9" r="2"/><path d="M7.5 16c.6-1.8 2-2.7 3.5-2.7s2.9.9 3.5 2.7M20 7v6m-3-3h6"/></svg>
-      <span>Salvar contato</span>
-    </a>
     <button class="floating-whatsapp" id="whatsapp-router-trigger" type="button" data-open-contact-router><span>Falar no WhatsApp</span></button>
 
     <dialog class="contact-router" id="contact-router" aria-labelledby="contact-router-title"><div class="contact-router__content"><button class="lead-dialog__close" type="button" data-close-contact-router aria-label="Fechar">×</button><p class="eyebrow">Atendimento direcionado</p><h2 id="contact-router-title">Como podemos ajudar?</h2><p>Escolha uma opção para falar com a equipe certa.</p><div class="contact-router__options" id="contact-router-options"></div></div></dialog>
@@ -102,7 +98,7 @@
       <form class="lead-form" id="lead-form">
         <button class="lead-dialog__close" type="button" data-close-lead aria-label="Fechar">×</button>
         <div class="lead-progress" role="progressbar" aria-label="Etapa do contato" aria-valuemin="1" aria-valuemax="2" aria-valuenow="1"><span></span><span></span></div>
-        <p class="eyebrow" id="lead-dialog-eyebrow">1 de 2 · Primeiro contato</p>
+        <p class="eyebrow" id="lead-dialog-eyebrow">Contato rápido</p>
         <h2 id="lead-dialog-title">Vamos conversar?</h2>
         <p id="lead-dialog-description">Seu nome e WhatsApp para começar.</p>
         <div class="lead-form__step" id="lead-step-one">
@@ -117,11 +113,7 @@
         <div class="lead-form__step" id="lead-step-two" hidden>
           <button class="lead-form__back" type="button" data-lead-back>← Voltar</button>
         <div class="lead-form__section" id="patient-lead-fields" hidden>
-          <span class="lead-form__section-title">Sobre seu atendimento</span>
-          <label>Sua profissão <small>opcional</small><input name="patientProfession" maxlength="100" placeholder="Ex.: professora" disabled /></label>
-          <label>Você já é paciente do Instituto Vert?
-            <select name="patientStatus" required disabled><option value="">Selecione</option><option value="novo">Ainda não</option><option value="atual">Sim, já sou paciente</option></select>
-          </label>
+          <span class="lead-form__section-title">Seu atendimento</span>
           <label>O que você procura?
             <select name="patientInterest" required disabled><option value="">Selecione</option><option value="Lentes em resina">Lentes em resina</option><option value="Consulta clínica">Consulta clínica</option><option value="Retorno ou acompanhamento">Retorno ou acompanhamento</option><option value="Outro atendimento">Outro atendimento</option></select>
           </label>
@@ -130,37 +122,53 @@
           </label>
         </div>
         <div class="lead-form__section" id="professional-lead-fields" hidden>
-          <span class="lead-form__section-title">Sobre sua atuação</span>
-          <label>Você é:
+          <span class="lead-form__section-title">Sobre você</span>
+          <label>Sua atuação
             <select name="professionalRole" required disabled><option value="">Selecione</option><option value="dentista">Dentista</option><option value="estudante">Estudante de Odontologia</option><option value="outro">Outro profissional da área odontológica</option><option value="saude" hidden disabled>Profissional da saúde</option></select>
           </label>
           <label id="health-profession-field" hidden>Qual é a sua profissão na saúde?<input name="healthProfession" maxlength="80" placeholder="Ex.: Fisioterapeuta" required disabled /></label>
-          <label><span id="professional-city-label">Cidade onde atua ou estuda</span><input name="professionalCity" maxlength="80" placeholder="Ex.: Ribeirão Preto" required disabled /></label>
         </div>
         <div class="lead-form__section" id="formation-lead-fields" hidden>
-          <span class="lead-form__section-title">Sobre o curso</span>
-          <label>Já fez algum curso na área?
-            <select name="hasPreviousCourse" required disabled><option value="">Selecione</option><option value="yes">Sim</option><option value="no">Não</option></select>
-          </label>
-          <label>Qual assunto mais interessa?
+          <span class="lead-form__section-title">Seu interesse</span>
+          <label>Qual assunto interessa?
             <select name="courseInterest" required disabled><option value="">Selecione</option><option value="Lentes em resina">Lentes em resina</option><option value="Estética odontológica">Estética odontológica</option><option value="Mentoria prática">Mentoria prática</option><option value="Outros cursos">Outros cursos</option></select>
           </label>
         </div>
         <div class="lead-form__section" id="rental-lead-fields" hidden>
-          <span class="lead-form__section-title">Sobre a locação</span>
-          <p class="lead-form__note">Locação exclusiva para dentistas e profissionais da saúde.</p>
+          <span class="lead-form__section-title">Sua sala</span>
           <label>Para qual atendimento precisa da sala?<input name="rentalPurpose" maxlength="120" placeholder="Ex.: consultas, estética, avaliação" required disabled /></label>
-          <label>Com que frequência pretende usar?
-            <select name="rentalFrequency" required disabled><option value="">Selecione</option><option value="pontual">Uso pontual</option><option value="semanal">Semanalmente</option><option value="mensal">Mensalmente</option><option value="a_definir">Ainda estou avaliando</option></select>
-          </label>
         </div>
         <div class="lead-form__section" id="friends-lead-fields" hidden>
-          <span class="lead-form__section-title">Sobre o Close Friends</span>
+          <span class="lead-form__section-title">Seu interesse</span>
           <label>O que gostaria de acompanhar?
             <select name="friendsInterest" required disabled><option value="">Selecione</option><option value="Bastidores clínicos">Bastidores clínicos</option><option value="Dicas e técnicas">Dicas e técnicas</option><option value="Cursos e eventos">Cursos e eventos</option><option value="Tudo isso">Tudo isso</option></select>
           </label>
         </div>
-        <label>Seu Instagram <small>opcional</small><input id="lead-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" placeholder="@seuusuario" /></label>
+        <details class="lead-more" id="lead-more">
+          <summary>Adicionar detalhes <small>opcional</small></summary>
+          <div class="lead-more__fields">
+            <div class="lead-more__group" id="patient-extra-fields" hidden>
+              <label>Sua profissão<input name="patientProfession" maxlength="100" placeholder="Ex.: professora" disabled /></label>
+              <label>Já é paciente do Instituto Vert?
+                <select name="patientStatus" disabled><option value="">Prefiro não informar</option><option value="novo">Ainda não</option><option value="atual">Sim, já sou paciente</option></select>
+              </label>
+            </div>
+            <div class="lead-more__group" id="professional-extra-fields" hidden>
+              <label><span id="professional-city-label">Cidade onde atua ou estuda</span><input name="professionalCity" maxlength="80" placeholder="Ex.: Ribeirão Preto" disabled /></label>
+            </div>
+            <div class="lead-more__group" id="formation-extra-fields" hidden>
+              <label>Já fez algum curso na área?
+                <select name="hasPreviousCourse" disabled><option value="">Prefiro não informar</option><option value="yes">Sim</option><option value="no">Não</option></select>
+              </label>
+            </div>
+            <div class="lead-more__group" id="rental-extra-fields" hidden>
+              <label>Frequência de uso
+                <select name="rentalFrequency" disabled><option value="">Ainda não sei</option><option value="pontual">Uso pontual</option><option value="semanal">Semanalmente</option><option value="mensal">Mensalmente</option></select>
+              </label>
+            </div>
+            <label>Seu Instagram<input id="lead-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" placeholder="@seuusuario" /></label>
+          </div>
+        </details>
         <label class="lead-consent"><input name="consent" type="checkbox" required /><span>Autorizo o Instituto Vert a usar estes dados para responder ao meu contato.</span></label>
         <p class="lead-form__feedback" id="lead-feedback" role="status"></p>
         <button class="lead-form__submit" type="submit">Falar com a equipe <span aria-hidden="true">→</span></button>
