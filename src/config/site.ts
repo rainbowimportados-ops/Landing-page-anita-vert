@@ -256,3 +256,21 @@ export const sobre = {
   ],
   compromissos: ['Planejamento individual', 'Plano por escrito', 'Acompanhamento após a alta'],
 }
+
+/**
+ * Perfil do Instagram da clínica mostrado na landing, no formato do app.
+ * Números e bio copiados do perfil em 27/09/2026 — atualizar aqui quando
+ * mudarem. As capas ficam em src/assets/instagram/perfil (post-1 a post-6),
+ * recortadas da grade do perfil e na mesma ordem dele.
+ */
+export const perfilInstagram = {
+  usuario: 'institutovert.br',
+  nome: 'Instituto VERT',
+  publicacoes: '160',
+  seguidores: '10,3 mil',
+  seguindo: '3.147',
+  bio: ['Odontologia de excelência 🏅', '🇨🇱🇦🇺🇦🇷🇧🇷🇪🇨🇫🇷'],
+  por: 'dra.anitaalmeida',
+  local: 'Ribeirão Preto | Franca',
+  link: 'institutovert.app',
+}
