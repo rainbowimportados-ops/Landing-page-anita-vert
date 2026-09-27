@@ -106,10 +106,10 @@ function Documento({ id }: { id: string }) {
     <div className="min-h-screen bg-fundo text-conteudo">
       <header className="border-b border-borda bg-superficie-inversa text-conteudo-inverso">
         <div className="container-vert flex h-[4.5rem] items-center justify-between">
-          <a href="/agendar" aria-label={`${clinica.nome} — início`} className="inline-flex min-h-[44px] items-center">
+          <a href="/" aria-label={`${clinica.nome} — início`} className="inline-flex min-h-[44px] items-center">
             <MarcaVert className="h-6" />
           </a>
-          <a href="/agendar" className="text-sm text-conteudo-inverso-suave underline-offset-4 hover:underline">Voltar ao site</a>
+          <a href="/" className="text-sm text-conteudo-inverso-suave underline-offset-4 hover:underline">Voltar ao site</a>
         </div>
       </header>
       <main className="container-vert max-w-3xl py-16 sm:py-20">

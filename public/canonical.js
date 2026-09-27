@@ -1,7 +1,7 @@
 (() => {
   const canonicalHost = 'instituto-vert.vercel.app';
-  // vert.institutovert.app saiu daqui de propósito: ele agora serve a
-  // landing page e a configuração dela, não deve ser redirecionado.
+  // vert.institutovert.app não entra aqui: o vercel.json já o redireciona
+  // para institutovert.app no servidor.
   const legacyHosts = new Set([
     'landing-page-vert-liart.vercel.app',
     'landing-page-vert-rainbowimportadosgmailcoms-projects.vercel.app',
