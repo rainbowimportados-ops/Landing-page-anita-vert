@@ -215,11 +215,10 @@ footer p { margin: 8px 0 0; }
 .privacy-form__instagram input { width: 100%; min-height: 44px; padding: 9px 11px; border: 1px solid rgba(74,47,31,.18); border-radius: 9px; background: #fff; color: var(--deep); font: 400 16px var(--sans); outline: none; }
 .privacy-form__consent { display: grid; grid-template-columns: auto 1fr; gap: 9px; align-items: center; padding: 11px 12px; border-radius: 10px; background: #eee4da; color: #654b3e; font: 500 .69rem/1.35 var(--sans); cursor: pointer; }
 .privacy-form__consent input { width: 18px; height: 18px; margin: 0; accent-color: var(--cacao); }
-.privacy-form__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.privacy-form__actions { display: grid; grid-template-columns: 1fr; gap: 7px; }
 .privacy-form__actions button { font-family: var(--sans); cursor: pointer; }
-.privacy-form__accept { min-height: 48px; padding: 10px 14px; border: 0; border-radius: 9px; background: var(--cacao); color: #fff; font-size: .72rem; font-weight: 700; }
-.privacy-form__decline { min-height: 48px; padding: 8px; border: 1px solid var(--cacao); border-radius: 9px; background: transparent; color: var(--deep); font-size: .72rem; font-weight: 700; }
-@media (max-width: 360px) { .privacy-form__actions { grid-template-columns: 1fr; } }
+.privacy-form__accept { min-height: 52px; padding: 10px 14px; border: 0; border-radius: 9px; background: var(--cacao); color: #fff; font-size: .8rem; font-weight: 700; }
+.privacy-form__decline { min-height: 44px; padding: 8px; border: 0; background: transparent; color: var(--deep); font-size: .68rem; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } .comparison:hover .comparison__after { opacity: 1; animation: none !important; } }

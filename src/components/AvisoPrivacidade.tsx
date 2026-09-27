@@ -44,8 +44,8 @@ export function AvisoPrivacidade() {
         </p>
         <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm underline underline-offset-4">Ler a política de privacidade</a>
         <div className="aviso-privacidade__acoes">
-          <button type="button" onClick={() => escolher('accepted')}>Autorizar métricas</button>
-          <button type="button" onClick={() => escolher('declined')}>Continuar sem métricas</button>
+          <button className="aviso-privacidade__autorizar" type="button" onClick={() => escolher('accepted')}>Autorizar métricas</button>
+          <button className="aviso-privacidade__recusar" type="button" onClick={() => escolher('declined')}>Continuar sem métricas</button>
         </div>
         <p className="mt-3 text-xs leading-relaxed text-conteudo-tenue">Você pode mudar sua escolha em “Privacidade e dados”, no rodapé.</p>
       </div>
