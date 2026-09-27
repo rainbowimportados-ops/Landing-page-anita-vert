@@ -3,7 +3,7 @@ import { Reveal } from './Reveal'
 
 export function Etapas() {
   return (
-    <section id="como-funciona" className="secao bg-superficie-suave">
+    <section id="como-funciona" className="secao">
       <div className="container-vert">
         <Reveal className="max-w-texto">
           <p className="olho">Como funciona</p>

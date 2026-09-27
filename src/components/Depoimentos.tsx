@@ -11,7 +11,7 @@ export function Depoimentos() {
   if (depoimentos.length === 0) return null
 
   return (
-    <section className="secao bg-superficie">
+    <section className="secao">
       <div className="container-vert">
         <Reveal className="max-w-texto">
           <p className="olho">Pacientes</p>

@@ -70,6 +70,14 @@
     @apply bg-fundo font-sans text-conteudo antialiased;
   }
 
+  main {
+    background:
+      radial-gradient(ellipse 68rem 55rem at 96% 16%, rgb(222 191 165 / .29), transparent 84%),
+      radial-gradient(ellipse 60rem 75rem at 2% 43%, rgb(225 202 182 / .34), transparent 85%),
+      radial-gradient(ellipse 72rem 75rem at 95% 72%, rgb(209 180 156 / .28), transparent 85%),
+      rgb(var(--cor-fundo));
+  }
+
   section[id] {
     scroll-margin-top: 5.5rem;
   }
@@ -512,9 +520,8 @@
 /* Linguagem editorial clara: creme quente, marrom espresso, serifa leve. */
 .hero-claro {
   background:
-    radial-gradient(60% 70% at 85% 20%, rgb(255 255 255 / 0.85), transparent 70%),
-    radial-gradient(50% 60% at 0% 100%, rgb(227 212 195 / 0.55), transparent 70%),
-    rgb(var(--cor-fundo));
+    radial-gradient(60% 70% at 85% 20%, rgb(255 255 255 / 0.65), transparent 75%),
+    radial-gradient(50% 60% at 0% 100%, rgb(227 212 195 / 0.25), transparent 75%);
 }
 
 .olho-linha {
@@ -588,40 +595,37 @@
   background: radial-gradient(120% 90% at 20% 10%, rgb(var(--cor-superficie-inversa-suave)), rgb(var(--cor-superficie-inversa)));
 }
 
-/* Fotos reais como planos de fundo: presença editorial sob superfícies de vidro. */
+/* As fotos se dissolvem no fundo contínuo da página, sem recortes entre seções. */
 .resultados-cenario,
 .unidades-cenario {
   position: relative;
   isolation: isolate;
-  overflow: hidden;
-}
-.resultados-cenario {
-  background: radial-gradient(circle at 10% 19%, rgb(235 215 196 / .64), transparent 39rem), rgb(var(--cor-fundo));
 }
 .resultados-cenario__foto {
   position: absolute;
-  top: 0;
+  top: -3rem;
   right: 0;
-  width: min(61%, 57rem);
-  height: min(52rem, 64vw);
+  width: min(72%, 65rem);
+  height: min(67rem, 85vw);
   margin: 0;
   overflow: hidden;
   pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 76% 68% at 69% 43%, #000 32%, transparent 100%);
+  mask-image: radial-gradient(ellipse 76% 68% at 69% 43%, #000 32%, transparent 100%);
 }
 .resultados-cenario__foto img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center 32%;
-  opacity: .4;
+  opacity: .34;
   filter: saturate(.75) contrast(.9);
 }
 .resultados-cenario__foto::after {
   position: absolute;
   inset: 0;
   content: '';
-  background: linear-gradient(90deg, rgb(247 243 236) 0%, rgb(247 243 236 / .18) 58%),
-    linear-gradient(0deg, rgb(247 243 236) 0%, transparent 53%);
+  background: linear-gradient(90deg, rgb(247 243 236 / .75), transparent 65%);
   pointer-events: none;
 }
 .resultados-cenario__foto .midia-paciente__marca { z-index: 2; opacity: .24; }
@@ -630,34 +634,35 @@
 .resultados-cenario__intro,
 .unidades-cenario__intro {
   padding: clamp(1.25rem, 3.2vw, 2.25rem);
-  border: 1px solid rgb(255 255 255 / .7);
   border-radius: 1.65rem;
-  background: linear-gradient(140deg, rgb(255 252 247 / .83), rgb(255 252 247 / .58));
-  box-shadow: 0 24px 60px -42px rgb(43 27 20 / .36), inset 0 1px 0 rgb(255 255 255 / .9);
+  background: linear-gradient(140deg, rgb(255 252 247 / .8), rgb(255 252 247 / .48));
+  box-shadow: 0 24px 60px -42px rgb(43 27 20 / .22), inset 0 1px 0 rgb(255 255 255 / .7);
   backdrop-filter: blur(19px) saturate(1.2);
   -webkit-backdrop-filter: blur(19px) saturate(1.2);
 }
 .resultados-cenario__creditos { margin-top: .65rem; max-width: 50rem; }
-.unidades-cenario {
-  background: rgb(228 214 196);
-}
 .unidades-cenario__foto,
 .unidades-cenario__foto::after {
   position: absolute;
-  inset: 0;
+  inset: -4rem 0;
 }
+.unidades-cenario__foto {
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 85% 75% at 57% 50%, #000 32%, transparent 100%);
+  mask-image: radial-gradient(ellipse 85% 75% at 57% 50%, #000 32%, transparent 100%);
+}
+.unidades-cenario__foto::after { inset: 0; }
 .unidades-cenario__foto img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center 44%;
-  opacity: .64;
+  opacity: .36;
   filter: saturate(.72);
 }
 .unidades-cenario__foto::after {
   content: '';
-  background: linear-gradient(180deg, rgb(247 243 236 / .88), rgb(247 243 236 / .54) 48%, rgb(247 243 236 / .79)),
-    linear-gradient(90deg, rgb(247 243 236 / .58), transparent 60%);
+  background: linear-gradient(90deg, rgb(247 243 236 / .55), transparent 80%), rgb(247 243 236 / .23);
   pointer-events: none;
 }
 .unidades-cenario::before {
@@ -665,21 +670,28 @@
   inset: 0;
   content: '';
   z-index: 1;
-  background: radial-gradient(circle at 82% 30%, rgb(255 255 255 / .38), transparent 32rem);
+  background: radial-gradient(circle at 82% 30%, rgb(255 255 255 / .23), transparent 32rem);
   pointer-events: none;
 }
 .unidades-cenario .unidades-abas { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
 .unidades-cenario #painel-unidade { background: linear-gradient(140deg, rgb(255 252 247 / .88), rgb(255 252 247 / .72)); }
 @media (max-width: 640px) {
-  .resultados-cenario__foto { width: 100%; height: 29rem; }
-  .resultados-cenario__foto img { opacity: .3; object-position: 50% 23%; }
+  .resultados-cenario__foto { top: -2rem; width: 100%; height: 32rem; }
+  .resultados-cenario__foto img { opacity: .26; object-position: 50% 23%; }
   .resultados-cenario__foto::after {
-    background: linear-gradient(0deg, rgb(247 243 236) 0%, rgb(247 243 236 / .25) 70%);
+    background: linear-gradient(0deg, rgb(247 243 236 / .5), transparent 70%);
   }
   .resultados-cenario__intro,
   .unidades-cenario__intro { background: rgb(255 252 247 / .8); }
-  .unidades-cenario__foto img { opacity: .49; object-position: 49% center; }
-  .unidades-cenario__foto::after { background: rgb(247 243 236 / .7); }
+  .unidades-cenario__foto img { opacity: .29; object-position: 49% center; }
+  .unidades-cenario__foto::after { background: rgb(247 243 236 / .38); }
+}
+
+/* A seção escura abre e fecha em degradê, sem uma faixa de cor sólida. */
+#cursos {
+  background: linear-gradient(180deg,
+    rgb(43 27 20 / 0) 0%, rgb(43 27 20 / .97) 10%,
+    rgb(43 27 20 / .97) 89%, rgb(43 27 20 / 0) 100%);
 }
 
 /* Foto principal da primeira dobra. */

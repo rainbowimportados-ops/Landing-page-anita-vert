@@ -5,7 +5,7 @@ export function Duvidas() {
   const { faq } = useConteudo()
 
   return (
-    <section id="duvidas" className="secao bg-superficie">
+    <section id="duvidas" className="secao">
       <div className="container-vert grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-12">
         <Reveal>
           <p className="olho">Dúvidas frequentes</p>
