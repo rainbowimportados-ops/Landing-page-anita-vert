@@ -94,7 +94,64 @@
 
     <dialog class="contact-router" id="contact-router" aria-labelledby="contact-router-title"><div class="contact-router__content"><button class="lead-dialog__close" type="button" data-close-contact-router aria-label="Fechar">×</button><p class="eyebrow">Atendimento direcionado</p><h2 id="contact-router-title">Como podemos ajudar?</h2><p>Escolha uma opção para falar com a equipe certa.</p><div class="contact-router__options" id="contact-router-options"></div></div></dialog>
 
-    <dialog class="lead-dialog" id="lead-dialog" aria-labelledby="lead-dialog-title"><form class="lead-form" id="lead-form"><button class="lead-dialog__close" type="button" data-close-lead aria-label="Fechar">×</button><p class="eyebrow">Contato rápido</p><h2 id="lead-dialog-title">Antes de continuar</h2><p id="lead-dialog-description">Informe seus dados para receber atendimento personalizado.</p><label>Nome<input id="lead-name" name="name" autocomplete="name" maxlength="100" required /></label><label>Telefone com DDD<input id="lead-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="(16) 99999-9999" required /></label><label>Seu Instagram <small>opcional</small><input id="lead-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" placeholder="@seuusuario" /></label><label id="lead-profession-field">Profissão <small>opcional</small><input id="lead-profession" name="profession" autocomplete="organization-title" maxlength="100" /></label><div class="lead-demographics"><label>Faixa etária <small>opcional</small><select name="ageRange"><option value="">Não informar</option><option>18-24</option><option>25-34</option><option>35-44</option><option>45-54</option><option>55-64</option><option>65+</option></select></label><label>Sexo <small>opcional</small><select name="gender"><option value="">Não informar</option><option value="feminino">Feminino</option><option value="masculino">Masculino</option><option value="outro">Outro</option><option value="prefiro_nao_informar">Prefiro não informar</option></select></label></div><div class="formation-lead-fields" id="formation-lead-fields" hidden><fieldset class="choice-field"><legend>Você é:</legend><div class="choice-field__options"><label><input name="isDentist" type="radio" value="yes" disabled required /><span>Dentista</span></label><label><input name="isDentist" type="radio" value="no" disabled required /><span>Estudante</span></label></div></fieldset><fieldset class="choice-field"><legend>Já fez algum curso na área?</legend><div class="choice-field__options"><label><input name="hasPreviousCourse" type="radio" value="yes" disabled required /><span>Sim</span></label><label><input name="hasPreviousCourse" type="radio" value="no" disabled required /><span>Não</span></label></div></fieldset></div><label class="lead-consent"><input name="consent" type="checkbox" required /><span>Autorizo o Instituto Vert a usar estes dados para responder ao meu contato.</span></label><p class="lead-form__feedback" id="lead-feedback" role="status"></p><button class="lead-form__submit" type="submit">Chamar no WhatsApp</button></form></dialog>
+    <dialog class="lead-dialog" id="lead-dialog" aria-labelledby="lead-dialog-title">
+      <form class="lead-form" id="lead-form">
+        <button class="lead-dialog__close" type="button" data-close-lead aria-label="Fechar">×</button>
+        <p class="eyebrow" id="lead-dialog-eyebrow">Contato rápido</p>
+        <h2 id="lead-dialog-title">Antes de continuar</h2>
+        <p id="lead-dialog-description">Conte um pouco sobre o que você procura.</p>
+        <div class="lead-form__section">
+          <span class="lead-form__section-title">Seus dados</span>
+          <label>Nome completo<input id="lead-name" name="name" autocomplete="name" maxlength="100" required /></label>
+          <label>WhatsApp com DDD<input id="lead-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="(16) 99999-9999" required /></label>
+          <label>Instagram <small>opcional</small><input id="lead-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" placeholder="@seuusuario" /></label>
+        </div>
+        <div class="lead-form__section" id="patient-lead-fields" hidden>
+          <span class="lead-form__section-title">Sobre seu atendimento</span>
+          <label>Você já é paciente do Instituto Vert?
+            <select name="patientStatus" required disabled><option value="">Selecione</option><option value="novo">Ainda não</option><option value="atual">Sim, já sou paciente</option></select>
+          </label>
+          <label>O que você procura?
+            <select name="patientInterest" required disabled><option value="">Selecione</option><option value="Lentes em resina">Lentes em resina</option><option value="Consulta clínica">Consulta clínica</option><option value="Retorno ou acompanhamento">Retorno ou acompanhamento</option><option value="Outro atendimento">Outro atendimento</option></select>
+          </label>
+          <label>Qual unidade prefere?
+            <select name="patientUnit" required disabled><option value="">Selecione</option><option value="Franca">Franca</option><option value="Ribeirão Preto">Ribeirão Preto</option></select>
+          </label>
+        </div>
+        <div class="lead-form__section" id="professional-lead-fields" hidden>
+          <span class="lead-form__section-title">Sobre sua atuação</span>
+          <label>Você é:
+            <select name="professionalRole" required disabled><option value="">Selecione</option><option value="dentista">Dentista</option><option value="estudante">Estudante de Odontologia</option><option value="outro">Outro profissional da área odontológica</option></select>
+          </label>
+          <label>Cidade onde atua ou estuda<input name="professionalCity" maxlength="80" placeholder="Ex.: Ribeirão Preto" required disabled /></label>
+        </div>
+        <div class="lead-form__section" id="formation-lead-fields" hidden>
+          <span class="lead-form__section-title">Sobre o curso</span>
+          <label>Já fez algum curso na área?
+            <select name="hasPreviousCourse" required disabled><option value="">Selecione</option><option value="yes">Sim</option><option value="no">Não</option></select>
+          </label>
+          <label>Qual assunto mais interessa?
+            <select name="courseInterest" required disabled><option value="">Selecione</option><option value="Lentes em resina">Lentes em resina</option><option value="Estética odontológica">Estética odontológica</option><option value="Mentoria prática">Mentoria prática</option><option value="Outros cursos">Outros cursos</option></select>
+          </label>
+        </div>
+        <div class="lead-form__section" id="rental-lead-fields" hidden>
+          <span class="lead-form__section-title">Sobre a locação</span>
+          <label>Para qual atendimento precisa da sala?<input name="rentalPurpose" maxlength="120" placeholder="Ex.: consultas, estética, avaliação" required disabled /></label>
+          <label>Com que frequência pretende usar?
+            <select name="rentalFrequency" required disabled><option value="">Selecione</option><option value="pontual">Uso pontual</option><option value="semanal">Semanalmente</option><option value="mensal">Mensalmente</option><option value="a_definir">Ainda estou avaliando</option></select>
+          </label>
+        </div>
+        <div class="lead-form__section" id="friends-lead-fields" hidden>
+          <span class="lead-form__section-title">Sobre o Close Friends</span>
+          <label>O que gostaria de acompanhar?
+            <select name="friendsInterest" required disabled><option value="">Selecione</option><option value="Bastidores clínicos">Bastidores clínicos</option><option value="Dicas e técnicas">Dicas e técnicas</option><option value="Cursos e eventos">Cursos e eventos</option><option value="Tudo isso">Tudo isso</option></select>
+          </label>
+        </div>
+        <label class="lead-consent"><input name="consent" type="checkbox" required /><span>Autorizo o Instituto Vert a usar estes dados para responder ao meu contato.</span></label>
+        <p class="lead-form__feedback" id="lead-feedback" role="status"></p>
+        <button class="lead-form__submit" type="submit">Continuar no WhatsApp</button>
+      </form>
+    </dialog>
 
     <dialog class="privacy-dialog" id="privacy-dialog" aria-labelledby="privacy-dialog-title"><form class="privacy-form" id="privacy-form"><h2 id="privacy-dialog-title">Privacidade</h2><label class="privacy-form__instagram"><span>Seu Instagram <small>opcional</small></span><input id="privacy-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" pattern="@?[A-Za-z0-9._]{1,30}" placeholder="@seuusuario" /></label><label class="privacy-form__consent"><input name="trackingConsent" type="checkbox" required /><span>Autorizo associar meus acessos e cliques a mim, para um atendimento mais personalizado.</span></label><div class="privacy-form__actions"><button class="privacy-form__accept" type="submit">Autorizar</button><button class="privacy-form__decline" type="button" data-privacy-decline>Seguir sem autorizar</button></div></form></dialog>
 

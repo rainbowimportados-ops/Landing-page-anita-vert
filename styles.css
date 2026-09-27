@@ -182,10 +182,14 @@ footer p { margin: 8px 0 0; }
 .lead-dialog { width: min(92vw, 470px); padding: 0; overflow: visible; border-radius: 22px; }
 .lead-form { position: relative; display: grid; gap: 14px; padding: 30px; }
 .lead-form h2 { max-width: 90%; font-size: 2.5rem; }
+.lead-form__section { display: grid; gap: 13px; padding-top: 16px; border-top: 1px solid rgba(74,47,31,.14); }
+.lead-form__section[hidden] { display: none; }
+.lead-form__section-title { color: #967760; font-size: .65rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
 .lead-form label { display: grid; gap: 7px; color: #654b3e; font-size: .68rem; font-weight: 600; letter-spacing: .03em; }
 .lead-form label small { color: #8b7467; font-weight: 400; }
 .lead-demographics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .lead-form input:not([type="checkbox"]):not([type="radio"]), .lead-form select { width: 100%; padding: 13px 14px; border: 1px solid rgba(74,47,31,.18); border-radius: 10px; background: #fff; color: var(--deep); font-size: 16px; outline: none; }
+.lead-form select { min-height: 48px; }
 .lead-form input:focus, .lead-form select:focus { border-color: var(--cacao); box-shadow: 0 0 0 3px rgba(106,69,46,.12); }
 .formation-lead-fields { display: grid; gap: 13px; }
 .choice-field { min-width: 0; margin: 0; padding: 0; border: 0; }

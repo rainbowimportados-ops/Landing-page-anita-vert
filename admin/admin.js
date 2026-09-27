@@ -620,7 +620,7 @@ async function loadLeads() {
   if (journeyList) journeyList.innerHTML = '<div class="empty-state"><strong>Carregando acessos…</strong></div>';
   if (formationList) formationList.innerHTML = '<div class="empty-state"><strong>Carregando interessados…</strong></div>';
   const [leadResult, clickResult] = await Promise.all([
-    supabase.from('digital_card_leads').select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at,visitor_id,instagram_handle,source_origin,age_range,gender').order('created_at', { ascending: false }).limit(500),
+    supabase.from('digital_card_leads').select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at,visitor_id,instagram_handle,source_origin,age_range,gender,answers').order('created_at', { ascending: false }).limit(500),
     supabase.from('digital_card_clicks').select('visitor_id,botao,unidade,origem,dispositivo,instagram_handle,created_at').eq('superficie', 'digital_card').in('evento', ['page_view', 'cta_click', 'consent', 'lead_created']).not('visitor_id', 'is', null).order('created_at', { ascending: false }).limit(5000),
   ]);
   if (leadResult.error || clickResult.error) {
@@ -733,8 +733,11 @@ function filteredContactLeads() {
   const search = document.querySelector('#lead-search').value.trim().toLocaleLowerCase('pt-BR');
   const filter = document.querySelector('#lead-filter').value;
   return contactLeads.filter((lead) => {
-    const matchesFilter = filter === 'all' || (filter === 'marked' ? lead.marked : !lead.marked);
-    const searchable = [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.button, lead.unit, lead.source_origin, ...(lead.tags || [])].join(' ').toLocaleLowerCase('pt-BR');
+    const matchesFilter = filter === 'all' || (filter === 'marked' ? lead.marked
+      : filter === 'unmarked' ? !lead.marked
+      : filter === 'appointment' ? ['appointment', 'patient', 'contact'].includes(lead.lead_type)
+      : lead.lead_type === filter);
+    const searchable = [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.button, lead.unit, lead.source_origin, ...Object.values(lead.answers || {}), ...(lead.tags || [])].join(' ').toLocaleLowerCase('pt-BR');
     return matchesFilter && (!search || searchable.includes(search));
   });
 }
@@ -757,6 +760,7 @@ function renderLeadRow(lead) {
   const journey = visitorJourneys.find((item) => item.visitorId === lead.visitor_id);
   const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lead.created_at));
   const tags = (lead.tags || []).map((tag) => `<span class="lead-tag">${escapeHtml(tag)}</span>`).join('');
+  const answers = formatLeadAnswers(lead.answers);
   return `<article class="lead-row${lead.marked ? ' is-marked' : ''}" data-lead-id="${escapeHtml(lead.id)}">
     <label class="lead-row__select"><input class="lead-select" type="checkbox" ${selectedLeadIds.has(lead.id) ? 'checked' : ''} aria-label="Selecionar ${escapeHtml(lead.name)}" /></label>
     <div class="lead-row__contact" data-label="Contato">
@@ -766,7 +770,7 @@ function renderLeadRow(lead) {
       ${lead.instagram_handle ? `<a href="https://www.instagram.com/${encodeURIComponent(String(lead.instagram_handle).replace(/^@/, ''))}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.instagram_handle)}</a>` : ''}
       ${tags ? `<div class="lead-tags">${tags}</div>` : ''}
     </div>
-    <div class="lead-row__source" data-label="Origem"><span>${escapeHtml(lead.button)}</span><small>${escapeHtml(lead.unit || 'Sem unidade')}</small><small>${escapeHtml(lead.source_origin || 'Origem não identificada')}</small></div>
+    <div class="lead-row__source" data-label="Origem"><span>${escapeHtml(lead.button)}</span><small>${escapeHtml(lead.unit || 'Sem unidade')}</small><small>${escapeHtml(lead.source_origin || 'Origem não identificada')}</small>${answers ? `<small class="lead-answer">${escapeHtml(answers)}</small>` : ''}</div>
     <time class="lead-row__date" data-label="Recebido em" datetime="${escapeHtml(lead.created_at)}">${escapeHtml(date)}${journey ? `<br><strong>${journey.clicks} ${journey.clicks === 1 ? 'clique' : 'cliques'}</strong>` : ''}</time>
     <div class="lead-row__actions" data-label="Ações">
       <button type="button" data-lead-action="mark" aria-label="${lead.marked ? 'Desmarcar' : 'Marcar'} ${escapeHtml(lead.name)}" title="${lead.marked ? 'Desmarcar' : 'Marcar'}">${lead.marked ? '★' : '☆'}</button>
@@ -777,12 +781,20 @@ function renderLeadRow(lead) {
   </article>`;
 }
 
+function formatLeadAnswers(answers) {
+  if (!answers || typeof answers !== 'object') return '';
+  const labels = { perfil:'Perfil', cidade:'Cidade', ja_fez_curso:'Já fez curso', interesse:'Interesse',
+    finalidade:'Finalidade', frequencia:'Frequência', situacao:'Paciente', unidade:'Unidade' };
+  return Object.entries(answers).filter(([key, value]) => labels[key] && value !== '' && value != null)
+    .map(([key, value]) => `${labels[key]}: ${typeof value === 'boolean' ? (value ? 'Sim' : 'Não') : value}`).join(' · ');
+}
+
 function renderFormationLeadCard(lead) {
   const digits = String(lead.phone).replace(/\D/g, '');
   const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lead.created_at));
   const dentist = lead.is_dentist === true ? 'Dentista' : lead.is_dentist === false ? 'Estudante de Odontologia' : 'Perfil não informado';
   const previousCourse = lead.has_previous_course === true ? 'Já fez curso' : lead.has_previous_course === false ? 'Primeiro curso' : 'Curso anterior não informado';
-  return `<article class="lead-card lead-card--formation"><div><small>${escapeHtml(date)} · Formação</small><strong>${escapeHtml(lead.name)}</strong><span>${escapeHtml(lead.course_title || lead.button)}</span><ul><li>${escapeHtml(dentist)}</li><li>${escapeHtml(previousCourse)}</li></ul></div><div><small>${escapeHtml(lead.phone)}</small><a href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">Chamar no WhatsApp <span>→</span></a></div></article>`;
+  return `<article class="lead-card lead-card--formation"><div><small>${escapeHtml(date)} · Formação</small><strong>${escapeHtml(lead.name)}</strong><span>${escapeHtml(lead.course_title || lead.button)}</span><ul><li>${escapeHtml(dentist)}</li><li>${escapeHtml(previousCourse)}</li>${formatLeadAnswers(lead.answers) ? `<li>${escapeHtml(formatLeadAnswers(lead.answers))}</li>` : ''}</ul></div><div><small>${escapeHtml(lead.phone)}</small><a href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">Chamar no WhatsApp <span>→</span></a></div></article>`;
 }
 
 document.querySelector('#refresh-leads').addEventListener('click', () => void loadLeads());
@@ -933,8 +945,8 @@ document.querySelector('#export-leads').addEventListener('click', () => {
     window.alert('Não há contatos para exportar.');
     return;
   }
-  const header = ['Nome', 'Telefone', 'Instagram', 'Profissão', 'Faixa etária', 'Sexo', 'Origem', 'Unidade', 'Origem do acesso', 'Recebido em', 'Marcado', 'Etiquetas'];
-  const csvRows = rows.map((lead) => [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.age_range, lead.gender, lead.button, lead.unit, lead.source_origin, lead.created_at, lead.marked ? 'Sim' : 'Não', (lead.tags || []).join('; ')]);
+  const header = ['Nome', 'Telefone', 'Instagram', 'Profissão', 'Faixa etária', 'Sexo', 'Tipo', 'Origem', 'Unidade', 'Respostas', 'Origem do acesso', 'Recebido em', 'Marcado', 'Etiquetas'];
+  const csvRows = rows.map((lead) => [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.age_range, lead.gender, lead.lead_type, lead.button, lead.unit, formatLeadAnswers(lead.answers), lead.source_origin, lead.created_at, lead.marked ? 'Sim' : 'Não', (lead.tags || []).join('; ')]);
   const csv = '\uFEFF' + [header, ...csvRows].map((row) => row.map(csvCell).join(',')).join('\r\n');
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const link = document.createElement('a');

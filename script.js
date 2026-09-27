@@ -39,8 +39,8 @@ const SERVICE_OPTIONS = [
   { id: 'lentes', label: 'Lentes em resina', message: 'Olá! Sou {nome} e quero saber sobre lentes em resina na unidade {unidade}.', unitChoice: true },
   { id: 'clinico', label: 'Clínico geral', message: 'Olá! Sou {nome} e quero atendimento clínico geral na unidade {unidade}.', unitChoice: true },
   { id: 'curso', label: 'Cursos para dentistas', message: 'Olá! Sou {nome} e quero informações sobre os cursos do Instituto Vert. Sou {perfil}. {curso_anterior}', leadType: 'formation' },
-  { id: 'locacao', label: 'Alugar sala em Ribeirão', message: 'Olá! Sou {nome} e quero informações sobre a locação de sala em Ribeirão Preto.', unit: 'Ribeirão Preto' },
-  { id: 'close_friends', label: 'Close Friends', message: 'Olá! Sou {nome} e quero saber como entrar no Close Friends do Instituto Vert.' },
+  { id: 'locacao', label: 'Alugar sala em Ribeirão', message: 'Olá! Sou {nome} e quero informações sobre a locação de sala em Ribeirão Preto.', unit: 'Ribeirão Preto', leadType: 'rental' },
+  { id: 'close_friends', label: 'Close Friends', message: 'Olá! Sou {nome} e quero saber como entrar no Close Friends do Instituto Vert.', leadType: 'close_friends' },
 ];
 
 function renderServiceActions(company) {
@@ -58,7 +58,7 @@ function renderServiceActions(company) {
       link.target = '_blank'; link.rel = 'noopener noreferrer';
       link.dataset.track = service.id;
       const course = service.leadType === 'formation';
-      prepareLeadLink(link, { message: service.message, label: service.label, unit: service.unit || '', leadType: course ? 'formation' : 'contact', courseTitle: course ? 'Cursos para dentistas' : '' });
+      prepareLeadLink(link, { message: service.message, label: service.label, unit: service.unit || '', leadType: service.leadType || 'contact', courseTitle: course ? 'Cursos para dentistas' : '', serviceId: service.id });
     }
     link.innerHTML = `<span class="service-action__number" aria-hidden="true">0${index + 1}</span><span>${service.label}</span><span class="service-action__arrow" aria-hidden="true">→</span>`;
     container.append(link);
@@ -141,13 +141,14 @@ function applyPreMessage(destination, message, lead = {}) {
   } catch { return safe; }
 }
 
-function prepareLeadLink(link, { collectLead = true, message = '', label = 'Contato', unit = '', leadType = 'contact', courseId = '', courseTitle = '' } = {}) {
+function prepareLeadLink(link, { collectLead = true, message = '', label = 'Contato', unit = '', leadType = 'contact', courseId = '', courseTitle = '', serviceId = '' } = {}) {
   if (!collectLead) return link;
   link.dataset.collectLead = 'true';
   link.dataset.preMessage = message;
   link.dataset.leadLabel = label;
   link.dataset.leadUnit = unit;
   link.dataset.leadType = leadType;
+  if (serviceId) link.dataset.serviceId = serviceId;
   if (courseId) link.dataset.courseId = courseId;
   if (courseTitle) link.dataset.courseTitle = courseTitle;
   return link;
@@ -195,7 +196,7 @@ function renderContactRouter(units, company, service = null) {
     const link = trackableLink(applyPreMessage(destination, message, { unit: unitName }), 'whatsapp_agendar', unit.id);
     link.className = 'contact-router__option';
     link.innerHTML = `<span><small>${service ? escapeText(service.label) : 'Nova consulta'}</small><strong>${escapeText(service ? unitName : (unit.contactButtonLabel || `Consulta em ${unitName}`))}</strong></span><b aria-hidden="true">→</b>`;
-    prepareLeadLink(link, { collectLead: unit.collectLead !== false, message, label: `${service?.label || 'Consulta'} — ${unitName}`, unit: unitName, leadType: 'appointment' });
+    prepareLeadLink(link, { collectLead: unit.collectLead !== false, message, label: `${service?.label || 'Consulta'} — ${unitName}`, unit: unitName, leadType: 'appointment', serviceId: service?.id || '' });
     contactRouterOptions.append(link);
   });
 
@@ -535,34 +536,46 @@ document.addEventListener('click', (event) => {
     unit: link.dataset.leadUnit || link.dataset.unit || '',
     track: link.dataset.track || 'contato',
     leadType: link.dataset.leadType || 'contact',
+    serviceId: link.dataset.serviceId || '',
     courseId: link.dataset.courseId || '',
     courseTitle: link.dataset.courseTitle || '',
   };
   if (contactRouter.open) contactRouter.close();
   leadForm.reset();
   document.querySelector('#lead-instagram').value = visitorInstagram || storageGet(INSTAGRAM_STORAGE_KEY);
-  const isFormation = pendingLead.leadType === 'formation';
-  const isPatient = pendingLead.leadType === 'patient';
-  const isAppointment = pendingLead.leadType === 'appointment';
-  document.querySelector('#lead-dialog-title').textContent = isFormation
-    ? `Interesse em ${pendingLead.courseTitle}`
-    : isPatient
-      ? 'Atendimento para paciente'
-      : isAppointment
-        ? `Consulta em ${pendingLead.unit}`
-      : pendingLead.button || currentCompany.leadFormTitle || 'Antes de continuar';
-  document.querySelector('#lead-dialog-description').textContent = isFormation
-    ? 'Preencha seus dados e responda duas perguntas rápidas.'
-    : isPatient
-      ? 'Informe seu nome e telefone para identificarmos seu cadastro antes do atendimento.'
-      : currentCompany.leadFormDescription || 'Informe seus dados para receber atendimento personalizado.';
-  const formationFields = document.querySelector('#formation-lead-fields');
-  formationFields.hidden = !isFormation;
-  formationFields.querySelectorAll('input,select').forEach((field) => { field.disabled = !isFormation; });
-  const professionField = document.querySelector('#lead-profession-field');
-  const professionInput = document.querySelector('#lead-profession');
-  professionField.hidden = isFormation;
-  professionInput.disabled = isFormation;
+  const type = pendingLead.leadType;
+  const professional = ['formation', 'rental', 'close_friends'].includes(type);
+  const title = type === 'formation' ? `Interesse em ${pendingLead.courseTitle}`
+    : type === 'rental' ? 'Alugar sala em Ribeirão'
+    : type === 'close_friends' ? 'Close Friends'
+    : type === 'patient' ? 'Atendimento para paciente'
+    : type === 'appointment' ? `Consulta em ${pendingLead.unit}`
+    : pendingLead.button || 'Contato';
+  const description = type === 'formation' ? 'Conte sobre sua experiência para indicarmos o curso ideal.'
+    : type === 'rental' ? 'Conte como pretende usar a sala para enviarmos as opções de locação.'
+    : type === 'close_friends' ? 'Conte sobre sua atuação e seu interesse no conteúdo exclusivo.'
+    : 'Conte o que procura para nossa equipe direcionar seu atendimento.';
+  document.querySelector('#lead-dialog-title').textContent = title;
+  document.querySelector('#lead-dialog-description').textContent = description;
+  document.querySelector('#lead-dialog-eyebrow').textContent = professional ? 'Para a área odontológica' : 'Atendimento ao paciente';
+  const sections = {
+    '#patient-lead-fields': !professional,
+    '#professional-lead-fields': professional,
+    '#formation-lead-fields': type === 'formation',
+    '#rental-lead-fields': type === 'rental',
+    '#friends-lead-fields': type === 'close_friends',
+  };
+  Object.entries(sections).forEach(([selector, visible]) => {
+    const section = document.querySelector(selector);
+    section.hidden = !visible;
+    section.querySelectorAll('input,select').forEach((field) => { field.disabled = !visible; });
+  });
+  if (!professional) {
+    if (type === 'patient') leadForm.elements.patientStatus.value = 'atual';
+    if (pendingLead.unit) leadForm.elements.patientUnit.value = pendingLead.unit;
+    if (pendingLead.serviceId === 'lentes') leadForm.elements.patientInterest.value = 'Lentes em resina';
+    if (pendingLead.serviceId === 'clinico') leadForm.elements.patientInterest.value = 'Consulta clínica';
+  }
   leadFeedback.textContent = '';
   registrarClique(pendingLead.track, pendingLead.unit || null, 'form_opened');
   leadDialog.showModal();
@@ -588,14 +601,26 @@ leadForm.addEventListener('submit', async (event) => {
   const lead = {
     name: String(formData.get('name') || '').trim(),
     phone: String(formData.get('phone') || '').trim(),
-    profession: String(formData.get('profession') || '').trim(),
+    profession: ({ dentist: 'Dentista', estudante: 'Estudante de Odontologia', outro: 'Profissional da área odontológica' })[formData.get('professionalRole')] || '',
     instagram: normalizeInstagramHandle(formData.get('instagram')),
-    ageRange: String(formData.get('ageRange') || '').trim(),
-    gender: String(formData.get('gender') || '').trim(),
-    isDentist: formData.get('isDentist') === 'yes' ? true : formData.get('isDentist') === 'no' ? false : null,
+    isDentist: formData.get('professionalRole') === 'dentista' ? true : formData.get('professionalRole') === 'estudante' ? false : null,
     hasPreviousCourse: formData.get('hasPreviousCourse') === 'yes' ? true : formData.get('hasPreviousCourse') === 'no' ? false : null,
-    city: '',
+    city: String(formData.get('professionalCity') || '').trim(),
     course: pendingLead.courseTitle || '',
+    unit: String(formData.get('patientUnit') || pendingLead.unit || '').trim(),
+  };
+  const answers = pendingLead.leadType === 'formation' ? {
+    perfil: lead.profession, cidade: lead.city, ja_fez_curso: formData.get('hasPreviousCourse') === 'yes',
+    interesse: String(formData.get('courseInterest') || ''),
+  } : pendingLead.leadType === 'rental' ? {
+    perfil: lead.profession, cidade: lead.city,
+    finalidade: String(formData.get('rentalPurpose') || '').trim(), frequencia: String(formData.get('rentalFrequency') || ''),
+  } : pendingLead.leadType === 'close_friends' ? {
+    perfil: lead.profession, cidade: lead.city, interesse: String(formData.get('friendsInterest') || ''),
+  } : {
+    situacao: String(formData.get('patientStatus') || ''),
+    interesse: String(formData.get('patientInterest') || ''),
+    unidade: lead.unit,
   };
   if (lead.phone.replace(/\D/g, '').length < 10) {
     leadFeedback.textContent = 'Informe um telefone válido com DDD.';
@@ -606,7 +631,11 @@ leadForm.addEventListener('submit', async (event) => {
   leadFeedback.textContent = 'Salvando seus dados…';
   let destinationForStorage = pendingLead.destination;
   try { const url = new URL(destinationForStorage); url.search = ''; destinationForStorage = url.href; } catch { destinationForStorage = ''; }
-  const intencao = pendingLead.leadType === 'formation' ? 'curso' : pendingLead.leadType === 'patient' ? 'paciente_atual' : 'avaliacao';
+  const intencao = pendingLead.leadType === 'formation' ? 'curso'
+    : pendingLead.leadType === 'rental' ? 'locacao'
+    : pendingLead.leadType === 'close_friends' ? 'close_friends'
+    : pendingLead.leadType === 'patient' ? 'paciente_atual'
+    : pendingLead.serviceId === 'lentes' ? 'lentes' : 'avaliacao';
   const params = new URLSearchParams(window.location.search);
   const utm = {};
   ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach((chave) => { const valor = params.get(chave); if (valor) utm[chave] = valor.slice(0, 100); });
@@ -623,16 +652,16 @@ leadForm.addEventListener('submit', async (event) => {
       telefone: lead.phone,
       profissao: lead.profession || null,
       rotulo: pendingLead.button,
-      unidade: pendingLead.unit || null,
+      unidade: lead.unit || null,
       destino: destinationForStorage || null,
       dentista: lead.isDentist,
       ja_fez_curso: lead.hasPreviousCourse,
+      respostas: answers,
+      cidade: lead.city || null,
       curso_id: pendingLead.courseId || null,
       curso_titulo: pendingLead.courseTitle || null,
       visitor_id: trackingConsent ? visitorId() : null,
       instagram: lead.instagram || null,
-      faixa_etaria: lead.ageRange || null,
-      genero: lead.gender || null,
       utm,
       referrer: detectarOrigem(),
       pagina: window.location.pathname,
@@ -655,7 +684,13 @@ leadForm.addEventListener('submit', async (event) => {
   }
   if (salvo) registrarClique(pendingLead.track, pendingLead.unit || null, 'lead_created');
   registrarClique(pendingLead.track, pendingLead.unit || null, 'whatsapp_opened');
-  const destination = applyPreMessage(pendingLead.destination, pendingLead.message, lead);
+  const details = Object.entries(answers).map(([key, value]) => {
+    const labels = { perfil: 'Perfil', cidade: 'Cidade', ja_fez_curso: 'Já fez curso', interesse: 'Interesse',
+      finalidade: 'Finalidade da sala', frequencia: 'Frequência', situacao: 'Paciente', unidade: 'Unidade' };
+    const display = typeof value === 'boolean' ? (value ? 'Sim' : 'Não') : value;
+    return display ? `${labels[key]}: ${display}` : '';
+  }).filter(Boolean).join(' | ');
+  const destination = applyPreMessage(pendingLead.destination, `${pendingLead.message} ${details}`, lead);
   // Se o banco falhar ou demorar, o atendimento abre mesmo assim.
   leadFeedback.textContent = 'Tudo certo. Abrindo o atendimento…';
   leadForm.reset();
