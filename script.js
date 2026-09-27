@@ -232,6 +232,7 @@ function renderUnits(units) {
 function showUnit(unit, updateUrl = true) {
   if (!unit) return;
   activeUnitId = unit.id;
+  document.body.classList.add('unit-view');
   const city = unit.city || unit.name || 'Unidade';
   const photos = unitPhotos(unit);
   document.querySelector('.profile').hidden = true;
@@ -273,6 +274,7 @@ function showUnit(unit, updateUrl = true) {
 
 function showCard(updateUrl = true) {
   activeUnitId = '';
+  document.body.classList.remove('unit-view');
   document.querySelector('.profile').hidden = false;
   document.querySelector('.units').hidden = false;
   document.getElementById('card-extras').hidden = false;
