@@ -169,6 +169,8 @@ export function InstagramSecao() {
             <button
               key={perfil.usuario}
               role="tab"
+              id={`ig-aba-${perfil.pasta}`}
+              aria-controls={`ig-painel-${perfil.pasta}`}
               aria-selected={i === ativo}
               onClick={() => setAtivo(i)}
               className={`min-h-[44px] rounded-xl px-3 text-sm transition-colors duration-rapido ${
@@ -183,7 +185,9 @@ export function InstagramSecao() {
         <div className="mt-6 grid gap-8 lg:mt-12 lg:grid-cols-2 lg:items-start">
           {perfisInstagram.map((perfil, i) => (
             <Reveal key={perfil.usuario} delay={i * 80} className={i === ativo ? '' : 'hidden lg:block'}>
-              <PerfilApp perfil={perfil} />
+              <div role="tabpanel" id={`ig-painel-${perfil.pasta}`} aria-labelledby={`ig-aba-${perfil.pasta}`}>
+                <PerfilApp perfil={perfil} />
+              </div>
             </Reveal>
           ))}
         </div>
