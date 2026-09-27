@@ -542,7 +542,6 @@ document.addEventListener('click', (event) => {
   };
   if (contactRouter.open) contactRouter.close();
   leadForm.reset();
-  document.querySelector('#lead-more').open = false;
   document.querySelector('#lead-instagram').value = visitorInstagram || storageGet(INSTAGRAM_STORAGE_KEY);
   const type = pendingLead.leadType;
   const professional = ['formation', 'rental', 'close_friends'].includes(type);

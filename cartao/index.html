@@ -144,21 +144,20 @@
             <select name="friendsInterest" required disabled><option value="">Selecione</option><option value="Bastidores clínicos">Bastidores clínicos</option><option value="Dicas e técnicas">Dicas e técnicas</option><option value="Cursos e eventos">Cursos e eventos</option><option value="Tudo isso">Tudo isso</option></select>
           </label>
         </div>
-        <details class="lead-more" id="lead-more">
-          <summary>Adicionar detalhes <small>opcional</small></summary>
+        <div class="lead-more">
           <div class="lead-more__fields">
             <div class="lead-more__group" id="patient-extra-fields" hidden>
-              <label>Sua profissão<input name="patientProfession" maxlength="100" placeholder="Ex.: professora" disabled /></label>
+              <label><span>Sua profissão <small>opcional</small></span><input name="patientProfession" maxlength="100" placeholder="Ex.: professora" disabled /></label>
               <label>Já é paciente do Instituto Vert?
-                <select name="patientStatus" disabled><option value="">Prefiro não informar</option><option value="novo">Ainda não</option><option value="atual">Sim, já sou paciente</option></select>
+                <select name="patientStatus" disabled><option value="">Selecione</option><option value="novo">Ainda não</option><option value="atual">Sim, já sou paciente</option></select>
               </label>
             </div>
             <div class="lead-more__group" id="professional-extra-fields" hidden>
-              <label><span id="professional-city-label">Cidade onde atua ou estuda</span><input name="professionalCity" maxlength="80" placeholder="Ex.: Ribeirão Preto" disabled /></label>
+              <label><span><span id="professional-city-label">Cidade onde atua ou estuda</span> <small>opcional</small></span><input name="professionalCity" maxlength="80" placeholder="Ex.: Ribeirão Preto" disabled /></label>
             </div>
             <div class="lead-more__group" id="formation-extra-fields" hidden>
               <label>Já fez algum curso na área?
-                <select name="hasPreviousCourse" disabled><option value="">Prefiro não informar</option><option value="yes">Sim</option><option value="no">Não</option></select>
+                <select name="hasPreviousCourse" disabled><option value="">Selecione</option><option value="yes">Sim</option><option value="no">Não</option></select>
               </label>
             </div>
             <div class="lead-more__group" id="rental-extra-fields" hidden>
@@ -166,9 +165,9 @@
                 <select name="rentalFrequency" disabled><option value="">Ainda não sei</option><option value="pontual">Uso pontual</option><option value="semanal">Semanalmente</option><option value="mensal">Mensalmente</option></select>
               </label>
             </div>
-            <label>Seu Instagram<input id="lead-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" placeholder="@seuusuario" /></label>
+            <label><span>Seu Instagram <small>opcional</small></span><input id="lead-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" placeholder="@seuusuario" /></label>
           </div>
-        </details>
+        </div>
         <label class="lead-consent"><input name="consent" type="checkbox" required /><span>Autorizo o Instituto Vert a usar estes dados para responder ao meu contato.</span></label>
         <p class="lead-form__feedback" id="lead-feedback" role="status"></p>
         <button class="lead-form__submit" type="submit">Falar com a equipe <span aria-hidden="true">→</span></button>
