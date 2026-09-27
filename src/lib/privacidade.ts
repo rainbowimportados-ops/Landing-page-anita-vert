@@ -1,5 +1,5 @@
 export const PRIVACY_STORAGE_KEY = 'vert_privacy_choice_v1'
-export const CONSENT_VERSION = '2026-09-v4'
+export const CONSENT_VERSION = '2026-09-v5'
 
 export function escolhaPrivacidade(): 'accepted' | 'declined' | null {
   try {

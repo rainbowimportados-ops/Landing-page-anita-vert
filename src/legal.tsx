@@ -34,6 +34,7 @@ const documentos: Record<string, { titulo: string; resumo: string; secoes: Secao
           'Junto com o pedido guardamos a origem da visita (como o parâmetro utm de uma campanha ou o domínio de referência), a página e o botão usados. O site não obtém automaticamente seu telefone, e-mail ou perfil do Instagram pelo simples acesso; você precisa informar esses dados ou compartilhá-los por uma integração específica.',
           'Somente se você autorizar as métricas no aviso de privacidade, registramos visitas e cliques: botão, tipo de dispositivo, página, origem da visita e data. Ao recusar, não enviamos esses eventos de navegação.',
           'No cartão digital, a autorização também permite guardar um identificador do navegador e o @ do Instagram, se você o informar, para associar os acessos ao atendimento. A escolha vale para o site e o cartão e pode ser alterada em “Privacidade e dados”.',
+          'Usamos armazenamento local do navegador para lembrar sua escolha de privacidade. O cartão usa esse armazenamento para manter um identificador apenas após a autorização de métricas. Cookies e tecnologias semelhantes que não sejam necessários à navegação dependem de sua escolha afirmativa.',
         ],
       },
       {
