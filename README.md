@@ -1,20 +1,21 @@
 # Instituto Vert
 
-Duas páginas no mesmo build, servidas pelo projeto `instituto-vert` na Vercel.
+Landing, cartão digital e painéis no mesmo build, servidos pelo projeto `instituto-vert` na Vercel.
 
 | Rota | O que é |
 | --- | --- |
-| `/` | **Cartão digital** — página mobile-first de contatos e agendamento |
-| `/agendar` | **Landing page** — página de captação com tratamentos, processo e FAQ |
-| `/config` | Painel de configuração da landing page (login) |
-| `/admin` | Painel administrativo do cartão digital |
+| `/` | **Landing page** — página principal, de captação, com tratamentos, resultados e FAQ |
+| `/cartao` | **Cartão digital** — página mobile-first de contatos e agendamento |
+| `/gestao` | Acesso aos dois painéis |
+| `/admin` | Painel do cartão digital (unidades, contatos, leads, métricas) |
+| `/config` | Painel da landing page |
 | `/privacidade`, `/termos` | Política de privacidade e termos de uso |
 
-O subdomínio **`vert.institutovert.app`** serve a landing page na raiz — um
-rewrite condicionado ao host manda `/` para `/agendar` — e o painel dela
-continua em `/config`.
+Redirecionamentos (em `vercel.json`): `vert.institutovert.app/*` vai para
+`institutovert.app/*` e o antigo `/agendar` vai para `/`, mantendo os
+parâmetros de campanha (`?utm_source=…`).
 
-## Cartão digital (`/`)
+## Cartão digital (`/cartao`)
 
 - WhatsApp para as unidades de Franca e Ribeirão Preto
 - resultados clínicos reais autorizados
@@ -26,7 +27,7 @@ continua em `/config`.
 Conteúdo editável pelo painel em `/admin`, gravado na tabela
 `digital_card_content` do Supabase.
 
-## Landing page (`/agendar`)
+## Landing page (`/`)
 
 Página de conversão para tráfego de anúncio e busca: tratamentos, diferenciais,
 o processo em quatro etapas, unidades, área para dentistas e FAQ.

@@ -7,6 +7,27 @@
       "has": [
         {
           "type": "host",
+          "value": "vert.institutovert.app"
+        }
+      ],
+      "destination": "https://institutovert.app/:path*",
+      "permanent": false
+    },
+    {
+      "source": "/agendar",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/agendar/",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
           "value": {
             "inc": [
               "instituto-vert-rainbowimportadosgmailcoms-projects.vercel.app",
@@ -24,14 +45,23 @@
     {
       "source": "/assets/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     },
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
       ]
     }
   ]

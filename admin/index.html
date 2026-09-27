@@ -36,7 +36,7 @@
           <button class="login-secondary" id="first-access" type="button">Primeiro acesso por e-mail</button>
         </form>
         <p class="feedback" id="login-feedback" role="status"></p>
-        <a class="back-link" href="/">← Voltar ao cartão</a>
+        <a class="back-link" href="/cartao">← Voltar ao cartão</a>
       </section>
     </main>
 
@@ -60,7 +60,7 @@
 
     <div class="app" id="admin-app" data-active-section="visao-geral" hidden>
       <aside class="sidebar">
-        <a class="sidebar__brand" href="/" aria-label="Abrir cartão digital">
+        <a class="sidebar__brand" href="/cartao" aria-label="Abrir cartão digital">
           <img src="/assets/logo-secundaria-marrom.jpeg" alt="Instituto Vert" width="220" height="180" />
         </a>
         <nav aria-label="Seções do painel">
@@ -101,7 +101,7 @@
           <div class="topbar__title"><p class="eyebrow" id="workspace-context">Painel administrativo</p><h1 id="workspace-title">Visão geral</h1></div>
           <div class="topbar__actions">
             <span class="save-status" id="save-status">Tudo salvo</span>
-            <a class="button button--ghost" href="/" target="_blank" rel="noopener">Ver cartão</a>
+            <a class="button button--ghost" href="/cartao" target="_blank" rel="noopener">Ver cartão</a>
             <button class="button" id="save">Salvar alterações</button>
           </div>
         </header>
@@ -318,7 +318,7 @@
 
           <aside class="preview-pane">
             <div class="preview-pane__heading"><span>Prévia ao vivo</span><i id="preview-dot"></i></div>
-            <div class="phone-frame"><iframe id="card-preview" src="/?preview=admin" title="Prévia do cartão digital"></iframe></div>
+            <div class="phone-frame"><iframe id="card-preview" src="/cartao?preview=admin" title="Prévia do cartão digital"></iframe></div>
           </aside>
         </div>
       </main>

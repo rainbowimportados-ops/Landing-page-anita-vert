@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Páginas no mesmo build: o cartão digital na raiz, o painel do
-// cartão, a landing page de captação em /agendar e a configuração dela
-// em /config, mais política de privacidade e termos de uso.
+// Páginas no mesmo build: a landing page na raiz, o cartão digital em
+// /cartao, os painéis /admin e /config, o acesso /gestao e as páginas
+// de privacidade e termos.
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -13,12 +13,13 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        card: 'index.html',
+        card: 'cartao/index.html',
         admin: 'admin/index.html',
-        agendar: 'agendar/index.html',
+        landing: 'index.html',
         config: 'config/index.html',
         privacidade: 'privacidade/index.html',
         termos: 'termos/index.html',
+        gestao: 'gestao/index.html',
       },
     },
   },
