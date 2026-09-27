@@ -21,10 +21,4 @@ create policy "site_instagram leitura publica" on public.site_instagram
 revoke insert, update, delete on public.site_instagram from anon, authenticated;
 grant select on public.site_instagram to anon, authenticated;
 
--- Agendamento (aplicado no projeto em 27/09/2026, job "sincronizar-instagram"):
--- select cron.schedule('sincronizar-instagram', '17 */6 * * *', $$
---   select net.http_post(
---     url := 'https://xiskevunqbvmoclygppc.supabase.co/functions/v1/sincronizar-instagram',
---     headers := jsonb_build_object('Content-Type','application/json',
---       'apikey','<chave publishable>','Authorization','Bearer <chave publishable>'),
---     body := '{}'::jsonb, timeout_milliseconds := 60000) $$);
+-- O agendamento do pg_cron fica em 20260927143000_site_instagram_reserva.sql.

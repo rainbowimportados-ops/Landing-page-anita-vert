@@ -54,22 +54,31 @@ Deno.serve(async (req) => {
   const db = { apikey: servico, Authorization: `Bearer ${servico}`, 'Content-Type': 'application/json' }
   const forcar = req.headers.get('x-forcar') === servico
 
-  // 1. O que já está gravado (para a trava de tempo e a comparação).
+  // 1. Reserva atômica no banco: com a chave publicável qualquer um chama esta
+  // função, então só uma chamada por janela chega à Windsor.
+  if (!forcar) {
+    const r = await fetch(`${url}/rest/v1/rpc/reservar_sincronizacao_instagram`, {
+      method: 'POST',
+      headers: db,
+      body: JSON.stringify({ p_horas: HORAS_ENTRE_LEITURAS }),
+    })
+    if (!r.ok) return responder(500, { ok: false, etapa: 'reserva', erro: `HTTP ${r.status}` })
+    if ((await r.json()) !== true) return responder(200, { ok: true, etapa: 'ignorado', motivo: 'leitura recente' })
+  }
+
+  // 2. O que já está gravado, para a comparação. Sem essa base as travas não
+  // valem, então uma falha de leitura interrompe tudo.
   const atuais = new Map<string, Linha>()
   try {
     const r = await fetch(`${url}/rest/v1/site_instagram?select=*`, { headers: db })
-    for (const l of (await r.json()) as Linha[]) atuais.set(String(l.usuario), l)
-  } catch { /* segue sem comparação */ }
-
-  if (!forcar && atuais.size === PERFIS.length) {
-    const maisAntigo = Math.min(...[...atuais.values()].map((l) => Date.parse(String(l.atualizado_em))))
-    const horas = (Date.now() - maisAntigo) / 36e5
-    if (horas < HORAS_ENTRE_LEITURAS) {
-      return responder(200, { ok: true, etapa: 'ignorado', motivo: `atualizado ha ${horas.toFixed(1)}h` })
-    }
+    const linhas = await r.json()
+    if (!r.ok || !Array.isArray(linhas)) throw new Error(`HTTP ${r.status}`)
+    for (const l of linhas as Linha[]) atuais.set(String(l.usuario), l)
+  } catch (e) {
+    return responder(500, { ok: false, etapa: 'leitura', erro: String(e) })
   }
 
-  // 2. Ler da Windsor.
+  // 3. Ler da Windsor.
   let perfis: Linha[]
   let midias: Linha[]
   try {
@@ -98,7 +107,7 @@ Deno.serve(async (req) => {
       continue
     }
 
-    // 3. Publicações mais recentes, com a capa copiada para o Storage.
+    // 4. Publicações mais recentes, com a capa copiada para o Storage.
     const recentes = midias
       .filter((m) => m.username === usuario && typeof m.media_permalink === 'string')
       .sort((a, b) => Date.parse(String(b.timestamp)) - Date.parse(String(a.timestamp)))
