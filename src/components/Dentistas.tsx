@@ -22,7 +22,7 @@ export function Dentistas() {
           <p className="mt-4 text-base leading-relaxed text-conteudo-inverso-suave">{profissionais.texto}</p>
         </Reveal>
 
-        <div className="mt-12 grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
+        <div className="mt-8 grid gap-4 sm:mt-10 lg:grid-cols-[1.35fr_0.65fr]">
           <Reveal>
             <article className="cursos-painel glass-card glass-card--dark flex h-full flex-col rounded-card border border-borda-inversa p-7 sm:p-10">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-realce">Formação</p>

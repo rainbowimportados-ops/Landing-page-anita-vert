@@ -31,7 +31,7 @@ export function Servicos() {
           </p>
         </Reveal>
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-5 sm:mt-10 sm:grid-cols-2 lg:grid-cols-3">
           {servicos.map((servico, indice) => (
             <Reveal key={servico.titulo} delay={indice * 45}>
               <article className="tratamento-card group flex h-full flex-col rounded-[1.25rem] border border-white/70 p-7">

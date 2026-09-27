@@ -12,8 +12,8 @@ const itens = [
 /** Segunda dobra: o sorriso de perto, com o comparador de arrastar. */
 export function Detalhes() {
   return (
-    <section className="relative pb-20 sm:pb-24" aria-labelledby="detalhes-titulo">
-      <div className="container-vert grid gap-10 lg:grid-cols-[1.35fr_0.65fr] lg:items-center lg:gap-14">
+    <section className="relative pb-12 sm:pb-16" aria-labelledby="detalhes-titulo">
+      <div className="container-vert grid gap-8 lg:grid-cols-[1.35fr_0.65fr] lg:items-center lg:gap-12">
         <Reveal>
           <ComparadorSorriso
             className="detalhes-comparador"

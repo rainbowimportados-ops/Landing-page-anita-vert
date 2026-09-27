@@ -18,7 +18,7 @@ export function ChamadaFinal() {
 
   return (
     <section id="contato" className="secao">
-      <div className="container-vert grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
+      <div className="container-vert grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-12">
         <Reveal>
           <p className="olho">Agendamento</p>
           <h2 className="titulo-secao mt-4">Agende sua avaliação</h2>

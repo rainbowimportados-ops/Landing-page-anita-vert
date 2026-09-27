@@ -18,7 +18,7 @@ export function Resultados() {
           </p>
         </Reveal>
 
-        <Reveal className="mt-12">
+        <Reveal className="mt-8 sm:mt-10">
           <article className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr] lg:items-center lg:gap-12">
             <ComparadorRosto url="/assets/comparadores/rosto-antes-depois.webp" titulo="Resultado real de paciente do Instituto Vert" focoVertical={36} />
             <div>
@@ -31,7 +31,7 @@ export function Resultados() {
           </article>
         </Reveal>
 
-        <Reveal className="mt-14">
+        <Reveal className="mt-10 sm:mt-12">
           <CasoCompleto />
         </Reveal>
 

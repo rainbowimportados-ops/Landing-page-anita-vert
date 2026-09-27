@@ -19,7 +19,7 @@ export function Unidades() {
           <p className="lead mt-4">Dois endereços, o mesmo propósito: transformar sorrisos e vidas.</p>
         </Reveal>
 
-        <Reveal className="mx-auto mt-10 max-w-5xl">
+        <Reveal className="mx-auto mt-8 max-w-5xl">
           <div role="tablist" aria-label="Escolha a unidade" className="unidades-abas mx-auto grid max-w-md grid-cols-2 gap-1 rounded-2xl p-1">
             {unidades.map((u, i) => (
               <button
