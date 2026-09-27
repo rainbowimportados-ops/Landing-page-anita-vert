@@ -1,0 +1,6 @@
+.midia-paciente__marca{position:absolute;inset:0;z-index:1;pointer-events:none;background:url('/assets/cartao/logo-horizontal-mask.png') center/42% auto no-repeat;opacity:.16;filter:drop-shadow(0 1px 3px rgb(0 0 0/.25))}
+.midia-paciente__marca--mini{background-size:60% auto;opacity:.17}
+.midia-paciente__creditos{margin:.6rem 0 0;color:rgb(var(--cor-conteudo-suave));font-size:.625rem;line-height:1.45;letter-spacing:.005em}
+.midia-paciente__video{position:relative;align-self:center;overflow:hidden}
+.midia-paciente__video video{display:block}
+@media(max-width:640px){.midia-paciente__marca{background-size:52% auto;opacity:.14}.midia-paciente__marca--mini{background-size:68% auto}.midia-paciente__creditos{font-size:.58rem}}

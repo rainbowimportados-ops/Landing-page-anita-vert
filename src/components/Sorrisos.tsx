@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import type { PointerEvent, ReactNode } from 'react'
 import { IconImagem, IconPausa, IconPlay } from './Icon'
+import { CreditosMidiaPaciente, MarcaMidiaPaciente } from './MarcaMidiaPaciente'
 import './sorrisos.css'
 
 // Montagens originais: antes em cima e depois embaixo. A janela apenas revela
@@ -36,16 +37,6 @@ export function BarraControles({
         <IconImagem className="h-[18px] w-[18px]" /> <span>Ver depois</span>
       </button>
     </div>
-  )
-}
-
-export function SeloResultado() {
-  return (
-    <span className="sorriso-selo">
-      Resultado real
-      <br />
-      Instituto VERT
-    </span>
   )
 }
 
@@ -132,11 +123,11 @@ export function ComparadorSorriso({
         <div className="sorriso-metade" style={{ clipPath: `inset(0 ${100 - divisor}% 0 0)` }}>
           <img src={registro.url} alt={`${registro.titulo}: antes do tratamento`} width={registro.largura} height={registro.altura} loading="lazy" draggable={false} />
         </div>
+        <MarcaMidiaPaciente />
         <div className="sorriso-divisor" style={{ left: `${divisor}%` }} aria-hidden="true"><span>‹ ›</span></div>
         <RotulosAntesDepois antes={divisor > 12} depois={divisor < 88} />
         <BarraControles reproduzindo={reproduzindo} bloqueado={bloqueado}
           aoVerAntes={() => mover(100)} aoReproduzir={reproduzindo ? parar : reproduzir} aoVerDepois={() => mover(0)} />
-        <SeloResultado />
         {children}
       </div>
       {falhou && <p role="status" className="mt-2 text-sm">Não foi possível carregar a foto. Tente atualizar a página.</p>}
@@ -145,6 +136,7 @@ export function ComparadorSorriso({
       <input id={id} className="sr-only" type="range" min="0" max="100" value={divisor} disabled={bloqueado}
         aria-valuetext={`${antes} por cento antes, ${depois} por cento depois`}
         onChange={(e) => mover(Number(e.target.value))} />
+      <CreditosMidiaPaciente />
     </figure>
   )
 }

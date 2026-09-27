@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { BarraControles, RotulosAntesDepois, SeloResultado } from './Sorrisos'
+import { BarraControles, RotulosAntesDepois } from './Sorrisos'
+import { CreditosMidiaPaciente, MarcaMidiaPaciente } from './MarcaMidiaPaciente'
 
 type Modo = 'ambos' | 'antes' | 'depois'
 
@@ -64,6 +65,7 @@ export function ComparadorRosto({
     <figure className={`sorriso-comparador ${className}`}>
       <div className="sorriso-janela rosto-janela">
         <div className="rosto-foto" role="img" aria-label={descricao} style={{ backgroundImage: `url(${url})`, backgroundPosition: `50% ${focoVertical}%` }} />
+        <MarcaMidiaPaciente />
         <div className="rosto-veu rosto-veu--antes" data-ativo={modo === 'depois'} aria-hidden="true" />
         <div className="rosto-veu rosto-veu--depois" data-ativo={modo === 'antes'} aria-hidden="true" />
         <div className="sorriso-divisor" style={{ left: '50%' }}>
@@ -78,9 +80,9 @@ export function ComparadorRosto({
           aoReproduzir={reproduzindo ? () => { limpar(); setModo('ambos') } : reproduzir}
           aoVerDepois={() => escolher('depois')}
         />
-        <SeloResultado />
       </div>
       <p className="sr-only" aria-live="polite">{reproduzindo ? '' : descricao}</p>
+      <CreditosMidiaPaciente />
     </figure>
   )
 }

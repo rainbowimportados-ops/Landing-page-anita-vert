@@ -3,6 +3,7 @@ import './instagram-perfil.css'
 import { perfisInstagram, type PerfilInstagramApp } from '../config/site'
 import { registrarClique, SUPABASE_ANON_KEY, SUPABASE_URL } from '../lib/analytics'
 import { MarcaVert } from './MarcaVert'
+import { CreditosMidiaPaciente, MarcaMidiaPaciente } from './MarcaMidiaPaciente'
 import { Reveal } from './Reveal'
 import vert1 from '../assets/instagram/perfil/post-1.webp'
 import vert2 from '../assets/instagram/perfil/post-2.webp'
@@ -211,11 +212,13 @@ function PerfilApp({ perfil: fixo, vivo }: { perfil: PerfilInstagramApp; vivo?: 
           <li key={post.src}>
             <a href={post.link} target="_blank" rel="noopener noreferrer" onClick={abrir('publicacao')}>
               <img src={post.src} alt={post.alt} width={435} height={579} loading="lazy" />
+              <MarcaMidiaPaciente miniatura />
               <span className="sr-only"> (ver no Instagram, abre em uma nova aba)</span>
             </a>
           </li>
         ))}
       </ul>
+      <CreditosMidiaPaciente className="ig-app__creditos" />
     </article>
   )
 }

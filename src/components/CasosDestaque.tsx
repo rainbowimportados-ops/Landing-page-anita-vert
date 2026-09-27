@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ComparadorRosto } from './ComparadorRosto'
 import { ComparadorSorriso } from './Sorrisos'
+import { MarcaMidiaPaciente } from './MarcaMidiaPaciente'
 
 // Fotos em public/assets/comparadores: enviadas pela clínica, só redimensionadas
 // e convertidas para WebP. Nenhuma foi retocada.
@@ -32,6 +33,7 @@ function Miniaturas({ vistas, atual, escolher, rotulo }: { vistas: Vista[]; atua
       {vistas.map((v, i) => (
         <button key={v.url} type="button" aria-pressed={i === atual} aria-label={`${rotulo}, vista ${i + 1} de ${vistas.length}`} onClick={() => escolher(i)}>
           <img src={v.mini} alt="" width={v.largura > v.altura ? 180 : Math.round((180 * v.largura) / v.altura)} height={180} loading="lazy" />
+          <MarcaMidiaPaciente miniatura />
         </button>
       ))}
     </div>

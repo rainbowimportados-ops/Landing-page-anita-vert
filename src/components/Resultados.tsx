@@ -2,6 +2,7 @@ import videoResultado from '../../assets/resultado.mp4'
 import posterVideo from '../../assets/video-poster.webp'
 import { CasoCompleto } from './CasosDestaque'
 import { ComparadorRosto } from './ComparadorRosto'
+import { CreditosMidiaPaciente, MarcaMidiaPaciente } from './MarcaMidiaPaciente'
 import { Reveal } from './Reveal'
 
 export function Resultados() {
@@ -37,21 +38,25 @@ export function Resultados() {
 
         <Reveal className="mt-5">
           <figure className="tratamento-card grid overflow-hidden rounded-[1.5rem] border border-white/70 md:grid-cols-[0.6fr_1.4fr] md:items-center">
-            <video
-              controls
-              playsInline
-              preload="metadata"
-              poster={posterVideo}
-              aria-label="Vídeo de resultado real do Instituto Vert"
-              className="aspect-[4/5] w-full bg-conteudo object-contain md:max-h-[28rem]"
-            >
-              <source src={videoResultado} type="video/mp4" />
-              Seu navegador não suporta vídeo.
-            </video>
+            <div className="midia-paciente__video">
+              <video
+                controls
+                playsInline
+                preload="metadata"
+                poster={posterVideo}
+                aria-label="Vídeo de resultado real do Instituto Vert"
+                className="aspect-[4/5] w-full bg-conteudo object-contain md:max-h-[28rem]"
+              >
+                <source src={videoResultado} type="video/mp4" />
+                Seu navegador não suporta vídeo.
+              </video>
+              <MarcaMidiaPaciente />
+            </div>
             <figcaption className="p-7 sm:p-10">
               <p className="olho-linha">Resultado em vídeo</p>
               <p className="mt-4 font-display text-3xl font-light text-conteudo">Veja o sorriso em movimento.</p>
               <p className="mt-3 text-sm text-conteudo-suave">Reprodução manual, sem áudio automático.</p>
+              <CreditosMidiaPaciente />
             </figcaption>
           </figure>
         </Reveal>
