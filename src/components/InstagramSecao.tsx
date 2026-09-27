@@ -83,12 +83,14 @@ function formatarContagem(n: number): string {
 
 /**
  * As capas no Storage vêm no tamanho original (até ~1,5 MB); o endpoint de
- * transformação do Supabase entrega a mesma imagem reduzida, em WebP.
+ * transformação do Supabase entrega a mesma imagem reduzida, em WebP. Largura e
+ * altura vão juntas, no formato 3:4 da grade: só com a largura, o Supabase
+ * mantém a altura original e corta uma faixa estreita do meio da foto.
  */
 function capaReduzida(url: string) {
   const original = `${SUPABASE_URL}/storage/v1/object/public/`
   if (!url.startsWith(original)) return url
-  return `${SUPABASE_URL}/storage/v1/render/image/public/${url.slice(original.length)}?width=480&quality=70`
+  return `${SUPABASE_URL}/storage/v1/render/image/public/${url.slice(original.length)}?width=480&height=640&resize=cover&quality=70`
 }
 
 /** Junta os dados fixos com os atualizados, só onde os atualizados são válidos. */
