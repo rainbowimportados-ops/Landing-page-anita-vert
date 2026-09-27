@@ -783,7 +783,7 @@ function renderLeadRow(lead) {
 
 function formatLeadAnswers(answers) {
   if (!answers || typeof answers !== 'object') return '';
-  const labels = { perfil:'Perfil', cidade:'Cidade', ja_fez_curso:'Já fez curso', interesse:'Interesse',
+  const labels = { perfil:'Perfil', cidade:'Cidade', profissao:'Profissão', ja_fez_curso:'Já fez curso', interesse:'Interesse',
     finalidade:'Finalidade', frequencia:'Frequência', situacao:'Paciente', unidade:'Unidade' };
   return Object.entries(answers).filter(([key, value]) => labels[key] && value !== '' && value != null)
     .map(([key, value]) => `${labels[key]}: ${typeof value === 'boolean' ? (value ? 'Sim' : 'Não') : value}`).join(' · ');

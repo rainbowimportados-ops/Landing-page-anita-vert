@@ -123,7 +123,8 @@
           <label>Você é:
             <select name="professionalRole" required disabled><option value="">Selecione</option><option value="dentista">Dentista</option><option value="estudante">Estudante de Odontologia</option><option value="outro">Outro profissional da área odontológica</option><option value="saude" hidden disabled>Profissional da saúde</option></select>
           </label>
-          <label>Cidade onde atua ou estuda<input name="professionalCity" maxlength="80" placeholder="Ex.: Ribeirão Preto" required disabled /></label>
+          <label id="health-profession-field" hidden>Qual é a sua profissão na saúde?<input name="healthProfession" maxlength="80" placeholder="Ex.: Fisioterapeuta" required disabled /></label>
+          <label><span id="professional-city-label">Cidade onde atua ou estuda</span><input name="professionalCity" maxlength="80" placeholder="Ex.: Ribeirão Preto" required disabled /></label>
         </div>
         <div class="lead-form__section" id="formation-lead-fields" hidden>
           <span class="lead-form__section-title">Sobre o curso</span>

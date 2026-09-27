@@ -559,6 +559,7 @@ document.addEventListener('click', (event) => {
   document.querySelector('#lead-dialog-description').textContent = description;
   document.querySelector('#lead-dialog-eyebrow').textContent = type === 'rental' ? 'Para profissionais da saúde'
     : professional ? 'Para a área odontológica' : 'Atendimento ao paciente';
+  document.querySelector('#professional-city-label').textContent = type === 'rental' ? 'Cidade onde atua' : 'Cidade onde atua ou estuda';
   const roleOptions = leadForm.elements.professionalRole.options;
   for (const option of roleOptions) {
     if (option.value === 'estudante' || option.value === 'outro') {
@@ -582,6 +583,7 @@ document.addEventListener('click', (event) => {
     section.hidden = !visible;
     section.querySelectorAll('input,select').forEach((field) => { field.disabled = !visible; });
   });
+  updateHealthProfessionField();
   if (!professional) {
     if (type === 'patient') leadForm.elements.patientStatus.value = 'atual';
     if (pendingLead.unit) leadForm.elements.patientUnit.value = pendingLead.unit;
@@ -593,6 +595,14 @@ document.addEventListener('click', (event) => {
   leadDialog.showModal();
   requestAnimationFrame(() => document.querySelector('#lead-name').focus());
 }, true);
+
+function updateHealthProfessionField() {
+  const field = document.querySelector('#health-profession-field');
+  const enabled = pendingLead?.leadType === 'rental' && leadForm.elements.professionalRole.value === 'saude';
+  field.hidden = !enabled;
+  field.querySelector('input').disabled = !enabled;
+}
+leadForm.elements.professionalRole.addEventListener('change', updateHealthProfessionField);
 
 window.addEventListener('popstate', () => {
   const id = location.hash.startsWith('#unidade-') ? decodeURIComponent(location.hash.slice(9)) : '';
@@ -626,6 +636,7 @@ leadForm.addEventListener('submit', async (event) => {
     interesse: String(formData.get('courseInterest') || ''),
   } : pendingLead.leadType === 'rental' ? {
     perfil: lead.profession, cidade: lead.city,
+    profissao: String(formData.get('healthProfession') || '').trim(),
     finalidade: String(formData.get('rentalPurpose') || '').trim(), frequencia: String(formData.get('rentalFrequency') || ''),
   } : pendingLead.leadType === 'close_friends' ? {
     perfil: lead.profession, cidade: lead.city, interesse: String(formData.get('friendsInterest') || ''),
@@ -706,7 +717,7 @@ leadForm.addEventListener('submit', async (event) => {
   if (salvo) registrarClique(pendingLead.track, pendingLead.unit || null, 'lead_created');
   registrarClique(pendingLead.track, pendingLead.unit || null, 'whatsapp_opened');
   const details = Object.entries(answers).map(([key, value]) => {
-    const labels = { perfil: 'Perfil', cidade: 'Cidade', ja_fez_curso: 'Já fez curso', interesse: 'Interesse',
+    const labels = { perfil: 'Perfil', cidade: 'Cidade', profissao: 'Profissão', ja_fez_curso: 'Já fez curso', interesse: 'Interesse',
       finalidade: 'Finalidade da sala', frequencia: 'Frequência', situacao: 'Paciente', unidade: 'Unidade' };
     const display = typeof value === 'boolean' ? (value ? 'Sim' : 'Não') : value;
     return display ? `${labels[key]}: ${display}` : '';
