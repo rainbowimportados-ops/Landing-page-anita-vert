@@ -114,6 +114,7 @@ export function Rodape() {
             {rodapeLegal && <p className="mt-1 max-w-3xl">{rodapeLegal}</p>}
           </div>
           <ul className="flex gap-5">
+            <li><button type="button" onClick={() => window.dispatchEvent(new Event('vert:privacy-settings'))} className={classeLink}>Privacidade e dados</button></li>
             <li><a href="/privacidade" className={classeLink}>Política de privacidade</a></li>
             <li><a href="/termos" className={classeLink}>Termos de uso</a></li>
           </ul>

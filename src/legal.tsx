@@ -11,7 +11,7 @@ import './index.css'
  */
 type Secao = { titulo: string; paragrafos: string[] }
 
-const atualizado = '26 de setembro de 2026'
+const atualizado = '27 de setembro de 2026'
 const whatsapp = `https://wa.me/${clinica.whatsappAtendimento}`
 
 const documentos: Record<string, { titulo: string; resumo: string; secoes: Secao[] }> = {
@@ -32,22 +32,22 @@ const documentos: Record<string, { titulo: string; resumo: string; secoes: Secao
         paragrafos: [
           'Quando você pede contato pelo site: nome, número de WhatsApp, a unidade de preferência e o interesse informado (por exemplo, avaliação, curso ou locação). Profissionais também informam profissão e cidade. No cartão digital, o @ do Instagram é opcional.',
           'Junto com o pedido guardamos a origem da visita (como o parâmetro utm de uma campanha), a página e o botão usados.',
-          'Visitas e cliques são contados de forma anônima, sem nome, telefone ou identificador pessoal: registramos o botão, o tipo de dispositivo, a página e a data.',
-          'Só se você autorizar no aviso de privacidade do cartão digital guardamos um identificador do navegador e o @ do Instagram informado, para ligar seus acessos ao seu atendimento.',
+          'Somente se você autorizar as métricas no aviso de privacidade, registramos visitas e cliques: botão, tipo de dispositivo, página, origem da visita e data. Ao recusar, não enviamos esses eventos de navegação.',
+          'No cartão digital, a autorização também permite guardar um identificador do navegador e o @ do Instagram, se você o informar, para associar os acessos ao atendimento. A escolha vale para o site e o cartão e pode ser alterada em “Privacidade e dados”.',
         ],
       },
       {
         titulo: 'Para que usamos',
         paragrafos: [
           'Para responder ao seu pedido e agendar o atendimento na unidade escolhida.',
-          'Para entender quais canais e campanhas trazem contatos, sempre em números agregados.',
+          'Para entender quais canais e campanhas trazem contatos, quando as métricas forem autorizadas.',
           'Não vendemos nem cedemos seus dados para fins de publicidade de terceiros.',
         ],
       },
       {
         titulo: 'Base legal',
         paragrafos: [
-          'Os dados de contato são tratados para atender a um pedido feito por você (procedimentos preliminares a um contrato). A ligação dos acessos à sua pessoa depende do seu consentimento, que pode ser recusado ou retirado a qualquer momento.',
+          'Os dados de contato são tratados para atender ao pedido feito por você, após confirmação específica no formulário. Métricas de navegação e a associação dos acessos ao navegador dependem de escolha afirmativa separada, que pode ser recusada ou retirada sem impedir o acesso ao site ou ao cartão.',
         ],
       },
       {

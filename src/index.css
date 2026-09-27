@@ -636,3 +636,12 @@
     object-position: 50% 26%;
   }
 }
+/* Escolha de privacidade: duas ações equivalentes e acesso ao site em ambas. */
+.aviso-privacidade{width:min(calc(100% - 2rem),31rem);max-height:min(90vh,720px);padding:0;border:1px solid rgb(var(--cor-borda-forte));border-radius:1.5rem;background:rgb(var(--cor-superficie));color:rgb(var(--cor-conteudo));box-shadow:0 30px 90px rgb(0 0 0/.3)}
+.aviso-privacidade::backdrop{background:rgb(24 15 10/.75);backdrop-filter:blur(8px)}
+.aviso-privacidade__corpo{padding:clamp(1.5rem,5vw,2.5rem)}
+.aviso-privacidade__acoes{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:1.5rem}
+.aviso-privacidade__acoes button{min-height:48px;padding:.6rem .8rem;border:1px solid rgb(var(--cor-marca-forte));border-radius:.8rem;background:rgb(var(--cor-marca-forte));color:rgb(var(--cor-conteudo-inverso));font-size:.8rem;font-weight:600}
+.aviso-privacidade__acoes button+button{background:transparent;color:rgb(var(--cor-conteudo))}
+.aviso-privacidade__acoes button:focus-visible{outline:3px solid rgb(var(--cor-marca-forte));outline-offset:3px}
+@media(max-width:380px){.aviso-privacidade__acoes{grid-template-columns:1fr}}

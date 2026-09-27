@@ -1,4 +1,5 @@
 import { Banner } from './components/Banner'
+import { AvisoPrivacidade } from './components/AvisoPrivacidade'
 import { ProvedorDeCaptura } from './components/Captura'
 import { BotaoFlutuante } from './components/BotaoFlutuante'
 import { ChamadaFinal } from './components/ChamadaFinal'
@@ -31,6 +32,7 @@ export default function App() {
       </a>
 
       <Header />
+      <AvisoPrivacidade />
 
       <main>
         <Hero />

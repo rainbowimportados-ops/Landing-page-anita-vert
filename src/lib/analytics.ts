@@ -1,3 +1,5 @@
+import { escolhaPrivacidade } from './privacidade'
+
 /**
  * Eventos da landing page.
  *
@@ -5,7 +7,7 @@
  * com `superficie = 'landing'`. O cartão digital grava na mesma tabela com
  * `superficie = 'digital_card'`. Nenhum dado pessoal é enviado: só o botão,
  * a unidade, a origem da visita, o tipo de dispositivo e a página.
- * (public.link_clicks guarda o histórico antigo e não recebe mais eventos.)
+ * Apenas após escolha afirmativa no aviso de privacidade.
  */
 
 /**
@@ -53,7 +55,7 @@ function detectarOrigem(): string {
  * `keepalive` mantém a requisição viva quando a aba navega para o WhatsApp.
  */
 export function registrarClique(botao: string, unidade?: string | null, evento: Evento = 'cta_click'): void {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY || escolhaPrivacidade() !== 'accepted') return
 
   const payload = {
     superficie: 'landing',

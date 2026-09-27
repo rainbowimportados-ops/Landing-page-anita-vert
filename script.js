@@ -9,10 +9,10 @@ const contactRouter = document.querySelector('#contact-router');
 const contactRouterOptions = document.querySelector('#contact-router-options');
 const privacyDialog = document.querySelector('#privacy-dialog');
 const privacyForm = document.querySelector('#privacy-form');
-const PRIVACY_STORAGE_KEY = 'vert_card_privacy_v1';
+const PRIVACY_STORAGE_KEY = 'vert_privacy_choice_v1';
 const VISITOR_STORAGE_KEY = 'vert_card_visitor_id';
 const INSTAGRAM_STORAGE_KEY = 'vert_card_instagram';
-const CONSENT_VERSION = '2026-09-v3';
+const CONSENT_VERSION = '2026-09-v4';
 let trackingConsent = false;
 let visitorInstagram = '';
 let pendingLead = null;
@@ -400,6 +400,7 @@ function eventoPadrao(botao) {
 
 function registrarClique(botao, unidade = null, evento = null) {
   if (new URLSearchParams(window.location.search).get('preview') === 'admin') return;
+  if (!trackingConsent || storageGet(PRIVACY_STORAGE_KEY) !== `accepted:${CONSENT_VERSION}`) return;
   const payload = {
     superficie: 'digital_card',
     evento: evento || eventoPadrao(botao),
@@ -429,8 +430,8 @@ function initializePrivacy() {
   const choice = storageGet(PRIVACY_STORAGE_KEY);
   visitorInstagram = normalizeInstagramHandle(storageGet(INSTAGRAM_STORAGE_KEY));
   trackingConsent = choice === `accepted:${CONSENT_VERSION}`;
-  registrarClique('visualizacao_pagina');
-  if (!trackingConsent && choice !== 'declined') openPrivacyDialog();
+  if (trackingConsent) registrarClique('visualizacao_pagina');
+  if (!trackingConsent && choice !== `declined:${CONSENT_VERSION}`) openPrivacyDialog();
 }
 
 privacyForm.addEventListener('submit', (event) => {
@@ -442,14 +443,15 @@ privacyForm.addEventListener('submit', (event) => {
   else storageRemove(INSTAGRAM_STORAGE_KEY);
   trackingConsent = true;
   privacyDialog.close();
-  // A visualização já foi contada de forma anônima ao abrir a página.
+  // Só após a escolha afirmativa os eventos passam a ser registrados.
   registrarClique(wasTracking ? 'preferencias_privacidade' : 'consentimento_autorizado');
 });
 
 document.querySelector('[data-privacy-decline]').addEventListener('click', () => {
   trackingConsent = false;
   visitorInstagram = '';
-  storageSet(PRIVACY_STORAGE_KEY, 'declined');
+  storageSet(PRIVACY_STORAGE_KEY, `declined:${CONSENT_VERSION}`);
+  storageRemove(VISITOR_STORAGE_KEY);
   storageRemove(INSTAGRAM_STORAGE_KEY);
   privacyDialog.close();
 });
