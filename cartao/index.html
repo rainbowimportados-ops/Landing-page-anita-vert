@@ -121,7 +121,7 @@
         <div class="lead-form__section" id="professional-lead-fields" hidden>
           <span class="lead-form__section-title">Sobre sua atuação</span>
           <label>Você é:
-            <select name="professionalRole" required disabled><option value="">Selecione</option><option value="dentista">Dentista</option><option value="estudante">Estudante de Odontologia</option><option value="outro">Outro profissional da área odontológica</option></select>
+            <select name="professionalRole" required disabled><option value="">Selecione</option><option value="dentista">Dentista</option><option value="estudante">Estudante de Odontologia</option><option value="outro">Outro profissional da área odontológica</option><option value="saude" hidden disabled>Profissional da saúde</option></select>
           </label>
           <label>Cidade onde atua ou estuda<input name="professionalCity" maxlength="80" placeholder="Ex.: Ribeirão Preto" required disabled /></label>
         </div>
@@ -136,6 +136,7 @@
         </div>
         <div class="lead-form__section" id="rental-lead-fields" hidden>
           <span class="lead-form__section-title">Sobre a locação</span>
+          <p class="lead-form__note">Locação exclusiva para dentistas e profissionais da saúde.</p>
           <label>Para qual atendimento precisa da sala?<input name="rentalPurpose" maxlength="120" placeholder="Ex.: consultas, estética, avaliação" required disabled /></label>
           <label>Com que frequência pretende usar?
             <select name="rentalFrequency" required disabled><option value="">Selecione</option><option value="pontual">Uso pontual</option><option value="semanal">Semanalmente</option><option value="mensal">Mensalmente</option><option value="a_definir">Ainda estou avaliando</option></select>
