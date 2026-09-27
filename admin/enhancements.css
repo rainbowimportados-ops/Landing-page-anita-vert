@@ -227,6 +227,45 @@
   border-radius: 14px 14px 0 0;
   background: white;
 }
+
+/* Gestão integrada: navegação, CRM e editor do site. */
+.sidebar { background:linear-gradient(170deg,#352319,#211510 84%); box-shadow:12px 0 34px rgba(43,27,20,.08); }
+.sidebar nav { overflow-y:auto; scrollbar-width:thin; padding-bottom:16px; }
+.nav-group-label { color:#d2bca8; }
+.nav-link.is-active { background:rgba(255,255,255,.14); box-shadow:inset 0 0 0 1px rgba(255,255,255,.1); }
+.topbar { background:rgba(250,246,240,.8); border-bottom-color:rgba(255,255,255,.72); backdrop-filter:blur(18px) saturate(1.3); }
+.button--ghost,.crm-summary button,.lead-row,.lead-toolbar { background:linear-gradient(155deg,rgba(255,255,255,.97),rgba(255,250,243,.82)); box-shadow:0 10px 35px -30px rgba(48,29,19,.3); }
+.preview-pane[hidden],.topbar__actions>[hidden] { display:none!important; }
+.app[data-active-section="site"] .editor-grid,
+.app[data-active-section="contatos"] .editor-grid,
+.app[data-active-section="acessos"] .editor-grid,
+.app[data-active-section="visao-geral"] .editor-grid { grid-template-columns:minmax(0,1fr); }
+.app[data-active-section="site"] .editor { max-width:1100px; padding-bottom:20px; }
+.app[data-active-section="contatos"] .editor { max-width:1220px; }
+.site-editor-frame { display:block; width:100%; height:min(78vh,900px); min-height:580px; margin-top:18px; border:1px solid rgba(120,85,58,.16); border-radius:20px; background:#f7f3ee; box-shadow:0 24px 70px -42px rgba(43,27,20,.45); }
+.crm-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:18px 0 4px; }
+.crm-summary button { display:flex; min-height:90px; flex-direction:column; align-items:flex-start; justify-content:space-between; padding:15px 17px; border:1px solid var(--border); border-radius:15px; color:var(--chocolate); text-align:left; cursor:pointer; }
+.crm-summary button:hover,.crm-summary button:focus-visible { border-color:#a88970; transform:translateY(-2px); }
+.crm-summary span { color:#745d50; font-size:.7rem; font-weight:600; }
+.crm-summary strong { font:500 1.85rem/1 'Cormorant Garamond',serif; }
+[data-panel="contatos"] .lead-toolbar { grid-template-columns:minmax(180px,1fr) 160px 160px auto; }
+.crm-stage { width:max-content; padding:5px 9px; border-radius:999px; background:#eee5d9; color:#624736!important; font-size:.59rem!important; font-weight:600; }
+.crm-stage--em_contato { background:#efe3cf; }
+.crm-stage--agendado { background:#e7dbcf; }
+.crm-stage--concluido { background:#e3e8dd; }
+.crm-stage--perdido { background:#f1e1df; }
+.crm-followup.is-due { color:#a33f36!important; font-weight:700; }
+.lead-row__source small { white-space:normal; line-height:1.4; }
+.lead-dialog textarea { width:100%; padding:11px 12px; border:1px solid var(--border); border-radius:9px; background:#fff; color:var(--chocolate); resize:vertical; }
+.lead-row__contact>a { color:#76523d; }
+.lead-card a { background:#664532; }
+@media(max-width:760px) {
+  .crm-summary { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .crm-summary button { min-height:74px; padding:12px; }
+  [data-panel="contatos"] .lead-toolbar { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  [data-panel="contatos"] .lead-toolbar .lead-search { grid-column:1/-1; }
+  .site-editor-frame { width:calc(100% + 16px); height:calc(100dvh - 210px); min-height:520px; margin-left:-8px; border-radius:12px; }
+}
 .lead-toolbar label { display: grid; gap: 6px; color: #654b3e; font-size: .65rem; font-weight: 600; }
 .lead-toolbar input,
 .lead-toolbar select { width: 100%; min-height: 42px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 9px; background: #fff; color: var(--chocolate); outline: none; }

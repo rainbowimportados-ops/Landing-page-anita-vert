@@ -16,6 +16,7 @@ const campo =
   'mt-1.5 w-full rounded-lg border border-borda-forte bg-superficie px-3 py-2.5 text-sm text-conteudo'
 
 export function Editor({ email, aoSair }: { email: string; aoSair: () => void }) {
+  const integrado = new URLSearchParams(window.location.search).has('embed')
   const [ajustes, setAjustes] = useState<Ajustes>({})
   // Guarda o que veio do banco, para saber se os seguidores mudaram de fato.
   const ajustesOriginais = useRef<Ajustes | null>(null)
@@ -100,8 +101,8 @@ export function Editor({ email, aoSair }: { email: string; aoSair: () => void })
   }
 
   return (
-    <div className="min-h-dvh bg-fundo pb-28">
-      <header className="border-b border-borda bg-superficie">
+    <div className={`${integrado ? 'min-h-full' : 'min-h-dvh'} bg-fundo pb-28`}>
+      {!integrado && <header className="border-b border-borda bg-superficie">
         <div className="container-vert flex h-16 items-center justify-between gap-4">
           <span className="font-display text-lg text-conteudo">
             Configuração da <span className="text-marca">landing</span>
@@ -116,9 +117,9 @@ export function Editor({ email, aoSair }: { email: string; aoSair: () => void })
             </button>
           </div>
         </div>
-      </header>
+      </header>}
 
-      <main className="container-vert max-w-3xl space-y-10 py-10">
+      <main className="container-vert max-w-3xl space-y-10 py-6">
         <p className="lead">
           Estes campos substituem o que está no código. Deixe em branco para manter o texto
           padrão. A página é atualizada assim que você salva.

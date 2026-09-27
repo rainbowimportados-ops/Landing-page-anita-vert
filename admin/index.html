@@ -25,8 +25,8 @@
       <section class="login-card">
         <img src="/assets/logo-principal-marrom.jpeg" alt="Instituto Vert" width="180" height="180" />
         <p class="eyebrow">Área restrita</p>
-        <h1>Gerencie seu cartão digital</h1>
-        <p>Entre com a senha cadastrada para administrar o cartão digital.</p>
+        <h1>Seu espaço de gestão</h1>
+        <p>Entre para acompanhar contatos e atualizar o site e o cartão.</p>
         <form id="login-form">
           <label for="email">E-mail autorizado</label>
           <input id="email" name="email" type="email" value="diretoria@institutovert.com.br" readonly />
@@ -64,11 +64,12 @@
           <img src="/assets/logo-secundaria-marrom.jpeg" alt="Instituto Vert" width="220" height="180" />
         </a>
         <nav aria-label="Seções do painel">
-          <span class="nav-group-label">Resumo</span>
+          <span class="nav-group-label">Atendimento</span>
           <button class="nav-link is-active" data-section="visao-geral"><span aria-hidden="true">⌂</span>Visão geral</button>
+          <button class="nav-link" data-section="contatos"><span aria-hidden="true">◉</span>CRM de contatos</button>
           <button class="nav-link" data-section="acessos"><span aria-hidden="true">◎</span>Instagram e acessos</button>
-          <button class="nav-link" data-section="contatos"><span aria-hidden="true">◎</span>Contatos recebidos</button>
-          <span class="nav-group-label">Configurações</span>
+          <span class="nav-group-label">Site e cartão</span>
+          <button class="nav-link" data-section="site"><span aria-hidden="true">▣</span>Editar site</button>
           <button class="nav-link" data-section="empresa"><span aria-hidden="true">◇</span>Dados da empresa</button>
           <button class="nav-link" data-section="unidades"><span aria-hidden="true">⌖</span>Unidades</button>
           <button class="nav-link" data-section="links"><span aria-hidden="true">↗</span>WhatsApp e contatos</button>
@@ -82,8 +83,9 @@
           <span>Área do painel</span>
           <select id="mobile-section-nav" aria-label="Escolha a área do painel">
             <option value="visao-geral">Visão geral</option>
+            <option value="site">Editar site</option>
             <option value="acessos">Instagram e acessos</option>
-            <option value="contatos">Contatos recebidos</option>
+            <option value="contatos">CRM de contatos</option>
             <option value="empresa">Dados da empresa</option>
             <option value="unidades">Unidades</option>
             <option value="links">WhatsApp e contatos</option>
@@ -269,8 +271,9 @@
             </section>
 
             <section class="panel" data-panel="contatos">
-              <div class="panel__heading"><div><p class="eyebrow">Atendimento</p><h2>Contatos recebidos</h2></div><button type="button" class="small-action" id="refresh-leads">Atualizar</button></div>
-              <p class="helper">Somente pessoas que preencheram e enviaram o formulário de contato.</p>
+              <div class="panel__heading"><div><p class="eyebrow">Site + cartão</p><h2>CRM de contatos</h2></div><button type="button" class="small-action" id="refresh-leads">Atualizar</button></div>
+              <p class="helper">Todos os formulários enviados. Acompanhe a etapa, registre a próxima ação e retome a conversa pelo WhatsApp.</p>
+              <div class="crm-summary" id="crm-summary" aria-label="Resumo do atendimento"></div>
               <div class="lead-toolbar" aria-label="Ferramentas dos contatos">
                 <label class="lead-search">
                   <span>Buscar contato</span>
@@ -283,10 +286,12 @@
                     <option value="marked">Marcados</option>
                     <option value="unmarked">Não marcados</option>
                     <option value="appointment">Pacientes e consultas</option>
+                    <option value="formation">Cursos</option>
                     <option value="rental">Locação de sala</option>
                     <option value="close_friends">Close Friends</option>
                   </select>
                 </label>
+                <label><span>Etapa</span><select id="lead-stage-filter"><option value="all">Todas as etapas</option><option value="novo">Novos</option><option value="em_contato">Em contato</option><option value="agendado">Agendados</option><option value="concluido">Concluídos</option><option value="perdido">Perdidos</option><option value="followup">Retorno vencido</option></select></label>
                 <button type="button" class="lead-toolbar__button" id="export-leads">Exportar CSV</button>
               </div>
               <div class="lead-selection-bar">
@@ -299,6 +304,12 @@
                 </div>
               </div>
               <div class="leads-list" id="leads-list"><div class="empty-state"><strong>Carregando contatos…</strong></div></div>
+            </section>
+
+            <section class="panel" data-panel="site">
+              <div class="panel__heading"><div><p class="eyebrow">Conteúdo público</p><h2>Editar site</h2></div><a class="small-action" href="/" target="_blank" rel="noopener">Ver site ↗</a></div>
+              <p class="helper">Textos, imagens, horários, dúvidas frequentes e depoimentos. Use o botão Salvar dentro do editor; as alterações aparecem no site após salvar.</p>
+              <iframe class="site-editor-frame" id="site-editor-frame" title="Editor do site" data-src="/config/?embed=1"></iframe>
             </section>
 
             <section class="panel" data-panel="campanhas">
@@ -342,6 +353,9 @@
           <label>Profissão<input id="lead-edit-profession" maxlength="100" /></label>
           <label>Faixa etária<select id="lead-edit-age"><option value="">Não informada</option><option>18-24</option><option>25-34</option><option>35-44</option><option>45-54</option><option>55-64</option><option>65+</option></select></label>
           <label>Sexo<select id="lead-edit-gender"><option value="">Não informado</option><option value="feminino">Feminino</option><option value="masculino">Masculino</option><option value="outro">Outro</option><option value="prefiro_nao_informar">Prefiro não informar</option></select></label>
+          <label>Etapa<select id="lead-edit-stage"><option value="novo">Novo</option><option value="em_contato">Em contato</option><option value="agendado">Agendado</option><option value="concluido">Concluído</option><option value="perdido">Perdido</option></select></label>
+          <label>Próximo retorno<input id="lead-edit-followup" type="datetime-local" /></label>
+          <label class="wide">Notas internas<textarea id="lead-edit-notes" rows="3" maxlength="2000" placeholder="Anote o combinado e o próximo passo"></textarea></label>
         </div>
         <label class="lead-dialog__tags">Etiquetas <input id="lead-edit-tags" maxlength="300" placeholder="Ex.: retorno, Franca, prioridade" /><small>Separe as etiquetas por vírgulas.</small></label>
         <label class="lead-dialog__mark" id="lead-dialog-mark"><input id="lead-edit-marked" type="checkbox" /> Marcar como importante</label>

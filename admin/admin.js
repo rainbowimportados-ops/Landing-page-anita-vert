@@ -224,7 +224,8 @@ const sectionDetails = {
   unidades: { title: 'Unidades', context: 'Configuração do atendimento' },
   links: { title: 'WhatsApp e contatos', context: 'Configuração do atendimento' },
   formacoes: { title: 'Formações e cursos', context: 'Conteúdo do cartão' },
-  contatos: { title: 'Contatos recebidos', context: 'Dados e relacionamento' },
+  contatos: { title: 'CRM de contatos', context: 'Site e cartão · atendimento' },
+  site: { title: 'Editar site', context: 'Conteúdo e identidade' },
   campanhas: { title: 'Campanhas e promoções', context: 'Conteúdo do cartão' },
   depoimentos: { title: 'Depoimentos', context: 'Conteúdo do cartão' },
   resultados: { title: 'Resultados e trabalhos', context: 'Conteúdo do cartão' },
@@ -238,6 +239,16 @@ function activatePanel(section, shouldScroll = false) {
   button.classList.add('is-active');
   panel.classList.add('is-active');
   adminApp.dataset.activeSection = section;
+  if (window.location.search !== `?section=${encodeURIComponent(section)}`) {
+    window.history.replaceState(null, '', `?section=${encodeURIComponent(section)}`);
+  }
+  if (section === 'site') {
+    const frame = document.querySelector('#site-editor-frame');
+    if (frame && !frame.src) frame.src = frame.dataset.src;
+  }
+  saveButton.hidden = ['site', 'contatos', 'acessos', 'visao-geral'].includes(section);
+  saveStatus.hidden = saveButton.hidden;
+  document.querySelector('.preview-pane').hidden = ['site', 'contatos', 'acessos', 'visao-geral'].includes(section);
   if (section === 'links' && content) renderUnitContacts();
   const details = sectionDetails[section];
   const title = document.querySelector('#workspace-title');
@@ -620,23 +631,24 @@ async function loadLeads() {
   if (journeyList) journeyList.innerHTML = '<div class="empty-state"><strong>Carregando acessos…</strong></div>';
   if (formationList) formationList.innerHTML = '<div class="empty-state"><strong>Carregando interessados…</strong></div>';
   const [leadResult, clickResult] = await Promise.all([
-    supabase.from('digital_card_leads').select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at,visitor_id,instagram_handle,source_origin,age_range,gender,answers').order('created_at', { ascending: false }).limit(500),
+    supabase.from('digital_card_leads').select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at,visitor_id,instagram_handle,source_origin,age_range,gender,answers,pipeline_status,internal_notes,next_followup_at').order('created_at', { ascending: false }).limit(500),
     supabase.from('digital_card_clicks').select('visitor_id,botao,unidade,origem,dispositivo,instagram_handle,created_at').eq('superficie', 'digital_card').in('evento', ['page_view', 'cta_click', 'consent', 'lead_created']).not('visitor_id', 'is', null).order('created_at', { ascending: false }).limit(5000),
   ]);
-  if (leadResult.error || clickResult.error) {
-    const message = leadResult.error?.message || clickResult.error?.message || 'Erro desconhecido';
+  if (leadResult.error) {
+    const message = leadResult.error.message;
     list.innerHTML = `<div class="empty-state"><strong>Não foi possível carregar</strong><p>${escapeHtml(message)}</p></div>`;
     if (journeyList) journeyList.innerHTML = list.innerHTML;
     if (formationList) formationList.innerHTML = list.innerHTML;
     return;
   }
   const data = leadResult.data || [];
-  contactLeads = data.filter((lead) => lead.lead_type !== 'formation');
+  contactLeads = data;
   formationLeads = data.filter((lead) => lead.lead_type === 'formation');
   visitorJourneys = aggregateVisitorJourneys(clickResult.data || [], data);
   selectedLeadIds = new Set([...selectedLeadIds].filter((id) => contactLeads.some((lead) => lead.id === id)));
   renderVisitorJourneys();
   renderContactList();
+  renderCrmSummary();
   if (formationList) formationList.innerHTML = formationLeads.length
     ? formationLeads.map(renderFormationLeadCard).join('')
     : '<div class="empty-state"><strong>Nenhum interessado ainda</strong><p>Os leads dos cursos aparecerão aqui com suas respostas.</p></div>';
@@ -732,14 +744,26 @@ function renderVisitorJourney(journey) {
 function filteredContactLeads() {
   const search = document.querySelector('#lead-search').value.trim().toLocaleLowerCase('pt-BR');
   const filter = document.querySelector('#lead-filter').value;
+  const stage = document.querySelector('#lead-stage-filter').value;
   return contactLeads.filter((lead) => {
     const matchesFilter = filter === 'all' || (filter === 'marked' ? lead.marked
       : filter === 'unmarked' ? !lead.marked
       : filter === 'appointment' ? ['appointment', 'patient', 'contact'].includes(lead.lead_type)
       : lead.lead_type === filter);
     const searchable = [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.button, lead.unit, lead.source_origin, ...Object.values(lead.answers || {}), ...(lead.tags || [])].join(' ').toLocaleLowerCase('pt-BR');
-    return matchesFilter && (!search || searchable.includes(search));
+    const matchesStage = stage === 'all' || (stage === 'followup'
+      ? lead.next_followup_at && new Date(lead.next_followup_at) <= new Date() && !['concluido', 'perdido'].includes(lead.pipeline_status)
+      : (lead.pipeline_status || 'novo') === stage);
+    return matchesFilter && matchesStage && (!search || searchable.includes(search));
   });
+}
+
+const stageLabels = { novo: 'Novo', em_contato: 'Em contato', agendado: 'Agendado', concluido: 'Concluído', perdido: 'Perdido' };
+
+function renderCrmSummary() {
+  const counts = Object.fromEntries(Object.keys(stageLabels).map((key) => [key, contactLeads.filter((lead) => (lead.pipeline_status || 'novo') === key).length]));
+  const due = contactLeads.filter((lead) => lead.next_followup_at && new Date(lead.next_followup_at) <= new Date() && !['concluido', 'perdido'].includes(lead.pipeline_status)).length;
+  document.querySelector('#crm-summary').innerHTML = `<button type="button" data-stage="novo"><span>Novos</span><strong>${counts.novo}</strong></button><button type="button" data-stage="em_contato"><span>Em contato</span><strong>${counts.em_contato}</strong></button><button type="button" data-stage="agendado"><span>Agendados</span><strong>${counts.agendado}</strong></button><button type="button" data-stage="followup"><span>Retornos vencidos</span><strong>${due}</strong></button>`;
 }
 
 function renderContactList() {
@@ -750,7 +774,7 @@ function renderContactList() {
       ? '<div class="empty-state"><strong>Nenhum contato encontrado</strong><p>Ajuste a busca ou o filtro.</p></div>'
       : '<div class="empty-state"><strong>Nenhum contato recebido ainda</strong><p>Os novos contatos aparecerão aqui.</p></div>';
   } else {
-    list.innerHTML = `<div class="lead-list-heading" aria-hidden="true"><span></span><span>Contato</span><span>Origem</span><span>Recebido em</span><span>Ações</span></div>${leads.map(renderLeadRow).join('')}`;
+    list.innerHTML = `<div class="lead-list-heading" aria-hidden="true"><span></span><span>Contato</span><span>Origem e etapa</span><span>Recebido em</span><span>Ações</span></div>${leads.map(renderLeadRow).join('')}`;
   }
   updateLeadSelectionBar();
 }
@@ -761,6 +785,9 @@ function renderLeadRow(lead) {
   const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(lead.created_at));
   const tags = (lead.tags || []).map((tag) => `<span class="lead-tag">${escapeHtml(tag)}</span>`).join('');
   const answers = formatLeadAnswers(lead.answers);
+  const stage = lead.pipeline_status || 'novo';
+  const followup = lead.next_followup_at ? new Intl.DateTimeFormat('pt-BR', { dateStyle:'short', timeStyle:'short' }).format(new Date(lead.next_followup_at)) : '';
+  const due = followup && new Date(lead.next_followup_at) <= new Date() && !['concluido', 'perdido'].includes(stage);
   return `<article class="lead-row${lead.marked ? ' is-marked' : ''}" data-lead-id="${escapeHtml(lead.id)}">
     <label class="lead-row__select"><input class="lead-select" type="checkbox" ${selectedLeadIds.has(lead.id) ? 'checked' : ''} aria-label="Selecionar ${escapeHtml(lead.name)}" /></label>
     <div class="lead-row__contact" data-label="Contato">
@@ -770,7 +797,7 @@ function renderLeadRow(lead) {
       ${lead.instagram_handle ? `<a href="https://www.instagram.com/${encodeURIComponent(String(lead.instagram_handle).replace(/^@/, ''))}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.instagram_handle)}</a>` : ''}
       ${tags ? `<div class="lead-tags">${tags}</div>` : ''}
     </div>
-    <div class="lead-row__source" data-label="Origem"><span>${escapeHtml(lead.button)}</span><small>${escapeHtml(lead.unit || 'Sem unidade')}</small><small>${escapeHtml(lead.source_origin || 'Origem não identificada')}</small>${answers ? `<small class="lead-answer">${escapeHtml(answers)}</small>` : ''}</div>
+    <div class="lead-row__source" data-label="Origem e etapa"><span class="crm-stage crm-stage--${stage}">${escapeHtml(stageLabels[stage] || stage)}</span><span>${escapeHtml(lead.lead_type === 'formation' ? 'Curso' : lead.lead_type === 'rental' ? 'Locação' : lead.lead_type === 'close_friends' ? 'Close Friends' : 'Paciente')} · ${escapeHtml(lead.button)}</span><small>${escapeHtml(lead.unit || 'Sem unidade')} · ${escapeHtml(lead.source_origin || 'Origem não identificada')}</small>${followup ? `<small class="crm-followup${due ? ' is-due' : ''}">Retorno: ${escapeHtml(followup)}</small>` : ''}${lead.internal_notes ? `<small class="lead-answer">${escapeHtml(lead.internal_notes)}</small>` : ''}${answers ? `<small class="lead-answer">${escapeHtml(answers)}</small>` : ''}</div>
     <time class="lead-row__date" data-label="Recebido em" datetime="${escapeHtml(lead.created_at)}">${escapeHtml(date)}${journey ? `<br><strong>${journey.clicks} ${journey.clicks === 1 ? 'clique' : 'cliques'}</strong>` : ''}</time>
     <div class="lead-row__actions" data-label="Ações">
       <button type="button" data-lead-action="mark" aria-label="${lead.marked ? 'Desmarcar' : 'Marcar'} ${escapeHtml(lead.name)}" title="${lead.marked ? 'Desmarcar' : 'Marcar'}">${lead.marked ? '★' : '☆'}</button>
@@ -802,6 +829,13 @@ document.querySelector('#refresh-accesses').addEventListener('click', () => { vo
 document.querySelector('#refresh-formation-leads').addEventListener('click', () => void loadLeads());
 document.querySelector('#lead-search').addEventListener('input', renderContactList);
 document.querySelector('#lead-filter').addEventListener('change', renderContactList);
+document.querySelector('#lead-stage-filter').addEventListener('change', renderContactList);
+document.querySelector('#crm-summary').addEventListener('click', (event) => {
+  const stage = event.target.closest('[data-stage]')?.dataset.stage;
+  if (!stage) return;
+  document.querySelector('#lead-stage-filter').value = stage;
+  renderContactList();
+});
 document.querySelector('#journey-search').addEventListener('input', renderVisitorJourneys);
 document.querySelector('#journey-filter').addEventListener('change', renderVisitorJourneys);
 
@@ -863,6 +897,7 @@ async function deleteLeads(ids) {
   contactLeads = contactLeads.filter((lead) => !ids.includes(lead.id));
   ids.forEach((id) => selectedLeadIds.delete(id));
   renderContactList();
+  renderCrmSummary();
   void loadMetrics();
 }
 
@@ -885,6 +920,9 @@ function openLeadDialog(mode, ids) {
   document.querySelector('#lead-edit-profession').value = lead?.profession || '';
   document.querySelector('#lead-edit-age').value = lead?.age_range || '';
   document.querySelector('#lead-edit-gender').value = lead?.gender || '';
+  document.querySelector('#lead-edit-stage').value = lead?.pipeline_status || 'novo';
+  document.querySelector('#lead-edit-followup').value = lead?.next_followup_at ? new Date(new Date(lead.next_followup_at).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
+  document.querySelector('#lead-edit-notes').value = lead?.internal_notes || '';
   document.querySelector('#lead-edit-tags').value = mode === 'tag' && ids.length > 1 ? '' : (lead?.tags || []).join(', ');
   document.querySelector('#lead-edit-marked').checked = Boolean(lead?.marked);
   dialog.showModal();
@@ -915,6 +953,9 @@ document.querySelector('#lead-dialog-form').addEventListener('submit', async (ev
         profession: document.querySelector('#lead-edit-profession').value.trim() || null,
         age_range: document.querySelector('#lead-edit-age').value || null,
         gender: document.querySelector('#lead-edit-gender').value || null,
+        pipeline_status: document.querySelector('#lead-edit-stage').value,
+        next_followup_at: document.querySelector('#lead-edit-followup').value ? new Date(document.querySelector('#lead-edit-followup').value).toISOString() : null,
+        internal_notes: document.querySelector('#lead-edit-notes').value.trim() || null,
         tags,
         marked: document.querySelector('#lead-edit-marked').checked,
         updated_at: new Date().toISOString(),
@@ -932,6 +973,7 @@ document.querySelector('#lead-dialog-form').addEventListener('submit', async (ev
   contactLeads = contactLeads.map((lead) => ids.includes(lead.id) ? { ...lead, ...changes } : lead);
   closeLeadDialog();
   renderContactList();
+  renderCrmSummary();
 });
 
 function csvCell(value) {
@@ -945,8 +987,8 @@ document.querySelector('#export-leads').addEventListener('click', () => {
     window.alert('Não há contatos para exportar.');
     return;
   }
-  const header = ['Nome', 'Telefone', 'Instagram', 'Profissão', 'Faixa etária', 'Sexo', 'Tipo', 'Origem', 'Unidade', 'Respostas', 'Origem do acesso', 'Recebido em', 'Marcado', 'Etiquetas'];
-  const csvRows = rows.map((lead) => [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.age_range, lead.gender, lead.lead_type, lead.button, lead.unit, formatLeadAnswers(lead.answers), lead.source_origin, lead.created_at, lead.marked ? 'Sim' : 'Não', (lead.tags || []).join('; ')]);
+  const header = ['Nome', 'Telefone', 'Instagram', 'Profissão', 'Faixa etária', 'Sexo', 'Tipo', 'Origem', 'Unidade', 'Respostas', 'Origem do acesso', 'Recebido em', 'Etapa', 'Próximo retorno', 'Notas internas', 'Marcado', 'Etiquetas'];
+  const csvRows = rows.map((lead) => [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.age_range, lead.gender, lead.lead_type, lead.button, lead.unit, formatLeadAnswers(lead.answers), lead.source_origin, lead.created_at, stageLabels[lead.pipeline_status || 'novo'], lead.next_followup_at, lead.internal_notes, lead.marked ? 'Sim' : 'Não', (lead.tags || []).join('; ')]);
   const csv = '\uFEFF' + [header, ...csvRows].map((row) => row.map(csvCell).join(',')).join('\r\n');
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const link = document.createElement('a');
@@ -1012,6 +1054,7 @@ async function openAdmin(nextSession, passwordJustConfigured = false) {
     return;
   }
   showAdmin();
+  activatePanel(new URLSearchParams(window.location.search).get('section') || adminApp.dataset.activeSection || 'visao-geral');
   void loadMetrics();
   void loadLeads();
   setStatus('Carregando…');

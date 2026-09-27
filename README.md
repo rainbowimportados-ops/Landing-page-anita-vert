@@ -6,9 +6,9 @@ Landing, cartão digital e painéis no mesmo build, servidos pelo projeto `insti
 | --- | --- |
 | `/` | **Landing page** — página principal, de captação, com tratamentos, resultados e FAQ |
 | `/cartao` | **Cartão digital** — página mobile-first de contatos e agendamento |
-| `/gestao` | Acesso aos dois painéis |
-| `/admin` | Painel do cartão digital (unidades, contatos, leads, métricas) |
-| `/config` | Painel da landing page |
+| `/gestao` | Entrada da gestão integrada |
+| `/admin` | Painel único: CRM, métricas, site e cartão |
+| `/config` | Editor do site, também aberto dentro do painel único |
 | `/privacidade`, `/termos` | Política de privacidade e termos de uso |
 
 Redirecionamentos (em `vercel.json`): `vert.institutovert.app/*` vai para
@@ -44,7 +44,7 @@ as duas páginas. "Como chegar" é gerado a partir do endereço, então não
 depende de link colado à mão. Os padrões em `src/config/site.ts` só entram se
 o Supabase estiver fora do ar.
 
-### Configuração pelo painel (`/config`)
+### Configuração pelo painel (`/admin`, seção “Editar site”)
 
 O que está em `src/config/site.ts` é o **padrão**. O painel grava só as
 diferenças na tabela `public.landing_content`, e elas são aplicadas por cima na
@@ -66,7 +66,8 @@ para dentistas.
 
 ### Login e permissão
 
-Entrada por link mágico do Supabase, sem senha. Quem pode salvar não é decidido
+O painel integrado usa a conta autorizada da diretoria, com senha definida após
+o primeiro acesso por e-mail. Quem pode salvar não é decidido
 no navegador: o RLS de `landing_content` exige que o usuário esteja em
 `digital_card_admins` — a mesma tabela que já governa o painel do cartão. A
 tela apenas reflete essa decisão; um usuário logado fora dessa lista recebe o
@@ -82,6 +83,11 @@ por telefone e 60 no total a cada 10 min) e grava em:
 - `crm_contacts` — uma pessoa por telefone normalizado (nunca sobrescreve nome);
 - `crm_leads` — uma oportunidade por pedido, com `intent`, `source_surface`,
   unidade, `utm`, página e botão de entrada.
+
+O CRM do painel acompanha os registros de `digital_card_leads` de ambas as
+superfícies. A diretoria pode filtrar por tipo e etapa, registrar notas e data
+de retorno, editar dados, etiquetar e exportar CSV. A tabela continua protegida
+pelas políticas RLS de `digital_card_admins`.
 
 "Já sou paciente" (`intent = paciente_atual`) identifica a pessoa, mas não
 cria oportunidade: é atendimento, não aquisição. Se o banco falhar ou demorar
