@@ -555,10 +555,10 @@ document.addEventListener('click', (event) => {
     : type === 'rental' ? 'Conte como pretende usar a sala para enviarmos as opções de locação.'
     : type === 'close_friends' ? 'Conte sobre sua atuação e seu interesse no conteúdo exclusivo.'
     : 'Conte o que procura para nossa equipe direcionar seu atendimento.';
-  document.querySelector('#lead-dialog-title').textContent = title;
-  document.querySelector('#lead-dialog-description').textContent = description;
-  document.querySelector('#lead-dialog-eyebrow').textContent = type === 'rental' ? 'Para profissionais da saúde'
-    : professional ? 'Para a área odontológica' : 'Atendimento ao paciente';
+  pendingLead.stepTitle = title;
+  pendingLead.stepDescription = description;
+  pendingLead.audience = type === 'rental' ? 'Profissionais da saúde'
+    : professional ? 'Área odontológica' : 'Atendimento ao paciente';
   document.querySelector('#professional-city-label').textContent = type === 'rental' ? 'Cidade onde atua' : 'Cidade onde atua ou estuda';
   const roleOptions = leadForm.elements.professionalRole.options;
   for (const option of roleOptions) {
@@ -591,6 +591,8 @@ document.addEventListener('click', (event) => {
     if (pendingLead.serviceId === 'clinico') leadForm.elements.patientInterest.value = 'Consulta clínica';
   }
   leadFeedback.textContent = '';
+  document.querySelector('#lead-step-feedback').textContent = '';
+  setLeadStep(1);
   registrarClique(pendingLead.track, pendingLead.unit || null, 'form_opened');
   leadDialog.showModal();
   requestAnimationFrame(() => document.querySelector('#lead-name').focus());
@@ -603,6 +605,46 @@ function updateHealthProfessionField() {
   field.querySelector('input').disabled = !enabled;
 }
 leadForm.elements.professionalRole.addEventListener('change', updateHealthProfessionField);
+
+function setLeadStep(step) {
+  const first = step === 1;
+  document.querySelector('#lead-step-one').hidden = !first;
+  document.querySelector('#lead-step-two').hidden = first;
+  document.querySelector('.lead-progress').setAttribute('aria-valuenow', String(step));
+  document.querySelector('#lead-dialog-eyebrow').textContent = `${step} de 2 · ${pendingLead.audience}`;
+  document.querySelector('#lead-dialog-title').textContent = first ? 'Vamos conversar?' : pendingLead.stepTitle;
+  document.querySelector('#lead-dialog-description').textContent = first
+    ? 'Seu nome e WhatsApp para começar. Na próxima etapa, só algumas perguntas rápidas.'
+    : pendingLead.stepDescription;
+  leadDialog.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function advanceLeadForm() {
+  const name = document.querySelector('#lead-name');
+  const phone = document.querySelector('#lead-phone');
+  const feedback = document.querySelector('#lead-step-feedback');
+  feedback.textContent = '';
+  if (!name.reportValidity()) return;
+  if (name.value.trim().length < 2) { feedback.textContent = 'Informe seu nome para continuar.'; name.focus(); return; }
+  if (!phone.reportValidity()) return;
+  if (phone.value.replace(/\D/g, '').length < 10) {
+    feedback.textContent = 'Informe um WhatsApp válido com DDD.';
+    phone.focus();
+    return;
+  }
+  setLeadStep(2);
+  const section = document.querySelector(pendingLead.leadType === 'formation' || pendingLead.leadType === 'rental' || pendingLead.leadType === 'close_friends'
+    ? '#professional-lead-fields' : '#patient-lead-fields');
+  requestAnimationFrame(() => section.querySelector('input:not([disabled]), select:not([disabled])')?.focus());
+}
+document.querySelector('#lead-next').addEventListener('click', advanceLeadForm);
+document.querySelector('[data-lead-back]').addEventListener('click', () => {
+  setLeadStep(1);
+  requestAnimationFrame(() => document.querySelector('#lead-name').focus());
+});
+document.querySelector('#lead-step-one').addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') { event.preventDefault(); advanceLeadForm(); }
+});
 
 window.addEventListener('popstate', () => {
   const id = location.hash.startsWith('#unidade-') ? decodeURIComponent(location.hash.slice(9)) : '';
@@ -623,7 +665,8 @@ leadForm.addEventListener('submit', async (event) => {
   const lead = {
     name: String(formData.get('name') || '').trim(),
     phone: String(formData.get('phone') || '').trim(),
-    profession: ({ dentist: 'Dentista', estudante: 'Estudante de Odontologia', outro: 'Profissional da área odontológica', saude: 'Profissional da saúde' })[formData.get('professionalRole')] || '',
+    profession: ({ dentista: 'Dentista', estudante: 'Estudante de Odontologia', outro: 'Profissional da área odontológica', saude: 'Profissional da saúde' })[formData.get('professionalRole')]
+      || String(formData.get('patientProfession') || '').trim(),
     instagram: normalizeInstagramHandle(formData.get('instagram')),
     isDentist: formData.get('professionalRole') === 'dentista' ? true : formData.get('professionalRole') === 'estudante' ? false : null,
     hasPreviousCourse: formData.get('hasPreviousCourse') === 'yes' ? true : formData.get('hasPreviousCourse') === 'no' ? false : null,
@@ -644,6 +687,7 @@ leadForm.addEventListener('submit', async (event) => {
     situacao: String(formData.get('patientStatus') || ''),
     interesse: String(formData.get('patientInterest') || ''),
     unidade: lead.unit,
+    profissao: lead.profession,
   };
   if (lead.phone.replace(/\D/g, '').length < 10) {
     leadFeedback.textContent = 'Informe um telefone válido com DDD.';

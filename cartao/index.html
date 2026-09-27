@@ -97,17 +97,25 @@
     <dialog class="lead-dialog" id="lead-dialog" aria-labelledby="lead-dialog-title">
       <form class="lead-form" id="lead-form">
         <button class="lead-dialog__close" type="button" data-close-lead aria-label="Fechar">×</button>
-        <p class="eyebrow" id="lead-dialog-eyebrow">Contato rápido</p>
-        <h2 id="lead-dialog-title">Antes de continuar</h2>
-        <p id="lead-dialog-description">Conte um pouco sobre o que você procura.</p>
-        <div class="lead-form__section">
-          <span class="lead-form__section-title">Seus dados</span>
-          <label>Nome completo<input id="lead-name" name="name" autocomplete="name" maxlength="100" required /></label>
-          <label>WhatsApp com DDD<input id="lead-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="(16) 99999-9999" required /></label>
-          <label>Instagram <small>opcional</small><input id="lead-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" placeholder="@seuusuario" /></label>
+        <div class="lead-progress" role="progressbar" aria-label="Etapa do contato" aria-valuemin="1" aria-valuemax="2" aria-valuenow="1"><span></span><span></span></div>
+        <p class="eyebrow" id="lead-dialog-eyebrow">1 de 2 · Primeiro contato</p>
+        <h2 id="lead-dialog-title">Vamos conversar?</h2>
+        <p id="lead-dialog-description">Seu nome e WhatsApp para começar.</p>
+        <div class="lead-form__step" id="lead-step-one">
+          <div class="lead-form__section">
+            <span class="lead-form__section-title">Só o essencial</span>
+            <label>Como podemos chamar você?<input id="lead-name" name="name" autocomplete="name" maxlength="100" required /></label>
+            <label>Seu WhatsApp com DDD<input id="lead-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="(16) 99999-9999" required /></label>
+          </div>
+          <p class="lead-form__feedback" id="lead-step-feedback" role="status"></p>
+          <button class="lead-form__next" id="lead-next" type="button">Continuar <span aria-hidden="true">→</span></button>
         </div>
+        <div class="lead-form__step" id="lead-step-two" hidden>
+          <button class="lead-form__back" type="button" data-lead-back>← Voltar</button>
+          <label>Seu Instagram <small>opcional</small><input id="lead-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" placeholder="@seuusuario" /></label>
         <div class="lead-form__section" id="patient-lead-fields" hidden>
           <span class="lead-form__section-title">Sobre seu atendimento</span>
+          <label>Sua profissão <small>opcional</small><input name="patientProfession" maxlength="100" placeholder="Ex.: professora" disabled /></label>
           <label>Você já é paciente do Instituto Vert?
             <select name="patientStatus" required disabled><option value="">Selecione</option><option value="novo">Ainda não</option><option value="atual">Sim, já sou paciente</option></select>
           </label>
@@ -151,7 +159,8 @@
         </div>
         <label class="lead-consent"><input name="consent" type="checkbox" required /><span>Autorizo o Instituto Vert a usar estes dados para responder ao meu contato.</span></label>
         <p class="lead-form__feedback" id="lead-feedback" role="status"></p>
-        <button class="lead-form__submit" type="submit">Continuar no WhatsApp</button>
+        <button class="lead-form__submit" type="submit">Falar com a equipe <span aria-hidden="true">→</span></button>
+        </div>
       </form>
     </dialog>
 
