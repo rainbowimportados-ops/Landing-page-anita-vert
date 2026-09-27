@@ -81,6 +81,16 @@ function formatarContagem(n: number): string {
   return n.toLocaleString('pt-BR')
 }
 
+/**
+ * As capas no Storage vêm no tamanho original (até ~1,5 MB); o endpoint de
+ * transformação do Supabase entrega a mesma imagem reduzida, em WebP.
+ */
+function capaReduzida(url: string) {
+  const original = `${SUPABASE_URL}/storage/v1/object/public/`
+  if (!url.startsWith(original)) return url
+  return `${SUPABASE_URL}/storage/v1/render/image/public/${url.slice(original.length)}?width=480&quality=70`
+}
+
 /** Junta os dados fixos com os atualizados, só onde os atualizados são válidos. */
 function combinar(perfil: PerfilInstagramApp, vivo?: DadosVivos) {
   const numero = (v: number | null | undefined, fixo: string) => (typeof v === 'number' && v > 0 ? formatarContagem(v) : fixo)
@@ -94,7 +104,7 @@ function combinar(perfil: PerfilInstagramApp, vivo?: DadosVivos) {
     bio: vivo?.bio ? vivo.bio.split('\n').map((l) => l.trim()).filter(Boolean) : perfil.bio,
     capas:
       postsVivos.length >= 3
-        ? postsVivos.slice(0, 6).map((p) => ({ src: p.imagem, alt: `Publicação de @${perfil.usuario} no Instagram`, link: p.link }))
+        ? postsVivos.slice(0, 6).map((p) => ({ src: capaReduzida(p.imagem), alt: `Publicação de @${perfil.usuario} no Instagram`, link: p.link }))
         : capas[perfil.pasta].map((c) => ({ ...c, link: urlPerfil(perfil.usuario) })),
   }
 }
