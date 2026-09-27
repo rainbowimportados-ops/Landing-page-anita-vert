@@ -1,7 +1,7 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import './instagram-perfil.css'
 import { perfisInstagram, type PerfilInstagramApp } from '../config/site'
-import { registrarClique } from '../lib/analytics'
+import { registrarClique, SUPABASE_ANON_KEY, SUPABASE_URL } from '../lib/analytics'
 import { MarcaVert } from './MarcaVert'
 import { Reveal } from './Reveal'
 import vert1 from '../assets/instagram/perfil/post-1.webp'
@@ -40,6 +40,65 @@ const capas: Record<PerfilInstagramApp['pasta'], { src: string; alt: string }[]>
 
 const urlPerfil = (usuario: string) => `https://www.instagram.com/${usuario}/`
 
+/**
+ * Dados atualizados a cada 6 h pela Edge Function sincronizar-instagram
+ * (tabela site_instagram). Enquanto não chegam, ou se o banco falhar, a seção
+ * mostra os dados fixos de site.ts e as capas empacotadas.
+ */
+type DadosVivos = {
+  usuario: string
+  nome: string | null
+  seguidores: number | null
+  seguindo: number | null
+  publicacoes: number | null
+  bio: string | null
+  posts: { id: string; link: string; imagem: string; tipo: string }[]
+}
+
+function useInstagramVivo(): Record<string, DadosVivos> {
+  const [dados, setDados] = useState<Record<string, DadosVivos>>({})
+  useEffect(() => {
+    const controle = new AbortController()
+    fetch(`${SUPABASE_URL}/rest/v1/site_instagram?select=usuario,nome,seguidores,seguindo,publicacoes,bio,posts`, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      signal: controle.signal,
+    })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((linhas: DadosVivos[]) => {
+        if (Array.isArray(linhas)) setDados(Object.fromEntries(linhas.map((l) => [l.usuario, l])))
+      })
+      .catch(() => {})
+    return () => controle.abort()
+  }, [])
+  return dados
+}
+
+/** Números no formato do app: 3.147 · 10,3 mil · 1,2 mi (arredonda para baixo, como o Instagram). */
+function formatarContagem(n: number): string {
+  const decimal = (v: number) => (Math.floor(v * 10) / 10).toLocaleString('pt-BR', { maximumFractionDigits: 1 })
+  if (n >= 1_000_000) return `${decimal(n / 1_000_000)} mi`
+  if (n >= 10_000) return `${decimal(n / 1_000)} mil`
+  return n.toLocaleString('pt-BR')
+}
+
+/** Junta os dados fixos com os atualizados, só onde os atualizados são válidos. */
+function combinar(perfil: PerfilInstagramApp, vivo?: DadosVivos) {
+  const numero = (v: number | null | undefined, fixo: string) => (typeof v === 'number' && v > 0 ? formatarContagem(v) : fixo)
+  const postsVivos = (vivo?.posts ?? []).filter((p) => p?.imagem && p?.link)
+  return {
+    ...perfil,
+    nome: vivo?.nome || perfil.nome,
+    publicacoes: numero(vivo?.publicacoes, perfil.publicacoes),
+    seguidores: numero(vivo?.seguidores, perfil.seguidores),
+    seguindo: typeof vivo?.seguindo === 'number' ? vivo.seguindo.toLocaleString('pt-BR') : perfil.seguindo,
+    bio: vivo?.bio ? vivo.bio.split('\n').map((l) => l.trim()).filter(Boolean) : perfil.bio,
+    capas:
+      postsVivos.length >= 3
+        ? postsVivos.slice(0, 6).map((p) => ({ src: p.imagem, alt: `Publicação de @${perfil.usuario} no Instagram`, link: p.link }))
+        : capas[perfil.pasta].map((c) => ({ ...c, link: urlPerfil(perfil.usuario) })),
+  }
+}
+
 function Icone({ d, className = 'h-6 w-6' }: { d: string; className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
@@ -74,7 +133,8 @@ function LinhaBio({ texto, rastreio }: { texto: string; rastreio: string }) {
   )
 }
 
-function PerfilApp({ perfil }: { perfil: PerfilInstagramApp }) {
+function PerfilApp({ perfil: fixo, vivo }: { perfil: PerfilInstagramApp; vivo?: DadosVivos }) {
+  const perfil = combinar(fixo, vivo)
   const link = urlPerfil(perfil.usuario)
   const abrir = (acao: string) => () => registrarClique(`instagram_${perfil.pasta}_${acao}`)
 
@@ -135,9 +195,9 @@ function PerfilApp({ perfil }: { perfil: PerfilInstagramApp }) {
       </div>
 
       <ul className="ig-app__grade">
-        {capas[perfil.pasta].map((post) => (
+        {perfil.capas.map((post) => (
           <li key={post.src}>
-            <a href={link} target="_blank" rel="noopener noreferrer" onClick={abrir('publicacao')}>
+            <a href={post.link} target="_blank" rel="noopener noreferrer" onClick={abrir('publicacao')}>
               <img src={post.src} alt={post.alt} width={435} height={579} loading="lazy" />
               <span className="sr-only"> (ver no Instagram, abre em uma nova aba)</span>
             </a>
@@ -152,6 +212,7 @@ function PerfilApp({ perfil }: { perfil: PerfilInstagramApp }) {
 export function InstagramSecao() {
   // No celular um perfil por vez, escolhido nas abas; no computador os dois lado a lado.
   const [ativo, setAtivo] = useState(0)
+  const vivos = useInstagramVivo()
 
   return (
     <section id="instagram" className="secao" aria-labelledby="instagram-titulo">
@@ -186,7 +247,7 @@ export function InstagramSecao() {
           {perfisInstagram.map((perfil, i) => (
             <Reveal key={perfil.usuario} delay={i * 80} className={i === ativo ? '' : 'hidden lg:block'}>
               <div role="tabpanel" id={`ig-painel-${perfil.pasta}`} aria-labelledby={`ig-aba-${perfil.pasta}`}>
-                <PerfilApp perfil={perfil} />
+                <PerfilApp perfil={perfil} vivo={vivos[perfil.usuario]} />
               </div>
             </Reveal>
           ))}
