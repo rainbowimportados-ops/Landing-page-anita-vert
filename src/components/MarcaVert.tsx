@@ -1,11 +1,14 @@
 import marcaHorizontal from '../assets/marca-vert.png'
 import marcaEmpilhada from '../assets/marcaVertEmpilhada'
+import marcaCircular from '../assets/marcaVertCircular'
 
 /**
  * Logos oficiais do Instituto Vert, sem redesenho.
  *
  * - `horizontal`: "INSTITUTO VERT" em linha, extraído de
  *   assets/logo-horizontal-oficial.jpeg.
+ * - `circular`: arco com "INSTITUTO" e "VERT", extraído de
+ *   public/assets/marca/logo-circular-principal.png (marcaVertCircular.ts).
  * - `empilhada`: "INSTITUTO" sobre "VERT", extraído de
  *   public/assets/marca/logo-horizontal-clara.png (data URI em marcaVertEmpilhada.ts).
  *
@@ -18,6 +21,7 @@ import marcaEmpilhada from '../assets/marcaVertEmpilhada'
 const versoes = {
   horizontal: { src: marcaHorizontal, proporcao: '8 / 1' },
   empilhada: { src: marcaEmpilhada, proporcao: '221 / 100' },
+  circular: { src: marcaCircular, proporcao: '320 / 334' },
 } as const
 
 export type VersaoMarca = keyof typeof versoes

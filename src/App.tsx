@@ -4,6 +4,7 @@ import { BotaoFlutuante } from './components/BotaoFlutuante'
 import { ChamadaFinal } from './components/ChamadaFinal'
 import { Confianca } from './components/Confianca'
 import { Dentistas } from './components/Dentistas'
+import { Detalhes } from './components/Detalhes'
 import { Depoimentos } from './components/Depoimentos'
 import { Diferenciais } from './components/Diferenciais'
 import { Duvidas } from './components/Duvidas'
@@ -14,6 +15,7 @@ import { InstagramSecao } from './components/InstagramSecao'
 import { Resultados } from './components/Resultados'
 import { Rodape } from './components/Rodape'
 import { Servicos } from './components/Servicos'
+import { Sobre } from './components/Sobre'
 import { ProvedorDeConteudo } from './lib/ConteudoContexto'
 import { Unidades } from './components/Unidades'
 
@@ -32,10 +34,12 @@ export default function App() {
 
       <main>
         <Hero />
+        <Detalhes />
         <Confianca />
         <Banner />
         <Servicos />
         <Resultados />
+        <Sobre />
         <Diferenciais />
         <Etapas />
         <InstagramSecao />

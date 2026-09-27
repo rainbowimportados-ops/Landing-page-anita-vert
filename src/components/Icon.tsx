@@ -135,3 +135,40 @@ export function IconEquipe({ className = 'h-5 w-5' }: { className?: string }) {
     </svg>
   )
 }
+
+/** Traço fino no mesmo padrão dos demais ícones (24×24, stroke 1.5). */
+function Traco({ d, className }: { d: string; className: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d={d} />
+    </svg>
+  )
+}
+
+export function IconImagem({ className = 'h-5 w-5' }: { className?: string }) {
+  return <Traco className={className} d="M4 5h16v14H4z M4 16l4.5-4.5 3.5 3.5 2.5-2.5L20 17.5 M15.5 9.5h.01" />
+}
+
+export function IconPlay({ className = 'h-5 w-5' }: { className?: string }) {
+  return <Traco className={className} d="M12 21a9 9 0 100-18 9 9 0 000 18z M10 8.5v7l5.5-3.5-5.5-3.5z" />
+}
+
+export function IconPausa({ className = 'h-5 w-5' }: { className?: string }) {
+  return <Traco className={className} d="M12 21a9 9 0 100-18 9 9 0 000 18z M10 9v6 M14 9v6" />
+}
+
+export function IconCheck({ className = 'h-5 w-5' }: { className?: string }) {
+  return <Traco className={className} d="M12 21a9 9 0 100-18 9 9 0 000 18z M8.5 12.2l2.4 2.4 4.6-5" />
+}
+
+export function IconEscudo({ className = 'h-5 w-5' }: { className?: string }) {
+  return <Traco className={className} d="M12 3l7 3v5.5c0 4.3-3 8-7 9.5-4-1.5-7-5.2-7-9.5V6l7-3z M9 12l2 2 4-4" />
+}
+
+export function IconBrilho({ className = 'h-5 w-5' }: { className?: string }) {
+  return <Traco className={className} d="M12 3l1.9 5.3L19 10l-5.1 1.7L12 17l-1.9-5.3L5 10l5.1-1.7L12 3z" />
+}
+
+export function IconCoracao({ className = 'h-5 w-5' }: { className?: string }) {
+  return <Traco className={className} d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z" />
+}

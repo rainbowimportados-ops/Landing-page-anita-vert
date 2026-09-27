@@ -1,3 +1,5 @@
+import fotoAnita from '../assets/hero/dra-anita-1200.webp'
+
 /**
  * Conteúdo editável da landing page do Instituto Vert.
  *
@@ -237,4 +239,20 @@ export const profissionais = {
       mensagem: 'Olá! Vim pelo site e gostaria de informações sobre a locação de consultório.',
     },
   ],
+}
+
+/**
+ * Seção "Sobre". Só fatos confirmados: nome, função e registro no CRO.
+ * `foto` é a foto oficial da Dra. Anita; vazia, a seção mostra a marca.
+ */
+export const sobre = {
+  olho: 'Quem cuida do seu sorriso',
+  nome: 'Dra. Anita Matias de Almeida',
+  cargo: 'Cirurgiã-dentista · Responsável técnica · CRO-SP 132978',
+  foto: fotoAnita,
+  paragrafos: [
+    'O Instituto Vert nasceu de uma ideia simples: estética e saúde bucal andam juntas. Cada sorriso começa pelo diagnóstico, e o plano só existe depois que o paciente entende o que vai ser feito e por quê.',
+    'A mesma equipe atende em Franca e em Ribeirão Preto, com o mesmo protocolo clínico. O objetivo é um resultado que combine com o seu rosto — natural o bastante para ninguém perguntar o que você fez.',
+  ],
+  compromissos: ['Planejamento individual', 'Plano por escrito', 'Acompanhamento após a alta'],
 }
