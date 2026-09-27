@@ -1,6 +1,33 @@
 import { ADMIN_EMAIL, ADMIN_REDIRECT_URL, loadCardContent, supabase } from '../lib/supabase.js';
 import { initOperations } from './operations.js';
 
+const navIconPaths = {
+  'visao-geral':'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
+  contatos:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2z"/>',
+  pipeline:'<path d="M4 4h16v4H4zM5 8l5 6v6l4-2v-4l5-6"/>',
+  avaliacoes:'<path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+  pacientes:'<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M17 7a3 3 0 0 1 0 6m1 3a5 5 0 0 1 3 4"/>',
+  agenda:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/>',
+  acessos:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3m0 12v3"/>',
+  'campanhas-crm':'<path d="M4 10v4h4l9 5V5l-9 5zM8 14l1 6h3m8-10a3 3 0 0 1 0 4"/>',
+  origens:'<path d="M4 19 19 4m-8 0h8v8M4 12v7h7"/>',
+  relatorios:'<path d="M4 20V10m5 10V4m5 16v-7m5 7V8M3 21h18"/>',
+  site:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18m-14-3h.01m3 0h.01"/>',
+  empresa:'<path d="M4 21V6l8-3 8 3v15M2 21h20M9 21v-7h6v7M8 8h.01M16 8h.01"/>',
+  unidades:'<path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0z"/><circle cx="12" cy="10" r="2"/>',
+  links:'<path d="M10 13a5 5 0 0 0 7 .3l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7-.3l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+  formacoes:'<path d="M3 5a9 9 0 0 1 9 2 9 9 0 0 1 9-2v14a9 9 0 0 0-9 2 9 9 0 0 0-9-2zM12 7v14"/>',
+  campanhas:'<path d="m12 2 2 7 7 3-7 2-2 8-2-8-7-2 7-3z"/>',
+  depoimentos:'<path d="M4 5h16v12H8l-4 4zM8 10h8m-8 3h5"/>',
+  resultados:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="1"/><path d="m3 17 5-5 4 4 3-3 6 5"/>',
+  equipe:'<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2m1-13 5 2v4a5 5 0 0 1-5 4"/>',
+};
+document.querySelectorAll('.nav-link[data-section]').forEach((button) => {
+  const icon = button.querySelector('span[aria-hidden="true"]');
+  const path = navIconPaths[button.dataset.section];
+  if (icon && path) icon.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
+});
+
 const loginScreen = document.querySelector('#login-screen');
 const passwordSetupScreen = document.querySelector('#password-setup-screen');
 const adminApp = document.querySelector('#admin-app');

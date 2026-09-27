@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="/admin/admin.css" />
     <link rel="stylesheet" href="/admin/metrics.css" />
     <link rel="stylesheet" href="/admin/enhancements.css" />
+    <link rel="stylesheet" href="/admin/design-system.css" />
   </head>
   <body>
     <main class="login-screen" id="login-screen">
@@ -129,8 +130,14 @@
         <div class="editor-grid">
           <form class="editor" id="content-form">
             <section class="panel is-active" data-panel="visao-geral">
-              <div class="panel__heading"><div><p class="eyebrow">Site + cartão · últimos 30 dias</p><h2>Visão geral</h2></div><span>Dados reais de captação e atendimento</span></div>
+              <div class="panel__heading overview-heading"><div><p class="eyebrow">Atendimento e captação</p><h2>Visão geral</h2><p>Acompanhe os principais indicadores do Instituto Vert.</p></div><label class="overview-period-label">Período <select id="overview-period" aria-label="Período da visão geral"><option value="7">Últimos 7 dias</option><option value="30" selected>Últimos 30 dias</option><option value="90">Últimos 90 dias</option></select></label></div>
               <div class="ops-dashboard" id="ops-dashboard"></div>
+            </section>
+
+            <section class="panel" data-panel="acessos">
+              <div class="panel__heading"><div><p class="eyebrow">Com consentimento</p><h2>Instagram e acessos</h2></div><button type="button" class="small-action" id="refresh-accesses">Atualizar</button></div>
+              <p class="helper">Veja quem apenas abriu o cartão, quem clicou e qual botão foi usado. O @ aparece somente quando foi informado pela própria pessoa.</p>
+              <details class="access-insights"><summary>Indicadores de acesso ao cartão <span>Visualizações, cliques e perfil informado</span></summary>
               <div class="metric-grid">
                 <article class="metric-card metric-card--primary"><small>Visitantes</small><strong id="metric-visitors">—</strong><span class="metric-card__caption">Pessoas únicas autorizadas</span></article>
                 <article class="metric-card"><small>Visualizações</small><strong id="metric-views">—</strong><span class="metric-card__caption">Aberturas do cartão</span></article>
@@ -161,11 +168,7 @@
                   <button type="button" data-jump-panel="links"><span class="shortcut-icon" aria-hidden="true">↗</span><strong>Configurar contatos</strong><small>WhatsApp e Instagram</small><i aria-hidden="true">→</i></button>
                 </div>
               </section>
-            </section>
-
-            <section class="panel" data-panel="acessos">
-              <div class="panel__heading"><div><p class="eyebrow">Com consentimento</p><h2>Instagram e acessos</h2></div><button type="button" class="small-action" id="refresh-accesses">Atualizar</button></div>
-              <p class="helper">Veja quem apenas abriu o cartão, quem clicou e qual botão foi usado. O @ aparece somente quando foi informado pela própria pessoa.</p>
+              </details>
               <div class="journey-summary" aria-label="Resumo dos acessos">
                 <article><small>Visitantes</small><strong id="journey-summary-total">—</strong></article>
                 <article><small>Só visualizaram</small><strong id="journey-summary-viewed">—</strong></article>
