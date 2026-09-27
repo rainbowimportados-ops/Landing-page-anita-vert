@@ -47,7 +47,7 @@ const documentos: Record<string, { titulo: string; resumo: string; secoes: Secao
       {
         titulo: 'Base legal',
         paragrafos: [
-          'Os dados de contato são tratados para atender ao pedido feito por você, após confirmação específica no formulário. Métricas de navegação e a associação dos acessos ao navegador dependem de escolha afirmativa separada, que pode ser recusada ou retirada sem impedir o acesso ao site ou ao cartão.',
+          'Os dados de contato são tratados para atender ao pedido que você faz ao enviar o formulário, informado junto ao botão de envio. Métricas de navegação e a associação dos acessos ao navegador dependem de escolha afirmativa separada, que pode ser recusada ou retirada sem impedir o acesso ao site ou ao cartão.',
         ],
       },
       {

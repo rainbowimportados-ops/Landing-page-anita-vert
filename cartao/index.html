@@ -168,14 +168,14 @@
             <label><span>Seu Instagram <small>opcional</small></span><input id="lead-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" placeholder="@seuusuario" /></label>
           </div>
         </div>
-        <label class="lead-consent"><input name="consent" type="checkbox" required /><span>Autorizo o Instituto Vert a usar estes dados para responder ao meu contato.</span></label>
+        <p class="lead-form__privacy-note">Ao tocar em “Falar com a equipe”, autorizo o Instituto Vert a usar os dados informados para responder ao meu contato. <a href="/privacidade" target="_blank" rel="noopener noreferrer">Política de privacidade</a>.</p>
         <p class="lead-form__feedback" id="lead-feedback" role="status"></p>
         <button class="lead-form__submit" type="submit">Falar com a equipe <span aria-hidden="true">→</span></button>
         </div>
       </form>
     </dialog>
 
-    <dialog class="privacy-dialog" id="privacy-dialog" aria-labelledby="privacy-dialog-title"><form class="privacy-form" id="privacy-form"><h2 id="privacy-dialog-title">Sua privacidade</h2><p>Você pode ver o cartão sem autorizar métricas. Se permitir, registramos seus acessos e cliques para entender o interesse pelos nossos serviços. O envio de dados de contato é uma escolha separada.</p><a href="/privacidade" target="_blank" rel="noopener noreferrer">Ler a política de privacidade</a><label class="privacy-form__instagram"><span>Seu Instagram <small>opcional</small></span><input id="privacy-instagram" name="instagram" autocomplete="off" autocapitalize="none" maxlength="31" pattern="@?[A-Za-z0-9._]{1,30}" placeholder="@seuusuario" /></label><label class="privacy-form__consent"><input name="trackingConsent" type="checkbox" required /><span>Autorizo associar meus acessos e cliques ao meu navegador e ao Instagram informado, se houver.</span></label><div class="privacy-form__actions"><button class="privacy-form__accept" type="submit">Autorizar métricas</button><button class="privacy-form__decline" type="button" data-privacy-decline>Continuar sem métricas</button></div></form></dialog>
+    <dialog class="privacy-dialog" id="privacy-dialog" aria-labelledby="privacy-dialog-title" aria-describedby="privacy-dialog-description"><form class="privacy-form" id="privacy-form"><span class="privacy-form__brand" aria-hidden="true"></span><span class="privacy-form__eyebrow">Sua escolha</span><h2 id="privacy-dialog-title">Privacidade no Instituto Vert</h2><p id="privacy-dialog-description">Você pode conhecer o cartão sem autorizar métricas. Se permitir, registramos acessos e cliques para entender o interesse pelos nossos serviços. No cartão, esses dados podem ser associados ao navegador e ao Instagram, caso você o informe depois. Seus dados de contato só são pedidos quando você decide falar com a equipe.</p><a href="/privacidade" target="_blank" rel="noopener noreferrer">Ler a política de privacidade</a><div class="privacy-form__actions"><button class="privacy-form__accept" type="submit">Autorizar métricas</button><button class="privacy-form__decline" type="button" data-privacy-decline>Continuar sem métricas</button></div><p class="privacy-form__hint">Você pode mudar sua escolha em “Privacidade e dados”, no rodapé.</p></form></dialog>
 
     <script type="module" src="/script.js"></script>
   </body>

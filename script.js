@@ -417,12 +417,7 @@ function registrarClique(botao, unidade = null, evento = null) {
 }
 
 function openPrivacyDialog() {
-  const consentField = privacyForm.elements.namedItem('trackingConsent');
-  const instagramField = privacyForm.elements.namedItem('instagram');
-  if (consentField instanceof HTMLInputElement) consentField.checked = trackingConsent;
-  if (instagramField instanceof HTMLInputElement) instagramField.value = visitorInstagram || storageGet(INSTAGRAM_STORAGE_KEY);
   privacyDialog.showModal();
-  requestAnimationFrame(() => instagramField?.focus());
 }
 
 function initializePrivacy() {
@@ -437,10 +432,7 @@ function initializePrivacy() {
 privacyForm.addEventListener('submit', (event) => {
   event.preventDefault();
   const wasTracking = trackingConsent;
-  visitorInstagram = normalizeInstagramHandle(new FormData(privacyForm).get('instagram'));
   storageSet(PRIVACY_STORAGE_KEY, `accepted:${CONSENT_VERSION}`);
-  if (visitorInstagram) storageSet(INSTAGRAM_STORAGE_KEY, visitorInstagram);
-  else storageRemove(INSTAGRAM_STORAGE_KEY);
   trackingConsent = true;
   privacyDialog.close();
   // Só após a escolha afirmativa os eventos passam a ser registrados.
@@ -724,7 +716,9 @@ leadForm.addEventListener('submit', async (event) => {
       superficie: 'digital_card',
       intencao,
       tipo_painel: pendingLead.leadType,
-      consentimento: formData.get('consent') === 'on',
+      // O envio é a ação afirmativa específica para responder ao contato;
+      // a escolha de métricas acima continua independente.
+      consentimento: true,
       nome: lead.name,
       telefone: lead.phone,
       profissao: lead.profession || null,
