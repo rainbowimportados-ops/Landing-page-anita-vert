@@ -258,19 +258,49 @@ export const sobre = {
 }
 
 /**
- * Perfil do Instagram da clínica mostrado na landing, no formato do app.
- * Números e bio copiados do perfil em 27/09/2026 — atualizar aqui quando
- * mudarem. As capas ficam em src/assets/instagram/perfil (post-1 a post-6),
- * recortadas da grade do perfil e na mesma ordem dele.
+ * Perfis do Instagram mostrados na landing, no formato do app. Números e bio
+ * copiados dos perfis em 27/09/2026 — atualizar aqui quando mudarem. As capas
+ * ficam em src/assets/instagram/<pasta> (post-1 a post-6), recortadas da grade
+ * de cada perfil e na mesma ordem dele. Na bio, "@usuario" vira link.
  */
-export const perfilInstagram = {
-  usuario: 'institutovert.br',
-  nome: 'Instituto VERT',
-  publicacoes: '160',
-  seguidores: '10,3 mil',
-  seguindo: '3.147',
-  bio: ['Odontologia de excelência 🏅', '🇨🇱🇦🇺🇦🇷🇧🇷🇪🇨🇫🇷'],
-  por: 'dra.anitaalmeida',
-  local: 'Ribeirão Preto | Franca',
-  link: 'institutovert.app',
+export type PerfilInstagramApp = {
+  pasta: 'perfil' | 'anita'
+  usuario: string
+  nome: string
+  verificado?: boolean
+  categoria?: string
+  publicacoes: string
+  seguidores: string
+  seguindo: string
+  bio: string[]
+  link: string
 }
+
+export const perfisInstagram: PerfilInstagramApp[] = [
+  {
+    pasta: 'perfil',
+    usuario: 'institutovert.br',
+    nome: 'Instituto VERT',
+    publicacoes: '160',
+    seguidores: '10,3 mil',
+    seguindo: '3.147',
+    bio: ['Odontologia de excelência 🏅', '🇨🇱🇦🇺🇦🇷🇧🇷🇪🇨🇫🇷', 'Por @dra.anitaalmeida', '📍 Ribeirão Preto | Franca'],
+    link: 'institutovert.app',
+  },
+  {
+    pasta: 'anita',
+    usuario: 'dra.anitaalmeida',
+    nome: 'Dra. Anita Almeida',
+    verificado: true,
+    categoria: 'Dentista e consultório odontológico',
+    publicacoes: '1.984',
+    seguidores: '20,4 mil',
+    seguindo: '955',
+    bio: [
+      'Vida real de uma dentista empreendedora.',
+      'Deus • lifestyle • moda • fitness • business',
+      'Mentora de Dentistas & Diretora Clínica @institutovert.br',
+    ],
+    link: 'institutovert.app',
+  },
+]
