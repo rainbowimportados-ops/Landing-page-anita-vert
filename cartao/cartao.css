@@ -52,7 +52,6 @@
 .digital-card .unit-detail { padding: 32px 22px 38px; background: radial-gradient(circle at 75% 0, rgba(156,100,65,.2), transparent 28rem); }
 .unit-detail__back { display: inline-flex; gap: 8px; align-items: center; min-height: 44px; padding: 0; border: 0; background: transparent; color: #e9d2b6; font: 500 .82rem var(--sans); cursor: pointer; }
 .unit-detail__brand { width: 145px; margin: 24px auto 30px; color: #f6e6d4; }
-.digital-card .unit-detail > .eyebrow { color: #b99b81; text-align: center; }
 .digital-card .unit-detail h2 { color: #f8e9d7; font-size: clamp(2.8rem, 10vw, 3.8rem); text-align: center; }
 .unit-detail__address { margin: 12px 10px 24px; color: #cfb79e; font: 400 .82rem/1.5 var(--sans); text-align: center; }
 .unit-detail__cover { height: min(90vw, 410px); overflow: hidden; border: 1px solid rgba(235,212,187,.35); border-radius: 17px; background: #b1896f; }
