@@ -86,12 +86,29 @@
 .card-footer__base small { color: #a98e77; font-size: .66rem; }
 .digital-card .privacy-settings { min-height: 0; padding: 0; color: #d9b89b; }
 .digital-card .floating-whatsapp { display: none; }
+.digital-card .card-footer { padding-bottom: 88px; }
+.save-contact-shortcut {
+  position: fixed; z-index: 20;
+  right: max(16px, calc((100vw - 480px) / 2 + 16px));
+  bottom: max(16px, calc(env(safe-area-inset-bottom) + 12px));
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  min-height: 50px; padding: 0 17px 0 13px;
+  border: 1px solid rgba(255,250,240,.75); border-radius: 999px;
+  background: linear-gradient(140deg, rgba(255,249,236,.95), rgba(235,214,185,.88));
+  color: #352217; box-shadow: inset 0 1px 0 #fff, 0 12px 32px rgba(12,6,3,.35);
+  backdrop-filter: blur(20px) saturate(1.2); -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  font: 600 .76rem var(--sans); white-space: nowrap;
+  transition: transform .2s var(--curve), box-shadow .2s ease;
+}
+.save-contact-shortcut svg { width: 22px; height: 22px; flex: none; }
+.save-contact-shortcut:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 #fff, 0 16px 36px rgba(12,6,3,.42); }
 .digital-card .contact-router__content h2, .digital-card .lead-form h2 { font-size: 2.2rem; }
 .digital-card .lead-dialog { max-height: 90vh; overflow-y: auto; }
 .digital-card :is(a,button,input,select):focus-visible { outline: 2px solid #f7d4a6; outline-offset: 3px; }
 @media (min-width: 700px) { .digital-card { padding: 32px 0; } .card-frame { border: 1px solid rgba(239,216,185,.2); border-radius: 26px; } }
 @media (max-width: 370px) { .digital-card .profile__identity { left: 20px; } .digital-card .profile__slogan { font-size: 2rem; } .digital-card .profile__content, .digital-card .units, .digital-card .unit-detail, .digital-card .card-footer { padding-inline: 16px; } .unit-detail__actions a { font-size: .68rem; } }
 @media (prefers-reduced-motion: reduce) { .service-action, .unit-tile img { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .save-contact-shortcut { transition: none; } }
 
 /* Liquid Glass Vert: controles em vidro quente sobre a fotografia e o cacau. */
 .digital-card {
