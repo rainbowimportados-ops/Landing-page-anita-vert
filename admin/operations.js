@@ -108,7 +108,7 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
   function renderCampaigns() {
     document.querySelector('#campaign-list').innerHTML = campaigns.length ? campaigns.map((c) => {
       const count = leads.filter((l) => origin(l) === c.slug).length;
-      return `<article class="ops-list-row ops-campaign"><span><strong>${safe(c.name)}</strong><small>${safe(c.destination === 'digital_card' ? 'Cartão' : 'Site')} · ${safe(c.slug)}</small><a href="${safe(campaignLink(c))}" target="_blank" rel="noopener">${safe(campaignLink(c))}</a></span><span><strong>${count}</strong><small>leads</small></span><em class="ops-pill">${c.status === 'active' ? 'Ativa' : 'Pausada'}</em><div><button type="button" data-copy-campaign="${safe(c.id)}">Copiar link</button><button type="button" data-toggle-campaign="${safe(c.id)}">${c.status === 'active' ? 'Pausar' : 'Ativar'}</button></div></article>`;
+      return `<article class="ops-list-row ops-campaign"><span><strong>${safe(c.name)}</strong><small>${safe(c.destination === 'digital_card' ? 'Cartão' : 'Site')} · ${safe(c.slug)}</small><a href="${safe(campaignLink(c))}" target="_blank" rel="noopener">${safe(campaignLink(c))}</a></span><span><strong>${count}</strong><small>leads</small></span><em class="ops-pill">${c.status === 'active' ? 'Ativa' : 'Pausada'}</em><div><button type="button" data-copy-campaign="${safe(c.id)}">Copiar link</button><button type="button" data-toggle-campaign="${safe(c.id)}">${c.status === 'active' ? 'Marcar pausada' : 'Marcar ativa'}</button></div></article>`;
     }).join('') : empty('Nenhuma campanha cadastrada', 'Crie um link de campanha para medir os leads enviados.');
   }
   function renderOrigins() {
@@ -164,6 +164,12 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
   document.querySelectorAll('[data-close-dialog]').forEach((button)=>button.addEventListener('click',()=>document.getElementById(button.dataset.closeDialog).close()));
   document.querySelectorAll('[data-new-lead]').forEach((button)=>button.addEventListener('click',()=>document.querySelector('#ops-new-lead').showModal()));
   document.querySelector('#new-campaign').addEventListener('click',()=>document.querySelector('#ops-campaign-dialog').showModal());
+  document.querySelector('#ops-campaign-form [name="name"]').addEventListener('input',(event)=>{
+    const slug=document.querySelector('#ops-campaign-form [name="slug"]');
+    if(slug.dataset.edited==='true')return;
+    slug.value=event.target.value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60);
+  });
+  document.querySelector('#ops-campaign-form [name="slug"]').addEventListener('input',(event)=>{event.target.dataset.edited='true';});
   document.querySelector('#pipeline-search').addEventListener('input',renderPipeline);
   document.querySelector('#pipeline-unit').addEventListener('change',renderPipeline);
   document.querySelector('#report-period').addEventListener('change',renderReports);
@@ -216,7 +222,7 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
     event.preventDefault();const form=event.target,data=new FormData(form),feedback=document.querySelector('#ops-campaign-feedback');
     const button=form.querySelector('button[type="submit"]');button.disabled=true;feedback.textContent='Salvando…';
     const {error}=await supabase.from('site_campaigns').insert({name:String(data.get('name')).trim(),slug:String(data.get('slug')).trim().toLowerCase(),destination:data.get('destination')});
-    button.disabled=false;if(error){feedback.textContent=error.message;return;}form.reset();feedback.textContent='';document.querySelector('#ops-campaign-dialog').close();void loadCampaigns();
+    button.disabled=false;if(error){feedback.textContent=error.message;return;}form.reset();form.elements.slug.dataset.edited='false';feedback.textContent='';document.querySelector('#ops-campaign-dialog').close();void loadCampaigns();
   });
   document.querySelector('#report-export').addEventListener('click',()=>{
     const data=reportLeads(),header=['Nome','Telefone','Interesse','Unidade','Origem','Etapa','Recebido em','Avaliação','Responsável'];
