@@ -7,10 +7,14 @@ import { Reveal } from './Reveal'
 
 export function Resultados() {
   return (
-    <section id="resultados" className="secao" aria-labelledby="resultados-titulo">
+    <section id="resultados" className="secao resultados-cenario" aria-labelledby="resultados-titulo">
       <span id="sorrisos" className="block scroll-mt-24" />
-      <div className="container-vert">
-        <Reveal className="mx-auto max-w-2xl text-center">
+      <figure className="resultados-cenario__foto" aria-hidden="true">
+        <img src="/assets/ambientes/sorriso-vert.webp" alt="" loading="lazy" width="1100" height="1650" />
+        <MarcaMidiaPaciente />
+      </figure>
+      <div className="container-vert resultados-cenario__conteudo">
+        <Reveal className="resultados-cenario__intro mx-auto max-w-2xl text-center">
           <p className="olho">Sorrisos reais · Antes e depois</p>
           <h2 id="resultados-titulo" className="titulo-secao mt-4">Resultados reais</h2>
           <p className="lead mt-4">
@@ -65,6 +69,7 @@ export function Resultados() {
           Fotografias originais, sem simulação digital do resultado. Cada caso é único. Os resultados podem variar de acordo com as características e
           necessidades de cada paciente.
         </p>
+        <CreditosMidiaPaciente className="resultados-cenario__creditos" />
       </div>
     </section>
   )

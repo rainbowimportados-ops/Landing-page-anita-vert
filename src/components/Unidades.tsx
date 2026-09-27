@@ -11,9 +11,12 @@ export function Unidades() {
   const unidade = unidades[ativa] ?? unidades[0]
 
   return (
-    <section id="unidades" className="secao">
-      <div className="container-vert">
-        <Reveal className="mx-auto max-w-2xl text-center">
+    <section id="unidades" className="secao unidades-cenario">
+      <div className="unidades-cenario__foto" aria-hidden="true">
+        <img src="/assets/ambientes/clinica-corredor.webp" alt="" loading="lazy" width="960" height="1280" />
+      </div>
+      <div className="container-vert unidades-cenario__conteudo">
+        <Reveal className="unidades-cenario__intro mx-auto max-w-2xl text-center">
           <p className="olho">Unidades</p>
           <h2 className="titulo-secao mt-4">Nossas unidades</h2>
           <p className="lead mt-4">Dois endereços, o mesmo propósito: transformar sorrisos e vidas.</p>

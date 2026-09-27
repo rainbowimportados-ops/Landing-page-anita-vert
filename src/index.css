@@ -588,6 +588,100 @@
   background: radial-gradient(120% 90% at 20% 10%, rgb(var(--cor-superficie-inversa-suave)), rgb(var(--cor-superficie-inversa)));
 }
 
+/* Fotos reais como planos de fundo: presença editorial sob superfícies de vidro. */
+.resultados-cenario,
+.unidades-cenario {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.resultados-cenario {
+  background: radial-gradient(circle at 10% 19%, rgb(235 215 196 / .64), transparent 39rem), rgb(var(--cor-fundo));
+}
+.resultados-cenario__foto {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(61%, 57rem);
+  height: min(52rem, 64vw);
+  margin: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.resultados-cenario__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 32%;
+  opacity: .4;
+  filter: saturate(.75) contrast(.9);
+}
+.resultados-cenario__foto::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: linear-gradient(90deg, rgb(247 243 236) 0%, rgb(247 243 236 / .18) 58%),
+    linear-gradient(0deg, rgb(247 243 236) 0%, transparent 53%);
+  pointer-events: none;
+}
+.resultados-cenario__foto .midia-paciente__marca { z-index: 2; opacity: .24; }
+.resultados-cenario__conteudo,
+.unidades-cenario__conteudo { position: relative; z-index: 1; }
+.resultados-cenario__intro,
+.unidades-cenario__intro {
+  padding: clamp(1.25rem, 3.2vw, 2.25rem);
+  border: 1px solid rgb(255 255 255 / .7);
+  border-radius: 1.65rem;
+  background: linear-gradient(140deg, rgb(255 252 247 / .83), rgb(255 252 247 / .58));
+  box-shadow: 0 24px 60px -42px rgb(43 27 20 / .36), inset 0 1px 0 rgb(255 255 255 / .9);
+  backdrop-filter: blur(19px) saturate(1.2);
+  -webkit-backdrop-filter: blur(19px) saturate(1.2);
+}
+.resultados-cenario__creditos { margin-top: .65rem; max-width: 50rem; }
+.unidades-cenario {
+  background: rgb(228 214 196);
+}
+.unidades-cenario__foto,
+.unidades-cenario__foto::after {
+  position: absolute;
+  inset: 0;
+}
+.unidades-cenario__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 44%;
+  opacity: .64;
+  filter: saturate(.72);
+}
+.unidades-cenario__foto::after {
+  content: '';
+  background: linear-gradient(180deg, rgb(247 243 236 / .88), rgb(247 243 236 / .54) 48%, rgb(247 243 236 / .79)),
+    linear-gradient(90deg, rgb(247 243 236 / .58), transparent 60%);
+  pointer-events: none;
+}
+.unidades-cenario::before {
+  position: absolute;
+  inset: 0;
+  content: '';
+  z-index: 1;
+  background: radial-gradient(circle at 82% 30%, rgb(255 255 255 / .38), transparent 32rem);
+  pointer-events: none;
+}
+.unidades-cenario .unidades-abas { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.unidades-cenario #painel-unidade { background: linear-gradient(140deg, rgb(255 252 247 / .88), rgb(255 252 247 / .72)); }
+@media (max-width: 640px) {
+  .resultados-cenario__foto { width: 100%; height: 29rem; }
+  .resultados-cenario__foto img { opacity: .3; object-position: 50% 23%; }
+  .resultados-cenario__foto::after {
+    background: linear-gradient(0deg, rgb(247 243 236) 0%, rgb(247 243 236 / .25) 70%);
+  }
+  .resultados-cenario__intro,
+  .unidades-cenario__intro { background: rgb(255 252 247 / .8); }
+  .unidades-cenario__foto img { opacity: .49; object-position: 49% center; }
+  .unidades-cenario__foto::after { background: rgb(247 243 236 / .7); }
+}
+
 /* Foto principal da primeira dobra. */
 .hero-foto {
   position: relative;
