@@ -197,6 +197,7 @@
 .lead-progress span:first-child, .lead-progress[aria-valuenow="2"] span { background: linear-gradient(90deg, #b98d67, #6e432d); }
 .lead-form__step { display: grid; gap: 15px; }
 .lead-form__step[hidden] { display: none; }
+.digital-card .lead-form > #lead-dialog-description { margin: 4px 0 2px; }
 .lead-form__step > .lead-form__section:first-child { margin-top: 2px; }
 .lead-form__step .lead-form__feedback:empty { display: none; }
 .lead-form__back { justify-self: start; min-height: 36px; padding: 0; border: 0; background: transparent; color: #78553f; font: 600 .73rem var(--sans); cursor: pointer; }
