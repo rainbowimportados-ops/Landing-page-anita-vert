@@ -677,6 +677,7 @@ async function loadLeads() {
     list.innerHTML = `<div class="empty-state"><strong>Não foi possível carregar</strong><p>${escapeHtml(message)}</p></div>`;
     if (journeyList) journeyList.innerHTML = list.innerHTML;
     if (formationList) formationList.innerHTML = list.innerHTML;
+    operations?.setError(message);
     return;
   }
   const data = leadResult.data || [];

@@ -24,10 +24,20 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
   let selectedId = null;
   let tab = 'dados';
   let agendaDate = new Date();
+  let loadError = null;
 
   function setLeads(value) {
+    loadError = null;
     leads = value || [];
     renderAll();
+  }
+  function setError(message) {
+    loadError = message;
+    const notice = empty('Não foi possível carregar os dados', message);
+    ['ops-dashboard','pipeline-board','evaluations-list','patients-list','agenda-calendar','agenda-list','origins-list','reports-content'].forEach((id) => {
+      const target = document.getElementById(id);
+      if (target) target.innerHTML = notice;
+    });
   }
   function renderAll() {
     renderDashboard(); renderPipeline(); renderEvaluations(); renderPatients(); renderAgenda();
@@ -37,6 +47,7 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
   function activate(section) {
     if (section === 'campanhas-crm') void loadCampaigns();
     if (section === 'equipe') renderTeam();
+    if (loadError) return;
     if (section === 'pipeline') renderPipeline();
     if (section === 'relatorios') renderReports();
   }
@@ -55,7 +66,7 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
     const scheduled = recent.filter((lead) => lead.appointment_at);
     const converted = recent.filter((lead) => lead.pipeline_status === 'concluido');
     const followups = leads.filter((lead) => lead.next_followup_at && new Date(lead.next_followup_at) <= new Date() && !['concluido','perdido'].includes(lead.pipeline_status));
-    const buckets = Array.from({length: period === 90 ? 13 : period}, (_, i) => ({count: 0, start: Date.now() - (period === 90 ? (12-i)*7 : period-1-i)*86400000}));
+    const buckets = Array.from({length: period === 90 ? 13 : period}, (_, i) => ({count: 0, start: Date.now() - (period === 90 ? (12-i)*7+6 : period-1-i)*86400000}));
     recent.forEach((lead) => {
       const elapsed = Math.floor((Date.now() - new Date(lead.created_at).getTime()) / 86400000);
       const index = period === 90 ? 12 - Math.floor(elapsed / 7) : period - 1 - elapsed;
@@ -249,5 +260,5 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
     const url=URL.createObjectURL(new Blob(['\uFEFF'+[header,...rows].map(row=>row.map(csv).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=`relatorio-vert-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   });
   renderAll();
-  return { setLeads, activate, loadCampaigns, renderAll };
+  return { setLeads, setError, activate, loadCampaigns, renderAll };
 }

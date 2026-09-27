@@ -222,4 +222,8 @@ button:disabled { cursor:not-allowed; opacity:.48; }
   .overview-donut { align-self:center; }
   .overview-origins ul { width:100%; }
 }
+@media (max-width:360px) {
+  .topbar__title { display:none; }
+  .topbar__actions { width:100%; justify-content:flex-end; }
+}
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; transition-duration:.01ms!important; } }
