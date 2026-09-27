@@ -6,7 +6,7 @@ export function Duvidas() {
 
   return (
     <section id="duvidas" className="secao bg-superficie">
-      <div className="container-vert grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+      <div className="container-vert grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-12">
         <Reveal>
           <p className="olho">Dúvidas frequentes</p>
           <h2 className="titulo-secao mt-3">Antes de agendar</h2>

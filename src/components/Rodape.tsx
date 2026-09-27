@@ -22,9 +22,9 @@ export function Rodape() {
   const { clinica, unidades, rodapeLegal, instagram } = useConteudo()
 
   return (
-    <footer className="bg-superficie-rodape pb-10 pt-16 text-conteudo-inverso-suave">
+    <footer className="bg-superficie-rodape pb-8 pt-12 text-conteudo-inverso-suave">
       <div className="container-vert">
-        <div className="grid gap-10 border-b border-borda-inversa pb-12 lg:grid-cols-[1.2fr_2fr]">
+        <div className="grid gap-8 border-b border-borda-inversa pb-10 lg:grid-cols-[1.2fr_2fr]">
           <div>
             <MarcaVert versao="circular" className="h-24 text-conteudo-inverso" />
             <p className="mt-6 font-display text-2xl italic leading-snug text-conteudo-inverso">

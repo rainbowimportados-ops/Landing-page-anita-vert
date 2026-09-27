@@ -232,3 +232,16 @@ button:disabled { cursor:not-allowed; opacity:.48; }
   .topbar__actions { width:100%; justify-content:flex-end; }
 }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+
+/* Rolagem só até o fim do conteúdo e blocos mais próximos. */
+.editor-grid { min-height:0; }
+.editor,.app[data-active-section] .editor { padding-bottom:28px; }
+.panel__heading { margin-bottom:16px; padding-bottom:16px; }
+.subheading { margin-top:22px; }
+.ops-toolbar { margin:14px 0; }
+.pipeline-column,.pipeline-column:nth-child(n) { min-height:0; }
+.pipeline-column__cards { min-height:120px; }
+@media (max-width:760px) {
+  .workspace { min-height:0; }
+  .editor,.app[data-active-section] .editor { padding-bottom:20px; }
+}

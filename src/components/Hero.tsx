@@ -16,7 +16,7 @@ export function Hero() {
 
   return (
     <section id="topo" className="hero-claro relative overflow-hidden pt-[5.5rem]">
-      <div className="container-vert relative grid gap-10 pb-16 pt-8 sm:pt-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-14 lg:pb-24">
+      <div className="container-vert relative grid gap-8 pb-10 pt-6 sm:pt-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12 lg:pb-16">
         <div className="animate-fade-up">
           <p className="olho-linha">Resultados reais</p>
           <h1 className="mt-5 font-display text-display-lg font-light tracking-[-0.02em] text-conteudo">
@@ -27,7 +27,7 @@ export function Hero() {
             planejamento e segurança.
           </p>
 
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
             <BotaoWhatsApp
               rastreio="hero_agendar"
               intencao="avaliacao"
@@ -43,7 +43,7 @@ export function Hero() {
             </BotaoAncora>
           </div>
 
-          <ul className="mt-12 grid max-w-md grid-cols-3 gap-4">
+          <ul className="mt-8 grid max-w-md grid-cols-3 gap-4">
             {atributos.map(({ Icone, texto }) => (
               <li key={texto} className="flex flex-col items-center gap-3 text-center text-[0.8125rem] leading-snug text-conteudo-suave">
                 <Icone className="h-7 w-7 text-conteudo" />

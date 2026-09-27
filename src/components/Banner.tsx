@@ -29,7 +29,7 @@ export function Banner() {
   )
 
   return (
-    <section className="bg-fundo pt-16 sm:pt-20">
+    <section className="bg-fundo pt-10 sm:pt-14">
       <div className="container-vert">
         <Reveal>
           {banner.link ? (

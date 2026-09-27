@@ -5,7 +5,7 @@ import { Reveal } from './Reveal'
 export function Sobre() {
   return (
     <section id="sobre" className="secao bg-superficie" aria-labelledby="sobre-titulo">
-      <div className="container-vert grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-20">
+      <div className="container-vert grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-14">
         <Reveal>
           <figure className="sobre-retrato">
             {sobre.foto ? (

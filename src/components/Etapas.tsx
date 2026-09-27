@@ -10,7 +10,7 @@ export function Etapas() {
           <h2 className="titulo-secao mt-3">Do primeiro contato ao retorno</h2>
         </Reveal>
 
-        <ol className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <ol className="mt-8 grid gap-4 sm:mt-10 sm:grid-cols-2 lg:grid-cols-4">
           {etapas.map((etapa, indice) => (
             /* `as="li"` mantém o item como filho direto de <ol>. */
             <Reveal

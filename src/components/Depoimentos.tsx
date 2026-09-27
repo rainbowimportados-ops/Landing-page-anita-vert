@@ -18,7 +18,7 @@ export function Depoimentos() {
           <h2 className="titulo-secao mt-3">Quem já passou por aqui</h2>
         </Reveal>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:mt-10 sm:grid-cols-2 lg:grid-cols-3">
           {depoimentos.map((depoimento, indice) => (
             <Reveal key={depoimento.nome} delay={indice * 45}>
               <figure className="h-full rounded-card border border-borda bg-fundo p-6">
