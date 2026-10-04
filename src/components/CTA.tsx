@@ -23,8 +23,8 @@ type Props = {
   className?: string
   /** Quando definido, o clique abre o modal de captação antes do WhatsApp. */
   intencao?: Intencao
-  /** `seta`: rótulo seguido de seta, como nos CTAs editoriais. */
-  icone?: 'whatsapp' | 'seta'
+  /** `seta`: rótulo seguido de seta, como nos CTAs editoriais; `nenhum`: só o texto. */
+  icone?: 'whatsapp' | 'seta' | 'nenhum'
   children: ReactNode
 }
 

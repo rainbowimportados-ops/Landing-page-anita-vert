@@ -111,6 +111,16 @@ export function Header() {
           >
             Agendar avaliação
           </BotaoWhatsApp>
+          <BotaoWhatsApp
+            rastreio="header_agendar_mobile"
+            intencao="avaliacao"
+            numero={clinica.whatsappComercial}
+            mensagem="Olá! Vim pelo site e gostaria de agendar uma avaliação."
+            icone="nenhum"
+            className="px-4 sm:hidden"
+          >
+            Agendar
+          </BotaoWhatsApp>
 
           <button
             type="button"

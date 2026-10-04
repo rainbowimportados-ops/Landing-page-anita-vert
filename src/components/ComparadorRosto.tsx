@@ -74,13 +74,13 @@ export function ComparadorRosto({
           </button>
         </div>
         <RotulosAntesDepois antes={modo !== 'depois'} depois={modo !== 'antes'} />
-        <BarraControles
-          reproduzindo={reproduzindo}
-          aoVerAntes={() => escolher('antes')}
-          aoReproduzir={reproduzindo ? () => { limpar(); setModo('ambos') } : reproduzir}
-          aoVerDepois={() => escolher('depois')}
-        />
       </div>
+      <BarraControles
+        reproduzindo={reproduzindo}
+        aoVerAntes={() => escolher('antes')}
+        aoReproduzir={reproduzindo ? () => { limpar(); setModo('ambos') } : reproduzir}
+        aoVerDepois={() => escolher('depois')}
+      />
       <p className="sr-only" aria-live="polite">{reproduzindo ? '' : descricao}</p>
       <CreditosMidiaPaciente />
     </figure>

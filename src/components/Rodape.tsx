@@ -113,10 +113,10 @@ export function Rodape() {
                 painel em /config; enquanto vazio, a linha não é exibida. */}
             {rodapeLegal && <p className="mt-1 max-w-3xl">{rodapeLegal}</p>}
           </div>
-          <ul className="flex gap-5">
-            <li><button type="button" onClick={() => window.dispatchEvent(new Event('vert:privacy-settings'))} className={classeLink}>Privacidade e dados</button></li>
-            <li><a href="/privacidade" className={classeLink}>Política de privacidade</a></li>
-            <li><a href="/termos" className={classeLink}>Termos de uso</a></li>
+          <ul className="flex flex-wrap gap-x-5 lg:shrink-0 lg:flex-nowrap">
+            <li><button type="button" onClick={() => window.dispatchEvent(new Event('vert:privacy-settings'))} className={`${classeLink} whitespace-nowrap`}>Privacidade e dados</button></li>
+            <li><a href="/privacidade" className={`${classeLink} whitespace-nowrap`}>Política de privacidade</a></li>
+            <li><a href="/termos" className={`${classeLink} whitespace-nowrap`}>Termos de uso</a></li>
           </ul>
         </div>
       </div>

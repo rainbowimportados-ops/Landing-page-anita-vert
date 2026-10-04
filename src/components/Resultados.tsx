@@ -46,7 +46,7 @@ export function Resultados() {
               <video
                 controls
                 playsInline
-                preload="metadata"
+                preload="none"
                 poster={posterVideo}
                 aria-label="Vídeo de resultado real do Instituto Vert"
                 className="aspect-[4/5] w-full bg-conteudo object-contain md:max-h-[28rem]"

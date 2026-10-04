@@ -7,3 +7,7 @@ dist-ssr
 *.local
 .DS_Store
 *.tsbuildinfo
+# Playwright CLI output (may contain credentials)
+.playwright-cli/
+test-results
+playwright-report
