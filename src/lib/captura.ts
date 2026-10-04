@@ -1,5 +1,6 @@
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from './analytics'
 import { origemDaVisita } from './origem'
+import { escolhaPrivacidade } from './privacidade'
 
 export type Intencao =
   | 'avaliacao'
@@ -9,6 +10,7 @@ export type Intencao =
   | 'implante'
   | 'curso'
   | 'locacao'
+  | 'paciente_atual'
 
 export type DadosLead = {
   nome: string
@@ -17,6 +19,11 @@ export type DadosLead = {
   unidade: string | null
   profissao?: string
   cidade?: string
+  /** true = dentista, false = estudante; nulo quando não se aplica. */
+  dentista?: boolean | null
+  jaFezCurso?: boolean | null
+  /** Respostas do formulário, no mesmo formato do cartão. */
+  respostas?: Record<string, string | boolean | null>
   rotulo: string
   cta: string
 }
@@ -31,7 +38,10 @@ export type ResultadoEnvio =
  * Tempo máximo de 4 s: o visitante nunca fica preso esperando o banco.
  */
 export async function enviarLead(dados: DadosLead): Promise<ResultadoEnvio> {
-  const origem = origemDaVisita()
+  // Origem, campanha e página só acompanham o contato se a pessoa aceitou as
+  // métricas; sem isso o pedido leva apenas o que ela digitou e o botão usado.
+  const comMetricas = escolhaPrivacidade() === 'accepted'
+  const origem = comMetricas ? origemDaVisita() : { utm: {}, referrer: '', pagina: '' }
   const controle = new AbortController()
   const limite = window.setTimeout(() => controle.abort(), 4000)
 
@@ -46,11 +56,21 @@ export async function enviarLead(dados: DadosLead): Promise<ResultadoEnvio> {
       },
       body: JSON.stringify({
         p: {
-          ...dados,
+          nome: dados.nome,
+          telefone: dados.telefone,
+          intencao: dados.intencao,
+          unidade: dados.unidade,
+          profissao: dados.profissao,
+          cidade: dados.cidade,
+          dentista: dados.dentista ?? null,
+          ja_fez_curso: dados.jaFezCurso ?? null,
+          respostas: dados.respostas ?? {},
+          rotulo: dados.rotulo,
+          cta: dados.cta,
           superficie: 'landing',
           consentimento: true,
           utm: origem.utm,
-          referrer: origem.referrer,
+          referrer: comMetricas ? origem.referrer || 'direto' : '',
           pagina: origem.pagina,
         },
       }),

@@ -40,11 +40,10 @@ export function AvisoPrivacidade() {
         <p className="olho mt-5">Sua escolha</p>
         <h2 id="aviso-privacidade-titulo" className="mt-2 font-display text-3xl font-light">Cookies e proteção de dados</h2>
         <p id="aviso-privacidade-descricao" className="mt-3 text-sm leading-relaxed text-conteudo-suave">
-          Usamos armazenamento necessário para lembrar sua escolha. Se aceitar os recursos opcionais, registramos acessos, origem e cliques para entender o interesse pelos nossos serviços. Você pode continuar sem métricas.
+          Usamos armazenamento necessário para lembrar sua escolha. Se aceitar os recursos opcionais, registramos acessos, origem e cliques apenas para medir e melhorar o site e o atendimento. Você pode continuar sem métricas.
         </p>
         <p className="mt-3 text-sm leading-relaxed text-conteudo-suave">
-          Nome e WhatsApp são pedidos quando você decide falar com a equipe. Ao enviar, usamos esses dados e a origem do acesso para responder ao pedido, independentemente da escolha acima.
-        </p>
+          Nome e WhatsApp são pedidos só quando você decide falar com a equipe, e usados apenas para responder ao pedido. Origem e campanha só acompanham o contato se você aceitar as métricas.</p>
         <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm underline underline-offset-4">Ler a política de privacidade</a>
         <div className="aviso-privacidade__acoes">
           <button className="aviso-privacidade__autorizar" type="button" onClick={() => escolher('accepted')}>Aceitar todos os opcionais</button>

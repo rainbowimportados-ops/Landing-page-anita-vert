@@ -582,6 +582,11 @@ document.addEventListener('click', (event) => {
     section.querySelectorAll('input,select').forEach((field) => { field.disabled = !visible; });
   });
   updateHealthProfessionField();
+  // Não repete o que o botão já informou (unidade escolhida; "já sou paciente").
+  const unitKnown = !professional && !!pendingLead.unit;
+  const statusKnown = type === 'patient';
+  const toggleField = (name, hide) => { const field = leadForm.elements[name]; const label = field.closest('label'); label.hidden = hide; field.disabled = hide || field.closest('[hidden]') !== null; };
+  if (!professional) { toggleField('patientUnit', unitKnown); toggleField('patientStatus', statusKnown); }
   if (!professional) {
     if (type === 'patient') leadForm.elements.patientStatus.value = 'atual';
     if (pendingLead.unit) leadForm.elements.patientUnit.value = pendingLead.unit;
@@ -682,7 +687,7 @@ leadForm.addEventListener('submit', async (event) => {
   } : pendingLead.leadType === 'close_friends' ? {
     perfil: lead.profession, cidade: lead.city, interesse: String(formData.get('friendsInterest') || ''),
   } : {
-    situacao: String(formData.get('patientStatus') || ''),
+    situacao: String(formData.get('patientStatus') || (pendingLead.leadType === 'patient' ? 'atual' : '')),
     interesse: String(formData.get('patientInterest') || ''),
     unidade: lead.unit,
     profissao: lead.profession,
@@ -696,6 +701,7 @@ leadForm.addEventListener('submit', async (event) => {
     return;
   }
   const submit = leadForm.querySelector('[type="submit"]');
+  if (submit.disabled) return;
   submit.disabled = true;
   leadFeedback.textContent = 'Salvando seus dados…';
   let destinationForStorage = pendingLead.destination;
@@ -705,10 +711,13 @@ leadForm.addEventListener('submit', async (event) => {
     : pendingLead.leadType === 'close_friends' ? 'close_friends'
     : pendingLead.leadType === 'patient' ? 'paciente_atual'
     : pendingLead.serviceId === 'lentes' ? 'lentes' : 'avaliacao';
+  // Origem, campanha e página só acompanham o contato se as métricas foram autorizadas.
   const params = new URLSearchParams(window.location.search);
   const utm = {};
-  ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach((chave) => { const valor = params.get(chave); if (valor) utm[chave] = valor.slice(0, 100); });
-  if (!utm.utm_source && params.get('origem')) utm.utm_source = `instagram:${params.get('origem')}`.slice(0, 100);
+  if (trackingConsent) {
+    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach((chave) => { const valor = params.get(chave); if (valor) utm[chave] = valor.slice(0, 100); });
+    if (!utm.utm_source && params.get('origem')) utm.utm_source = `instagram:${params.get('origem')}`.slice(0, 100);
+  }
   let salvo = false;
   try {
     // Mesmo motor da landing: grava no painel e no CRM, deduplicando pelo telefone.
@@ -734,8 +743,8 @@ leadForm.addEventListener('submit', async (event) => {
       visitor_id: trackingConsent ? visitorId() : null,
       instagram: lead.instagram || null,
       utm,
-      referrer: detectarOrigem(),
-      pagina: window.location.pathname,
+      referrer: trackingConsent ? detectarOrigem() : null,
+      pagina: trackingConsent ? window.location.pathname : null,
       cta: pendingLead.track,
     } });
     const limite = new Promise((resolve) => window.setTimeout(() => resolve({ data: null, error: { message: 'tempo' } }), 4000));
@@ -768,9 +777,10 @@ leadForm.addEventListener('submit', async (event) => {
   }).filter(Boolean).join(' | ');
   const destination = applyPreMessage(pendingLead.destination, `${pendingLead.message} ${details}`, lead);
   // Se o banco falhar ou demorar, o atendimento abre mesmo assim.
-  leadFeedback.textContent = 'Tudo certo. Abrindo o atendimento…';
-  leadForm.reset();
-  window.setTimeout(() => { window.location.href = destination; }, 250);
+  leadFeedback.textContent = salvo
+    ? 'Contato registrado. Abrindo o atendimento…'
+    : 'Não conseguimos registrar seu contato agora. Vamos abrir o WhatsApp para você continuar por lá.';
+  window.setTimeout(() => { leadForm.reset(); submit.disabled = false; window.location.href = destination; }, salvo ? 400 : 2200);
 });
 
 window.addEventListener('message', (event) => { if (event.origin === window.location.origin && event.data?.type === 'vert-card-preview') renderContent(event.data.content); });
