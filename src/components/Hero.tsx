@@ -16,7 +16,7 @@ export function Hero() {
 
   return (
     <section id="topo" className="hero-claro relative overflow-hidden pt-[5.5rem]">
-      <div className="container-vert relative grid gap-8 pb-10 pt-6 sm:pt-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12 lg:pb-16">
+      <div className="container-vert relative grid gap-6 pb-10 pt-4 sm:gap-8 sm:pt-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12 lg:pb-16">
         <div className="animate-fade-up">
           <p className="olho-linha">Resultados reais</p>
           <h1 className="mt-5 font-display text-display-lg font-light tracking-[-0.02em] text-conteudo">
@@ -42,18 +42,9 @@ export function Hero() {
               Conheça nossas unidades
             </BotaoAncora>
           </div>
-
-          <ul className="mt-8 grid max-w-md grid-cols-3 gap-4">
-            {atributos.map(({ Icone, texto }) => (
-              <li key={texto} className="flex flex-col items-center gap-3 text-center text-[0.8125rem] leading-snug text-conteudo-suave">
-                <Icone className="h-7 w-7 text-conteudo" />
-                {texto}
-              </li>
-            ))}
-          </ul>
         </div>
 
-        <figure className="hero-foto animate-fade-up [animation-delay:120ms]">
+        <figure className="hero-foto order-first animate-fade-up [animation-delay:120ms] lg:order-none">
           <img
             src={foto1200}
             srcSet={`${foto720} 720w, ${foto1200} 1200w`}
@@ -68,6 +59,15 @@ export function Hero() {
             <br />
             vidas reais.
           </figcaption>
+          {/* No celular a mesma informação aparece na faixa logo abaixo da primeira dobra. */}
+          <ul className="hero-selos hidden lg:grid">
+            {atributos.map(({ Icone, texto }) => (
+              <li key={texto}>
+                <Icone className="h-6 w-6 text-conteudo" />
+                {texto}
+              </li>
+            ))}
+          </ul>
         </figure>
       </div>
     </section>

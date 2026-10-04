@@ -8,7 +8,7 @@ import './sorrisos.css'
 // cada metade; não há retoque, morphing ou geração de dentes.
 export type Registro = { url: string; titulo: string; largura: number; altura: number }
 
-/** Barra de controles de vidro sobre a foto, igual para todos os comparadores. */
+/** Controles abaixo da foto (não cobrem o sorriso), iguais para todos os comparadores. */
 export function BarraControles({
   reproduzindo,
   bloqueado = false,
@@ -126,10 +126,10 @@ export function ComparadorSorriso({
         <MarcaMidiaPaciente />
         <div className="sorriso-divisor" style={{ left: `${divisor}%` }} aria-hidden="true"><span>‹ ›</span></div>
         <RotulosAntesDepois antes={divisor > 12} depois={divisor < 88} />
-        <BarraControles reproduzindo={reproduzindo} bloqueado={bloqueado}
-          aoVerAntes={() => mover(100)} aoReproduzir={reproduzindo ? parar : reproduzir} aoVerDepois={() => mover(0)} />
         {children}
       </div>
+      <BarraControles reproduzindo={reproduzindo} bloqueado={bloqueado}
+        aoVerAntes={() => mover(100)} aoReproduzir={reproduzindo ? parar : reproduzir} aoVerDepois={() => mover(0)} />
       {falhou && <p role="status" className="mt-2 text-sm">Não foi possível carregar a foto. Tente atualizar a página.</p>}
       {/* O arraste é visual; teclado e leitores de tela usam este controle. */}
       <label htmlFor={id} className="sr-only">Comparar antes e depois: {registro.titulo}</label>

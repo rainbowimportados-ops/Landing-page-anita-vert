@@ -155,3 +155,25 @@ test('Esc e o botão fechar dispensam o modal', async ({ page }) => {
   await modal(page).getByRole('button', { name: 'Fechar' }).click()
   await expect(modal(page)).toBeHidden()
 })
+
+test('celular: barra de agendar aparece ao rolar e some no rodapé', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await preparar(page)
+  const barra = page.locator('.floating-cta')
+  await expect(barra).toHaveCSS('opacity', '0')
+  await page.evaluate(() => window.scrollTo(0, 1400))
+  await expect(barra).toHaveCSS('opacity', '1')
+  await expect(barra.getByRole('link', { name: /agendar avaliação/i })).toBeVisible()
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await expect(barra).toHaveCSS('opacity', '0')
+})
+
+test('comparador: controles ficam abaixo da foto, sem cobrir o sorriso', async ({ page }) => {
+  await preparar(page)
+  const janela = page.locator('.sorriso-janela').first()
+  await janela.scrollIntoViewIfNeeded()
+  const barra = page.locator('.sorriso-barra').first()
+  const j = (await janela.boundingBox())!
+  const b = (await barra.boundingBox())!
+  expect(b.y).toBeGreaterThanOrEqual(j.y + j.height)
+})
