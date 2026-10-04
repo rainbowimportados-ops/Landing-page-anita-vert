@@ -48,8 +48,8 @@ export function Unidades() {
             className="tratamento-card mt-6 grid overflow-hidden rounded-[1.5rem] border border-white/70 md:grid-cols-[1fr_1.1fr]"
           >
             {/* Sem foto da fachada ainda: a marca ocupa o quadro. */}
-            <div className="unidade-marca grid min-h-[14rem] place-items-center" aria-hidden="true">
-              <MarcaVert versao="circular" className="h-28 text-conteudo-inverso/90" />
+            <div className="unidade-marca grid min-h-[7.5rem] place-items-center md:min-h-[14rem]" aria-hidden="true">
+              <MarcaVert versao="circular" className="h-20 text-conteudo-inverso/90 md:h-28" />
             </div>
             <div className="grid content-start gap-5 p-7 sm:p-10">
               <div>
