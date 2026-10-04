@@ -1,11 +1,10 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
-import Anthropic from 'npm:@anthropic-ai/sdk'
 import { encodeBase64 } from 'jsr:@std/encoding/base64'
 
 /**
  * Analisa as fotos de um caso de antes e depois (painel /config, aba Casos).
  *
- * Para cada foto o Claude diz se é antes ou depois, o ângulo (frente, perfil,
+ * Para cada foto a IA (OpenAI, API Responses) diz se é antes ou depois, o ângulo (frente, perfil,
  * sorriso de perto) e onde estão os dentes; depois forma os pares de mesmo
  * ângulo. O resultado é gravado em site_caso_fotos e o administrador revisa no
  * painel antes de publicar — a IA sugere, quem decide é a pessoa.
@@ -13,12 +12,26 @@ import { encodeBase64 } from 'jsr:@std/encoding/base64'
  * Só administradores (digital_card_admins) podem chamar. As fotos ficam no
  * bucket privado casos-pacientes e são lidas aqui com a chave de serviço.
  *
- * Secrets necessários: ANTHROPIC_API_KEY (além dos padrões do Supabase).
+ * Secrets necessários: OPENAI_API_KEY (além dos padrões do Supabase).
+ * Opcional: OPENAI_MODEL para trocar o modelo sem mudar o código.
  */
 
 const BUCKET = 'casos-pacientes'
 const MAXIMO_FOTOS = 16
 const ANGULOS = ['frente', 'perfil_direito', 'perfil_esquerdo', 'sorriso', 'outro'] as const
+const MODELO_PADRAO = 'gpt-6-astra'
+
+/** Erro devolvido pela API da OpenAI (status HTTP), para uma mensagem amigável. */
+class ErroIA extends Error {
+  constructor(public status: number) {
+    super(`IA indisponível (${status}).`)
+  }
+}
+
+type RespostaOpenAI = {
+  status?: string
+  output?: Array<{ type: string; content?: Array<{ type: string; text?: string; refusal?: string }> }>
+}
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -95,8 +108,9 @@ Deno.serve(async (req) => {
   const url = Deno.env.get('SUPABASE_URL')
   const servico = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!url || !servico) return responder(500, { ok: false, erro: 'Ambiente sem SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY.' })
-  if (!Deno.env.get('ANTHROPIC_API_KEY')) {
-    return responder(500, { ok: false, erro: 'A chave da IA (ANTHROPIC_API_KEY) ainda não foi cadastrada nos secrets do Supabase.' })
+  const chave = Deno.env.get('OPENAI_API_KEY')
+  if (!chave) {
+    return responder(500, { ok: false, erro: 'A chave da IA (OPENAI_API_KEY) ainda não foi cadastrada nos secrets do Supabase.' })
   }
   const db = { apikey: servico, Authorization: `Bearer ${servico}`, 'Content-Type': 'application/json' }
 
@@ -132,7 +146,7 @@ Deno.serve(async (req) => {
 
   // A análise roda em segundo plano: com muitas fotos ela pode passar do tempo
   // limite de uma requisição. O painel acompanha pelo status do caso.
-  EdgeRuntime.waitUntil(analisar(fotos, marcar, url, servico, db))
+  EdgeRuntime.waitUntil(analisar(fotos, marcar, url, servico, db, chave))
   return responder(202, { ok: true, iniciado: true })
 })
 
@@ -142,32 +156,42 @@ async function analisar(
   url: string,
   servico: string,
   db: Record<string, string>,
+  chave: string,
 ) {
   try {
-    // 3. Fotos para o Claude, cada uma rotulada com número e nome do arquivo.
-    const conteudo: Anthropic.ContentBlockParam[] = []
+    // 3. Fotos para a IA, cada uma rotulada com número e nome do arquivo.
+    const conteudo: Array<Record<string, string>> = []
     for (const [i, f] of fotos.entries()) {
       const arquivo = await fetch(`${url}/storage/v1/object/${BUCKET}/${f.caminho}`, { headers: { apikey: servico, Authorization: `Bearer ${servico}` } })
       if (!arquivo.ok) throw new Error(`Não foi possível ler a foto ${f.arquivo}.`)
-      const tipo = (arquivo.headers.get('content-type') ?? 'image/webp').split(';')[0] as 'image/webp' | 'image/jpeg' | 'image/png'
-      conteudo.push({ type: 'text', text: `Foto ${i + 1} — arquivo "${f.arquivo}" (${f.largura}×${f.altura}px):` })
-      conteudo.push({ type: 'image', source: { type: 'base64', media_type: tipo, data: encodeBase64(new Uint8Array(await arquivo.arrayBuffer())) } })
+      const tipo = (arquivo.headers.get('content-type') ?? 'image/webp').split(';')[0]
+      conteudo.push({ type: 'input_text', text: `Foto ${i + 1} — arquivo "${f.arquivo}" (${f.largura}×${f.altura}px):` })
+      conteudo.push({ type: 'input_image', detail: 'high', image_url: `data:${tipo};base64,${encodeBase64(new Uint8Array(await arquivo.arrayBuffer()))}` })
     }
-    conteudo.push({ type: 'text', text: 'Analise as fotos acima conforme as instruções.' })
+    conteudo.push({ type: 'input_text', text: 'Analise as fotos acima conforme as instruções.' })
 
-    const cliente = new Anthropic()
-    const resposta = await cliente.messages.create({
-      model: 'claude-opus-5-5',
-      max_tokens: 16000,
-      system: INSTRUCOES,
-      messages: [{ role: 'user', content: conteudo }],
-      output_config: { format: { type: 'json_schema', schema: ESQUEMA } },
+    const r = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${chave}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: Deno.env.get('OPENAI_MODEL') || MODELO_PADRAO,
+        instructions: INSTRUCOES,
+        input: [{ role: 'user', content: conteudo }],
+        max_output_tokens: 16000,
+        text: { format: { type: 'json_schema', name: 'analise_caso', strict: true, schema: ESQUEMA } },
+      }),
     })
-
-    if (resposta.stop_reason === 'refusal') throw new Error('A IA não analisou estas fotos. Marque antes, depois e os dentes manualmente.')
-    const texto = resposta.content.find((b) => b.type === 'text')
-    if (!texto || texto.type !== 'text') throw new Error('A IA não devolveu a análise.')
-    const analise = JSON.parse(texto.text) as Analise
+    if (!r.ok) {
+      console.error('OpenAI', r.status, await r.text())
+      throw new ErroIA(r.status)
+    }
+    const resposta = (await r.json()) as RespostaOpenAI
+    const partes = (resposta.output ?? []).filter((o) => o.type === 'message').flatMap((o) => o.content ?? [])
+    if (partes.some((p) => p.type === 'refusal')) throw new Error('A IA não analisou estas fotos. Marque antes, depois e os dentes manualmente.')
+    if (resposta.status === 'incomplete') throw new Error('A análise veio incompleta. Tente de novo ou divida a pasta em menos fotos.')
+    const texto = partes.find((p) => p.type === 'output_text')?.text
+    if (!texto) throw new Error('A IA não devolveu a análise.')
+    const analise = JSON.parse(texto) as Analise
 
     // 4. Grava foto a foto. Valores fora de 0–1 são presos ao intervalo.
     const entre01 = (v: number) => Math.min(1, Math.max(0, Number.isFinite(v) ? v : 0.5))
@@ -199,7 +223,14 @@ async function analisar(
     }
     await marcar({ status: 'analisado', analisado_em: new Date().toISOString() })
   } catch (erro) {
-    const mensagem = erro instanceof Anthropic.APIError ? `IA indisponível (${erro.status}). Tente de novo em instantes.` : (erro as Error).message
+    const mensagem =
+      erro instanceof ErroIA
+        ? erro.status === 401
+          ? 'A chave da OpenAI (OPENAI_API_KEY) foi recusada. Confira o secret no Supabase.'
+          : erro.status === 429
+            ? 'Limite ou crédito da OpenAI esgotado. Confira o saldo em platform.openai.com.'
+            : `IA indisponível (${erro.status}). Tente de novo em instantes.`
+        : (erro as Error).message
     await marcar({ status: 'erro', erro_analise: mensagem })
   }
 }

@@ -1,7 +1,7 @@
 -- Biblioteca de casos de antes e depois (painel /config, aba Casos).
 --
 -- Fluxo: o administrador importa pastas (uma por paciente) → as fotos vão para
--- o bucket PRIVADO casos-pacientes → a função analisar-caso pede ao Claude
+-- o bucket PRIVADO casos-pacientes → a função analisar-caso pede à IA (OpenAI)
 -- antes/depois, ângulo e a posição dos dentes → o administrador revisa, marca a
 -- autorização do paciente e publica. Só no momento de publicar as fotos
 -- escolhidas são copiadas para o bucket público e entram em
