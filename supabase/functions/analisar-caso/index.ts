@@ -130,6 +130,19 @@ Deno.serve(async (req) => {
 
   await marcar({ status: 'analisando', erro_analise: null })
 
+  // A análise roda em segundo plano: com muitas fotos ela pode passar do tempo
+  // limite de uma requisição. O painel acompanha pelo status do caso.
+  EdgeRuntime.waitUntil(analisar(fotos, marcar, url, servico, db))
+  return responder(202, { ok: true, iniciado: true })
+})
+
+async function analisar(
+  fotos: Foto[],
+  marcar: (dados: Record<string, unknown>) => Promise<Response>,
+  url: string,
+  servico: string,
+  db: Record<string, string>,
+) {
   try {
     // 3. Fotos para o Claude, cada uma rotulada com número e nome do arquivo.
     const conteudo: Anthropic.ContentBlockParam[] = []
@@ -185,10 +198,8 @@ Deno.serve(async (req) => {
       })
     }
     await marcar({ status: 'analisado', analisado_em: new Date().toISOString() })
-    return responder(200, { ok: true, fotos: analise.fotos.length, pares: parDe.size / 2 })
   } catch (erro) {
     const mensagem = erro instanceof Anthropic.APIError ? `IA indisponível (${erro.status}). Tente de novo em instantes.` : (erro as Error).message
     await marcar({ status: 'erro', erro_analise: mensagem })
-    return responder(502, { ok: false, erro: mensagem })
   }
-})
+}

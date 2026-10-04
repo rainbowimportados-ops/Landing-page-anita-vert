@@ -138,7 +138,7 @@ export function RevisarCaso({ id, aoVoltar }: { id: string; aoVoltar: () => void
               return `A IA analisou ${r.fotos} fotos e formou ${r.pares} ${r.pares === 1 ? 'par' : 'pares'}. Confira abaixo.`
             })}
           >
-            {ocupado === 'analisar' ? 'Analisando… (até 1 minuto)' : caso.analisado_em ? 'Analisar de novo com IA' : 'Analisar com IA'}
+            {ocupado === 'analisar' ? 'Analisando… (1 a 3 minutos)' : caso.analisado_em ? 'Analisar de novo com IA' : 'Analisar com IA'}
           </button>
         </div>
       </header>

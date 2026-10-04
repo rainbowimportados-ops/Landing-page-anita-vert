@@ -187,12 +187,26 @@ export async function excluirCaso(id: string) {
 
 /** Pede à IA a análise do caso (função analisar-caso no Supabase). */
 export async function analisarCaso(id: string): Promise<{ fotos: number; pares: number }> {
-  const { data, error } = await supabase.functions.invoke('analisar-caso', { body: { casoId: id } })
+  // A função responde na hora e analisa em segundo plano (16 fotos podem levar
+  // mais que o limite de uma requisição); aqui acompanhamos o status do caso.
+  const { error } = await supabase.functions.invoke('analisar-caso', { body: { casoId: id } })
   if (error) {
     const corpo = await (error as { context?: Response }).context?.json?.().catch(() => null)
     throw new Error(corpo?.erro ?? 'A análise não respondeu. Verifique se a função analisar-caso foi publicada no Supabase.')
   }
-  return data as { fotos: number; pares: number }
+  const limite = Date.now() + 6 * 60_000
+  while (Date.now() < limite) {
+    await new Promise((r) => setTimeout(r, 3000))
+    const { data, error: erroLeitura } = await supabase.from('site_casos').select('status, erro_analise').eq('id', id).single()
+    if (erroLeitura) throw new Error(erroLegivel(erroLeitura.message))
+    if (data.status === 'erro') throw new Error(data.erro_analise ?? 'A análise falhou.')
+    if (data.status === 'analisado') {
+      const { data: fotos } = await supabase.from('site_caso_fotos').select('par').eq('caso_id', id)
+      const pares = new Set((fotos ?? []).map((f) => f.par).filter(Boolean)).size
+      return { fotos: fotos?.length ?? 0, pares }
+    }
+  }
+  throw new Error('A análise está demorando mais que o normal. Abra o caso de novo em alguns minutos.')
 }
 
 // ---------- publicação ----------
@@ -216,8 +230,11 @@ async function publicarFoto(foto: FotoCaso): Promise<FotoPublicada> {
     const { data, error } = await supabase.storage.from(PRIVADO).download(origem)
     if (error || !data) throw new Error(`Não foi possível ler ${foto.arquivo}.`)
     const destino = `landing/casos/${origem}`
-    const envio = await supabase.storage.from(PUBLICO).upload(destino, data, { contentType: 'image/webp', cacheControl: '31536000', upsert: true })
-    if (envio.error) throw new Error(erroLegivel(envio.error.message))
+    // O caminho tem o id único da foto e o conteúdo nunca muda: se já existe
+    // (caso publicado antes), basta reaproveitar. Sem upsert porque o bucket
+    // público não tem política de leitura para sobrescrever.
+    const envio = await supabase.storage.from(PUBLICO).upload(destino, data, { contentType: 'image/webp', cacheControl: '31536000', upsert: false })
+    if (envio.error && !/exist|duplicate/i.test(envio.error.message)) throw new Error(erroLegivel(envio.error.message))
     return supabase.storage.from(PUBLICO).getPublicUrl(destino).data.publicUrl
   }
   const [src, mini] = [await copiar(foto.caminho), await copiar(foto.caminho_mini)]
