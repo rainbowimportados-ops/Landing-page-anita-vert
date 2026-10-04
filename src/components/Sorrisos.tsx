@@ -124,7 +124,7 @@ export function ComparadorSorriso({
           <img src={registro.url} alt={`${registro.titulo}: antes do tratamento`} width={registro.largura} height={registro.altura} loading="lazy" draggable={false} />
         </div>
         <MarcaMidiaPaciente />
-        <div className="sorriso-divisor" style={{ left: `${divisor}%` }} aria-hidden="true"><span>‹ ›</span></div>
+        <div className="sorriso-divisor sorriso-divisor--sutil" style={{ left: `${divisor}%` }} aria-hidden="true" />
         <RotulosAntesDepois antes={divisor > 12} depois={divisor < 88} />
         {children}
       </div>

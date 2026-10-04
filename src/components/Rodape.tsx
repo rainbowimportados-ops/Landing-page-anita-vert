@@ -28,9 +28,7 @@ export function Rodape() {
           <div>
             <MarcaVert versao="circular" className="h-16 text-conteudo-inverso sm:h-24" />
             <p className="mt-4 font-display text-xl italic leading-snug text-conteudo-inverso sm:mt-6 sm:text-2xl">
-              Sorrisos que
-              <br />
-              transformam histórias.
+              “Cada sorriso tem uma história… e é por isso que fazemos o que fazemos.”
             </p>
             <p className="mt-3 max-w-xs text-sm leading-relaxed">{clinica.tagline} em Franca e Ribeirão Preto.</p>
           </div>

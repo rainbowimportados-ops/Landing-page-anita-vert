@@ -1,87 +1,121 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
+import { alinhamentosRosto, type Alinhamento } from '../config/alinhamentos'
 import { BarraControles, RotulosAntesDepois } from './Sorrisos'
 import { CreditosMidiaPaciente, MarcaMidiaPaciente } from './MarcaMidiaPaciente'
 
-type Modo = 'ambos' | 'antes' | 'depois'
+/** Altura padrão dos dentes no quadro (0 = topo, 1 = base): deixa olhos e queixo à vista. */
+const DENTES_NO_QUADRO = 0.6
+const PADRAO: Alinhamento = { antes: { x: 0.5, y: 0.45 }, depois: { x: 0.5, y: 0.45 } }
 
 /**
- * Comparador para montagens com antes à esquerda e depois à direita, como a
- * foto foi feita. Os enquadramentos das duas metades não coincidem, então não
- * há sobreposição: "Ver antes" e "Ver depois" destacam uma metade (a outra
- * escurece), e a transição percorre antes → depois → as duas lado a lado.
+ * Enquadramento das duas metades no mesmo quadro retrato (4:5), com os dentes
+ * de antes e de depois no mesmo ponto. Escolhe a posição horizontal dos dentes
+ * e o menor zoom que cobrem o quadro inteiro nas duas fotos, sem sobrar borda.
  */
-export function ComparadorRosto({
-  url,
-  titulo,
-  className = '',
-  focoVertical = 42,
-}: {
-  url: string
-  titulo: string
-  className?: string
-  /** Altura do rosto na foto, em % (posição vertical do enquadramento). */
-  focoVertical?: number
-}) {
-  const [modo, setModo] = useState<Modo>('ambos')
-  const [reproduzindo, setReproduzindo] = useState(false)
-  const temporizadores = useRef<number[]>([])
+function enquadrar({ antes, depois, dentesNoQuadro = DENTES_NO_QUADRO }: Alinhamento) {
+  const proporcaoMetade = 1500 / 600 // altura ÷ largura de cada metade
+  const proporcaoQuadro = 5 / 4
+  let melhor = { tx: 0.5, k: Infinity }
+  for (let tx = 0.2; tx <= 0.8; tx += 0.005) {
+    let k = 1.04
+    for (const p of [antes, depois]) {
+      k = Math.max(k, tx / p.x, (1 - tx) / (1 - p.x))
+      // vertical: a metade (altura proporcaoMetade·k em larguras de quadro) cobre o quadro
+      const alturaRel = proporcaoMetade / proporcaoQuadro // altura da metade ÷ altura do quadro, com k = 1
+      k = Math.max(k, dentesNoQuadro / (alturaRel * p.y), (1 - dentesNoQuadro) / (alturaRel * (1 - p.y)))
+    }
+    if (k < melhor.k) melhor = { tx, k }
+  }
+  const alturaRel = proporcaoMetade / proporcaoQuadro
+  const camada = (p: { x: number; y: number }, deslocamento: 0 | 1): CSSProperties => ({
+    width: `${200 * melhor.k}%`,
+    left: `${(melhor.tx - (deslocamento + p.x) * melhor.k) * 100}%`,
+    top: `${(dentesNoQuadro - alturaRel * melhor.k * p.y) * 100}%`,
+  })
+  return { antes: camada(antes, 0), depois: camada(depois, 1) }
+}
 
-  const limpar = () => {
-    temporizadores.current.forEach((t) => window.clearTimeout(t))
-    temporizadores.current = []
+/**
+ * Comparador de rosto para montagens com antes à esquerda e depois à direita.
+ * Cada foto ocupa o quadro inteiro e as duas ficam sobrepostas com os dentes
+ * alinhados: arrastar para a direita mostra mais do antes, para a esquerda
+ * mais do depois, e no meio as duas ficam lado a lado.
+ */
+export function ComparadorRosto({ url, titulo, className = '' }: { url: string; titulo: string; className?: string }) {
+  const [divisor, setDivisor] = useState(50)
+  const [reproduzindo, setReproduzindo] = useState(false)
+  const quadro = useRef(0)
+  const id = useId()
+  const camadas = enquadrar(alinhamentosRosto[url] ?? PADRAO)
+  useEffect(() => () => cancelAnimationFrame(quadro.current), [])
+
+  function parar() {
+    cancelAnimationFrame(quadro.current)
     setReproduzindo(false)
   }
-  useEffect(() => limpar, [])
-
-  function escolher(novo: Modo) {
-    limpar()
-    setModo((atual) => (atual === novo ? 'ambos' : novo))
+  function mover(valor: number) {
+    parar()
+    setDivisor(Math.max(0, Math.min(100, valor)))
   }
-
+  function arrastar(evento: PointerEvent<HTMLDivElement>) {
+    const area = evento.currentTarget.getBoundingClientRect()
+    mover(((evento.clientX - area.left) / area.width) * 100)
+  }
+  /** Transição do antes para o depois: a linha corre da direita para a esquerda. */
   function reproduzir() {
-    limpar()
+    parar()
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setModo('ambos')
+      setDivisor(0)
       return
     }
     setReproduzindo(true)
-    setModo('antes')
-    temporizadores.current = [
-      window.setTimeout(() => setModo('depois'), 1600),
-      window.setTimeout(() => {
-        setModo('ambos')
-        setReproduzindo(false)
-      }, 3400),
-    ]
+    const inicio = performance.now()
+    setDivisor(100)
+    function passo(agora: number) {
+      const progresso = Math.min(1, (agora - inicio) / 2600)
+      const suave = progresso * progresso * (3 - 2 * progresso)
+      setDivisor(100 - suave * 100)
+      if (progresso < 1) quadro.current = requestAnimationFrame(passo)
+      else setReproduzindo(false)
+    }
+    quadro.current = requestAnimationFrame(passo)
   }
 
-  const descricao = {
-    ambos: `${titulo}: antes à esquerda e depois à direita`,
-    antes: `${titulo}: antes do tratamento`,
-    depois: `${titulo}: depois do tratamento`,
-  }[modo]
+  const antes = Math.round(divisor)
 
   return (
     <figure className={`sorriso-comparador sorriso-comparador--rosto ${className}`}>
-      <div className="sorriso-janela rosto-janela">
-        <div className="rosto-foto" role="img" aria-label={descricao} style={{ backgroundImage: `url(${url})`, backgroundPosition: `50% ${focoVertical}%` }} />
-        <MarcaMidiaPaciente />
-        <div className="rosto-veu rosto-veu--antes" data-ativo={modo === 'depois'} aria-hidden="true" />
-        <div className="rosto-veu rosto-veu--depois" data-ativo={modo === 'antes'} aria-hidden="true" />
-        <div className="sorriso-divisor" style={{ left: '50%' }}>
-          <button type="button" className="rosto-alca" onClick={reproduzir} aria-label="Reproduzir transição do antes para o depois">
-            ‹ ›
-          </button>
+      <div
+        className="sorriso-janela rosto-janela"
+        onPointerDown={(e) => {
+          if (e.button !== 0) return
+          e.currentTarget.setPointerCapture(e.pointerId)
+          arrastar(e)
+        }}
+        onPointerMove={(e) => { if (e.currentTarget.hasPointerCapture(e.pointerId)) arrastar(e) }}
+        onPointerUp={(e) => { if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId) }}
+      >
+        <div className="rosto-camada">
+          <img src={url} alt={`${titulo}: depois do tratamento`} style={camadas.depois} loading="lazy" draggable={false} />
         </div>
-        <RotulosAntesDepois antes={modo !== 'depois'} depois={modo !== 'antes'} />
+        <div className="rosto-camada" style={{ clipPath: `inset(0 ${100 - divisor}% 0 0)` }}>
+          <img src={url} alt={`${titulo}: antes do tratamento`} style={camadas.antes} loading="lazy" draggable={false} />
+        </div>
+        <MarcaMidiaPaciente />
+        <div className="sorriso-divisor sorriso-divisor--sutil" style={{ left: `${divisor}%` }} aria-hidden="true" />
+        <RotulosAntesDepois antes={divisor > 12} depois={divisor < 88} />
       </div>
       <BarraControles
         reproduzindo={reproduzindo}
-        aoVerAntes={() => escolher('antes')}
-        aoReproduzir={reproduzindo ? () => { limpar(); setModo('ambos') } : reproduzir}
-        aoVerDepois={() => escolher('depois')}
+        aoVerAntes={() => mover(100)}
+        aoReproduzir={reproduzindo ? parar : reproduzir}
+        aoVerDepois={() => mover(0)}
       />
-      <p className="sr-only" aria-live="polite">{reproduzindo ? '' : descricao}</p>
+      {/* O arraste é visual; teclado e leitores de tela usam este controle. */}
+      <label htmlFor={id} className="sr-only">Comparar antes e depois: {titulo}</label>
+      <input id={id} className="sr-only" type="range" min="0" max="100" value={divisor}
+        aria-valuetext={`${antes} por cento antes, ${100 - antes} por cento depois`}
+        onChange={(e) => mover(Number(e.target.value))} />
       <CreditosMidiaPaciente />
     </figure>
   )

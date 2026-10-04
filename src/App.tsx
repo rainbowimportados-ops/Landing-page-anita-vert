@@ -20,8 +20,6 @@ import { Servicos } from './components/Servicos'
 import { Sobre } from './components/Sobre'
 import { ProvedorDeConteudo } from './lib/ConteudoContexto'
 import { Unidades } from './components/Unidades'
-import { Ambientes } from './components/Ambientes'
-import { Manifesto } from './components/Manifesto'
 import { iniciarRolagemSuave } from './lib/rolagemSuave'
 
 export default function App() {
@@ -44,7 +42,6 @@ export default function App() {
       <main>
         <Hero />
         <Detalhes />
-        <Manifesto />
         <Banner />
         <Servicos />
         <Resultados />
@@ -53,7 +50,6 @@ export default function App() {
         <Etapas />
         <InstagramSecao />
         <Depoimentos />
-        <Ambientes />
         <Unidades />
         <Dentistas />
         <Duvidas />
