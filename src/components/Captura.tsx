@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useId, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { useConteudo } from '../lib/ConteudoContexto'
 import { linkWhatsApp, registrarClique } from '../lib/analytics'
 import { enviarLead, telefoneValido, type Intencao } from '../lib/captura'
@@ -90,6 +90,13 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
   const [enviando, setEnviando] = useState(false)
   const [resultado, setResultado] = useState<Resultado | null>(null)
   const idBase = useId()
+
+  // Ao errar, o foco vai para o primeiro campo com problema (inputs ou grupo de opções).
+  useEffect(() => {
+    if (!Object.keys(erros).length) return
+    const alvo = dialogo.current?.querySelector<HTMLElement>('[aria-invalid="true"], fieldset[aria-describedby] input')
+    alvo?.focus()
+  }, [erros])
 
   const abrir = useCallback<Abrir>((novo) => {
     setPedido(novo)
@@ -335,7 +342,7 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
                         aoMudar={(v) => definir('periodo', v)} />
                     )}
                     <Campo id={`${idBase}-cidade`} rotulo="Cidade onde atua ou estuda (opcional)">
-                      <input id={`${idBase}-cidade`} autoComplete="address-level2" maxLength={80} placeholder="Ex.: Ribeirão Preto" value={valores.cidade} onChange={aoDigitar('cidade')} />
+                      <input id={`${idBase}-cidade`} name="cidade" autoComplete="address-level2" maxLength={80} placeholder="Ex.: Ribeirão Preto" value={valores.cidade} onChange={aoDigitar('cidade')} />
                     </Campo>
                   </>
                 )}
@@ -358,11 +365,11 @@ export function ProvedorDeCaptura({ children }: { children: ReactNode }) {
                       <>
                         {valores.perfil === 'Profissional da saúde' && (
                           <Campo id={`${idBase}-profissao`} rotulo="Qual é a sua profissão?" erro={erros.profissaoSaude}>
-                            <input id={`${idBase}-profissao`} maxLength={80} placeholder="Ex.: Fisioterapeuta" value={valores.profissaoSaude} onChange={aoDigitar('profissaoSaude')} aria-invalid={!!erros.profissaoSaude} />
+                            <input id={`${idBase}-profissao`} name="profissao" maxLength={80} placeholder="Ex.: Fisioterapeuta" value={valores.profissaoSaude} onChange={aoDigitar('profissaoSaude')} aria-invalid={!!erros.profissaoSaude} />
                           </Campo>
                         )}
                         <Campo id={`${idBase}-finalidade`} rotulo="Para qual atendimento precisa da sala? (opcional)">
-                          <input id={`${idBase}-finalidade`} maxLength={120} placeholder="Ex.: consultas, avaliações" value={valores.finalidade} onChange={aoDigitar('finalidade')} />
+                          <input id={`${idBase}-finalidade`} name="finalidade" maxLength={120} placeholder="Ex.: consultas, avaliações" value={valores.finalidade} onChange={aoDigitar('finalidade')} />
                         </Campo>
                         <Seletor id={`${idBase}-frequencia`} rotulo="Frequência de uso (opcional)" valor={valores.frequencia} opcoes={frequencias} aoMudar={(v) => definir('frequencia', v)} />
                       </>
@@ -440,7 +447,7 @@ function Seletor({ id, rotulo, valor, opcoes, aoMudar, erro }: {
   return (
     <div className="captura__campo">
       <label htmlFor={id} className="text-sm font-medium">{rotulo}</label>
-      <select id={id} value={valor} onChange={(e) => aoMudar(e.target.value)} aria-invalid={!!erro}>
+      <select id={id} name={id.split('-').pop()} value={valor} onChange={(e) => aoMudar(e.target.value)} aria-invalid={!!erro}>
         <option value="">Selecione</option>
         {opcoes.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
