@@ -13,7 +13,14 @@ const PRIVADO = 'casos-pacientes'
 const PUBLICO = 'digital-card-media'
 const LADO_MAXIMO = 1800
 const LADO_MINI = 360
-const FORMATOS = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/avif']
+const FORMATOS = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/heic-sequence', 'image/heif-sequence', 'image/avif']
+const EXTENSOES = /\.(jpe?g|png|webp|heic|heif|avif)$/i
+
+/** Arquivos que o sistema cria sozinho (macOS, Windows) e não são fotos. */
+const ehLixoDoSistema = (nome: string) => nome.startsWith('._') || nome === '.DS_Store' || nome === 'Thumbs.db' || nome === 'desktop.ini'
+
+const ehFoto = (arquivo: File) => !ehLixoDoSistema(arquivo.name) && (FORMATOS.includes(arquivo.type.toLowerCase()) || EXTENSOES.test(arquivo.name))
+const ehHeic = (arquivo: File) => /heic|heif/i.test(arquivo.type) || /\.(heic|heif)$/i.test(arquivo.name)
 
 export type Caso = {
   id: string
@@ -52,23 +59,40 @@ const erroLegivel = (mensagem: string) =>
 
 // ---------- importação ----------
 
+export type Agrupamento = { grupos: Map<string, File[]>; ignorados: string[] }
+
 /** Agrupa arquivos por pasta de primeiro nível (uma pasta = um paciente). */
-export function agruparPorPasta(arquivos: File[]): Map<string, File[]> {
+export function agruparPorPasta(arquivos: File[]): Agrupamento {
   const grupos = new Map<string, File[]>()
+  const ignorados: string[] = []
   for (const arquivo of arquivos) {
-    if (!FORMATOS.includes(arquivo.type) && !/\.(jpe?g|png|webp|heic|heif|avif)$/i.test(arquivo.name)) continue
+    if (!ehFoto(arquivo)) {
+      if (!ehLixoDoSistema(arquivo.name)) ignorados.push(arquivo.name)
+      continue
+    }
     const caminho = (arquivo as File & { webkitRelativePath?: string }).webkitRelativePath || arquivo.name
     const partes = caminho.split('/')
     const pasta = partes.length > 1 ? partes[0] : `Caso de ${new Date().toLocaleDateString('pt-BR')}`
     grupos.set(pasta, [...(grupos.get(pasta) ?? []), arquivo])
   }
   for (const lista of grupos.values()) lista.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { numeric: true }))
-  return grupos
+  return { grupos, ignorados }
 }
 
-/** Lê pastas arrastadas para a página (inclusive subpastas). */
-export async function arquivosDoArraste(itens: DataTransferItemList): Promise<File[]> {
+/**
+ * Lê o que foi arrastado para a página: pastas (inclusive subpastas) ou fotos
+ * soltas. Fotos arrastadas direto do app Fotos do Mac não vêm como "entrada"
+ * de arquivo, então usamos a lista de arquivos do arraste como reserva.
+ */
+export async function arquivosDoArraste(transferencia: DataTransfer): Promise<File[]> {
   type Entrada = FileSystemEntry & { createReader?: () => FileSystemDirectoryReader }
+  // Tudo que vem do evento precisa ser lido agora, antes de qualquer await.
+  const soltos = [...transferencia.files]
+  const entradas = [...transferencia.items]
+    .filter((i) => i.kind === 'file')
+    .map((i) => i.webkitGetAsEntry?.())
+    .filter(Boolean) as Entrada[]
+
   const lerTudo = (leitor: FileSystemDirectoryReader) =>
     new Promise<FileSystemEntry[]>((resolver) => {
       const todas: FileSystemEntry[] = []
@@ -77,7 +101,8 @@ export async function arquivosDoArraste(itens: DataTransferItemList): Promise<Fi
     })
   const visitar = async (entrada: Entrada, raiz: string): Promise<File[]> => {
     if (entrada.isFile) {
-      const arquivo = await new Promise<File>((ok, falha) => (entrada as FileSystemFileEntry).file(ok, falha))
+      const arquivo = await new Promise<File>((ok, falha) => (entrada as FileSystemFileEntry).file(ok, falha)).catch(() => null)
+      if (!arquivo) return []
       // Guarda a pasta de origem no mesmo campo que o seletor de pastas usa.
       Object.defineProperty(arquivo, 'webkitRelativePath', { value: `${raiz}/${arquivo.name}` })
       return [arquivo]
@@ -88,21 +113,28 @@ export async function arquivosDoArraste(itens: DataTransferItemList): Promise<Fi
     }
     return []
   }
-  const entradas = [...itens].map((i) => i.webkitGetAsEntry()).filter(Boolean) as Entrada[]
-  return (await Promise.all(entradas.map((e) => visitar(e, e.isDirectory ? e.name : `Caso de ${new Date().toLocaleDateString('pt-BR')}`)))).flat()
+  const avulso = `Caso de ${new Date().toLocaleDateString('pt-BR')}`
+  const lidos = (await Promise.all(entradas.map((e) => visitar(e, e.isDirectory ? e.name : avulso)))).flat()
+  return lidos.length > 0 ? lidos : soltos
+}
+
+/** Abre a foto como imagem; HEIC (iPhone) é convertido aqui quando o navegador não abre sozinho. */
+async function abrirImagem(arquivo: File): Promise<ImageBitmap> {
+  try {
+    return await createImageBitmap(arquivo, { imageOrientation: 'from-image' })
+  } catch (erro) {
+    if (!ehHeic(arquivo)) throw erro
+    // Chrome e Firefox não leem HEIC: o conversor só é baixado quando precisa.
+    const { heicTo } = await import('heic-to')
+    return heicTo({ blob: arquivo, type: 'bitmap' })
+  }
 }
 
 /**
  * Redimensiona no navegador, sem cortar e respeitando a orientação da câmera.
  * Só reduz o tamanho do arquivo: a foto continua sendo a que foi enviada.
  */
-async function reduzir(arquivo: File, lado: number, qualidade: number) {
-  let imagem: ImageBitmap
-  try {
-    imagem = await createImageBitmap(arquivo, { imageOrientation: 'from-image' })
-  } catch {
-    throw new Error(`Não foi possível abrir "${arquivo.name}". Fotos HEIC do iPhone abrem só no Safari; no Chrome, exporte como JPG.`)
-  }
+async function reduzir(imagem: ImageBitmap, lado: number, qualidade: number) {
   const escala = Math.min(1, lado / Math.max(imagem.width, imagem.height))
   const largura = Math.round(imagem.width * escala)
   const altura = Math.round(imagem.height * escala)
@@ -110,19 +142,49 @@ async function reduzir(arquivo: File, lado: number, qualidade: number) {
   tela.width = largura
   tela.height = altura
   tela.getContext('2d')!.drawImage(imagem, 0, 0, largura, altura)
-  imagem.close()
   const blob = await new Promise<Blob>((ok, falha) => tela.toBlob((b) => (b ? ok(b) : falha(new Error('Falha ao converter a foto.'))), 'image/webp', qualidade))
   return { blob, largura, altura }
 }
 
-/** Cria o caso e envia as fotos para o armazenamento privado. */
-export async function importarCaso(nome: string, arquivos: File[], progresso: (feitas: number) => void): Promise<string> {
+/** Limite de fotos por caso (o mesmo da função analisar-caso). */
+export const MAXIMO_FOTOS = 16
+
+type FotoPronta = { arquivo: File; foto: Awaited<ReturnType<typeof reduzir>>; mini: Awaited<ReturnType<typeof reduzir>> }
+
+/**
+ * Prepara as fotos e só então cria o caso e envia para o armazenamento
+ * privado. Fotos que não abrem são puladas e devolvidas em `puladas`.
+ */
+export async function importarCaso(
+  nome: string,
+  arquivos: File[],
+  progresso: (etapa: 'preparando' | 'enviando', feitas: number) => void,
+): Promise<{ id: string; puladas: string[] }> {
+  const prontas: FotoPronta[] = []
+  const puladas: string[] = []
+  for (const [i, arquivo] of arquivos.entries()) {
+    progresso('preparando', i)
+    try {
+      const imagem = await abrirImagem(arquivo)
+      prontas.push({ arquivo, foto: await reduzir(imagem, LADO_MAXIMO, 0.88), mini: await reduzir(imagem, LADO_MINI, 0.8) })
+      imagem.close()
+    } catch {
+      puladas.push(arquivo.name)
+    }
+  }
+  if (prontas.length < 2) {
+    throw new Error(
+      puladas.length
+        ? `Não consegui abrir as fotos de "${nome}" (${puladas.slice(0, 3).join(', ')}${puladas.length > 3 ? '…' : ''}). Exporte como JPG (no app Fotos: Arquivo → Exportar) e tente de novo.`
+        : `A pasta "${nome}" precisa de pelo menos 2 fotos (uma de antes e uma de depois).`,
+    )
+  }
+
   const { data: caso, error } = await supabase.from('site_casos').insert({ nome: nome.slice(0, 120) }).select('id').single()
   if (error || !caso) throw new Error(erroLegivel(error?.message ?? 'Não foi possível criar o caso.'))
 
-  for (const [ordem, arquivo] of arquivos.entries()) {
-    const foto = await reduzir(arquivo, LADO_MAXIMO, 0.88)
-    const mini = await reduzir(arquivo, LADO_MINI, 0.8)
+  for (const [ordem, { arquivo, foto, mini }] of prontas.entries()) {
+    progresso('enviando', ordem)
     const base = `${caso.id}/${crypto.randomUUID()}`
     for (const [caminho, blob] of [[`${base}.webp`, foto.blob], [`${base}-mini.webp`, mini.blob]] as const) {
       const envio = await supabase.storage.from(PRIVADO).upload(caminho, blob, { contentType: 'image/webp', upsert: false })
@@ -138,9 +200,8 @@ export async function importarCaso(nome: string, arquivos: File[], progresso: (f
       ordem,
     })
     if (linha.error) throw new Error(erroLegivel(linha.error.message))
-    progresso(ordem + 1)
   }
-  return caso.id
+  return { id: caso.id, puladas }
 }
 
 // ---------- leitura e edição ----------
