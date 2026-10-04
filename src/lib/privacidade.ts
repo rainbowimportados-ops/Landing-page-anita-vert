@@ -18,6 +18,7 @@ export function guardarEscolha(escolha: 'accepted' | 'declined'): void {
     if (escolha === 'declined') {
       window.localStorage.removeItem('vert_card_visitor_id')
       window.localStorage.removeItem('vert_card_instagram')
+      window.sessionStorage.removeItem('vert_origem_v1')
     }
   } catch {}
 }

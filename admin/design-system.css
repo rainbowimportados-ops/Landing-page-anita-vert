@@ -245,3 +245,10 @@ button:disabled { cursor:not-allowed; opacity:.48; }
   .workspace { min-height:0; }
   .editor,.app[data-active-section] .editor { padding-bottom:20px; }
 }
+
+/* Celular: marca e seletor de área na mesma linha, para sobrar tela ao conteúdo. */
+@media (max-width:760px) {
+  .sidebar { flex-direction:row; min-height:0; padding:8px 12px; }
+  .sidebar__brand { width:112px; height:44px; flex:0 0 112px; }
+  .sidebar__brand picture,.sidebar__brand img { width:112px; height:44px; object-fit:contain; }
+}

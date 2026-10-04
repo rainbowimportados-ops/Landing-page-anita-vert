@@ -75,6 +75,15 @@ erro do banco ao tentar salvar.
 
 ## Captação e medição
 
+**Formulários.** Landing e cartão têm duas etapas: (1) nome e WhatsApp; (2) todas as
+perguntas do tipo de contato, de uma vez — paciente (interesse, unidade, já é paciente),
+curso (dentista ou estudante, assunto, cidade) e locação (somente dentista ou
+profissional da saúde; estudante é bloqueado e levado aos cursos). O que o botão já
+informa (interesse, unidade) não é perguntado de novo. A confirmação só aparece quando o
+banco confirma o registro; em caso de falha a pessoa é avisada e pode tentar de novo ou
+seguir ao WhatsApp. Origem, UTM, referência e página só acompanham o lead se as métricas
+foram autorizadas; sem autorização o pedido leva apenas o que foi digitado e o botão usado.
+
 **Leads.** Landing e cartão usam a mesma função pública do Supabase,
 `site_capturar_lead(p jsonb)`. Ela valida os dados, limita abusos (3 envios
 por telefone e 60 no total a cada 10 min) e grava em:
