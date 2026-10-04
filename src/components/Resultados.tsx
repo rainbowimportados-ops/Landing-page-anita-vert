@@ -18,7 +18,7 @@ export function Resultados() {
 
         <Reveal variante="imagem">
           <article className="resultados-destaque grid gap-6 lg:items-center lg:gap-14">
-            <ComparadorRosto url="/assets/comparadores/rosto-antes-depois.webp" titulo="Resultado real de paciente do Instituto Vert" />
+            <ComparadorRosto url="/assets/comparadores/caso-rosto-2.webp" titulo="Resultado real de paciente do Instituto Vert" />
             <div className="order-first lg:order-none">
               <p className="olho">Sorrisos reais · Antes e depois</p>
               <h2 id="resultados-titulo" className="titulo-secao mt-3">Resultados reais</h2>

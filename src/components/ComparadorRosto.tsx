@@ -4,6 +4,12 @@ import { BarraControles, RotulosAntesDepois } from './Sorrisos'
 import { CreditosMidiaPaciente, MarcaMidiaPaciente } from './MarcaMidiaPaciente'
 
 /** Altura padrão dos dentes no quadro (0 = topo, 1 = base): deixa olhos e queixo à vista. */
+/**
+ * Zoom máximo sobre a foto enviada. Acima disso a foto deixaria de parecer a
+ * original (vira só boca e nariz): nesse caso o alinhamento fica o mais próximo
+ * possível, sem ampliar mais.
+ */
+const ZOOM_MAXIMO = 1.12
 const DENTES_NO_QUADRO = 0.6
 const PADRAO: Alinhamento = { antes: { x: 0.5, y: 0.45 }, depois: { x: 0.5, y: 0.45 } }
 
@@ -26,11 +32,16 @@ function enquadrar({ antes, depois, dentesNoQuadro = DENTES_NO_QUADRO }: Alinham
     }
     if (k < melhor.k) melhor = { tx, k }
   }
+  melhor.k = Math.min(melhor.k, ZOOM_MAXIMO)
   const alturaRel = proporcaoMetade / proporcaoQuadro
+  const { k, tx } = melhor
+  // Posição ideal (dentes no ponto comum), presa ao intervalo em que a metade
+  // ainda cobre o quadro inteiro: nunca aparece borda vazia.
+  const preso = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
   const camada = (p: { x: number; y: number }, deslocamento: 0 | 1): CSSProperties => ({
-    width: `${200 * melhor.k}%`,
-    left: `${(melhor.tx - (deslocamento + p.x) * melhor.k) * 100}%`,
-    top: `${(dentesNoQuadro - alturaRel * melhor.k * p.y) * 100}%`,
+    width: `${200 * k}%`,
+    left: `${preso(tx - (deslocamento + p.x) * k, 1 - (deslocamento + 1) * k, -deslocamento * k) * 100}%`,
+    top: `${preso(dentesNoQuadro - alturaRel * k * p.y, 1 - alturaRel * k, 0) * 100}%`,
   })
   return { antes: camada(antes, 0), depois: camada(depois, 1) }
 }

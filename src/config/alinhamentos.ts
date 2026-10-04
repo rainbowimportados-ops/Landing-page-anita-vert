@@ -13,9 +13,9 @@ export type Alinhamento = {
 }
 
 export const alinhamentosRosto: Record<string, Alinhamento> = {
-  // Rostos em posições bem diferentes nas duas metades: alinhar os dentes pede zoom
-  // (~1,8×), então o quadro mostra do nariz ao queixo, com os dentes mais abaixo.
-  '/assets/comparadores/rosto-antes-depois.webp': { antes: { x: 0.28, y: 0.605 }, depois: { x: 0.73, y: 0.615 }, dentesNoQuadro: 0.7 },
+  // Rostos em posições bem diferentes nas duas metades: alinhar exigiria ampliar
+  // demais, então esta montagem não é usada no comparador. Mantida para referência.
+  '/assets/comparadores/rosto-antes-depois.webp': { antes: { x: 0.28, y: 0.605 }, depois: { x: 0.73, y: 0.615 } },
   '/assets/comparadores/caso-rosto-1.webp': { antes: { x: 0.53, y: 0.427 }, depois: { x: 0.5, y: 0.421 } },
   '/assets/comparadores/caso-rosto-2.webp': { antes: { x: 0.51, y: 0.465 }, depois: { x: 0.53, y: 0.452 } },
   '/assets/comparadores/caso-rosto-3.webp': { antes: { x: 0.69, y: 0.433 }, depois: { x: 0.7, y: 0.426 } },
