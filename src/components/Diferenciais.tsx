@@ -4,7 +4,7 @@ import { Reveal } from './Reveal'
 export function Diferenciais() {
   return (
     <section className="secao">
-      <div className="container-vert grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
+      <div className="container-vert grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
         <Reveal>
           <p className="olho">Por que a Vert</p>
           <h2 className="titulo-secao mt-3">
@@ -18,7 +18,7 @@ export function Diferenciais() {
           </p>
         </Reveal>
 
-        <div className="grid gap-x-8 gap-y-9 sm:grid-cols-2">
+        <div className="trilho grid gap-x-8 gap-y-9 sm:grid-cols-2">
           {diferenciais.map((item, indice) => (
             <Reveal key={item.titulo} delay={indice * 45}>
               <div className="diferencial-item interactive-card border-l-2 border-borda-forte pl-5">

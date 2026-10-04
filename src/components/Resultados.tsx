@@ -15,40 +15,37 @@ export function Resultados() {
         <MarcaMidiaPaciente />
       </figure>
       <div className="container-vert resultados-cenario__conteudo">
-        <Reveal className="resultados-cenario__intro mx-auto max-w-2xl text-center">
-          <p className="olho">Sorrisos reais · Antes e depois</p>
-          <h2 id="resultados-titulo" className="titulo-secao mt-4">Resultados reais</h2>
-          <p className="lead mt-4">
-            Histórias que comprovam o que fazemos. Fotografias originais dos nossos pacientes, sem simulação do
-            resultado.
-          </p>
-        </Reveal>
 
-        <Reveal variante="imagem" className="mt-8 sm:mt-10">
-          <article className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr] lg:items-center lg:gap-12">
+        <Reveal variante="imagem">
+          <article className="resultados-destaque grid gap-6 lg:grid-cols-[1.3fr_0.7fr] lg:items-center lg:gap-12">
             <ComparadorRosto url="/assets/comparadores/rosto-antes-depois.webp" titulo="Resultado real de paciente do Instituto Vert" focoVertical={36} />
-            <div>
-              <p className="olho-linha">Caso em destaque</p>
-              <h3 className="mt-4 font-display text-display-sm font-light text-conteudo">O sorriso que muda o rosto inteiro.</h3>
-              <p className="mt-4 font-display text-xl leading-snug text-conteudo-suave">
+            <div className="order-first lg:order-none">
+              <p className="olho">Sorrisos reais · Antes e depois</p>
+              <h2 id="resultados-titulo" className="titulo-secao mt-3">Resultados reais</h2>
+              <p className="lead mt-3">
+                Histórias que comprovam o que fazemos. Fotografias originais dos nossos pacientes, sem simulação do resultado.
+              </p>
+              <p className="olho-linha mt-[clamp(1.25rem,4svh,2.25rem)]">Caso em destaque</p>
+              <h3 className="mt-3 font-display text-[clamp(1.6rem,1.2rem+1.4vw,2.2rem)] font-light leading-tight text-conteudo">O sorriso que muda o rosto inteiro.</h3>
+              <p className="mt-2 text-sm leading-relaxed text-conteudo-suave">
                 Mesma paciente, antes e depois do tratamento. Fotografia original, sem retoque do resultado.
               </p>
             </div>
           </article>
         </Reveal>
 
-        <Reveal className="mt-10 sm:mt-12">
+        <Reveal className="mt-[clamp(2.5rem,8svh,4.5rem)]">
           <CasoCompleto />
         </Reveal>
 
-        <Reveal variante="imagem" className="mt-5">
+        <Reveal variante="imagem" className="mt-[clamp(2.5rem,8svh,4.5rem)]">
           <figure className="tratamento-card grid overflow-hidden rounded-[1.5rem] border border-white/70 md:grid-cols-[0.6fr_1.4fr] md:items-center">
             <div className="midia-paciente__video">
               <VideoCameraLenta
                 src={videoResultado}
                 poster={posterVideo}
                 rotulo="Vídeo de resultado real do Instituto Vert, em câmera lenta"
-                className="aspect-[4/5] w-full bg-conteudo object-contain md:max-h-[28rem]"
+                className="aspect-[4/5] w-full bg-conteudo object-contain md:max-h-[min(28rem,calc(100svh-10rem))]"
               />
               <MarcaMidiaPaciente />
             </div>

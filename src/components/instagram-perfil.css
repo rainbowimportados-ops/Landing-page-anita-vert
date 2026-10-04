@@ -31,3 +31,8 @@
 .ig-app__grade a:hover img{filter:brightness(.85)}
 .ig-app__creditos{margin:0;padding:10px 14px 12px;color:#aaa29c;text-align:center;font-size:.55rem}
 @media(max-width:420px){.ig-app{border-radius:22px}.ig-app__topo{gap:14px;padding:10px 14px 4px}.ig-app__avatar{width:78px;height:78px}.ig-app__barra,.ig-app__bio,.ig-app__acoes{padding-left:14px;padding-right:14px}.ig-app__numeros dd{font-size:1rem}.ig-app__numeros dt{font-size:.8rem}.ig-app__bio{font-size:.875rem}}
+
+/* Cabe na tela: duas fileiras de publicações e quadro mais estreito no computador. */
+.ig-app__grade li:nth-child(n+7){display:none}
+.ig-app__grade a{aspect-ratio:1/1}
+@media(min-width:1024px){.ig-app{max-width:25rem}.ig-app__avatar{width:76px;height:76px}.ig-app__barra{padding-top:14px}}

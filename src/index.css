@@ -215,8 +215,9 @@
     @apply mx-auto w-full max-w-content px-5 sm:px-8;
   }
 
+  /* Espaço proporcional à altura da tela: blocos inteiros na tela, sem vazio sobrando. */
   .secao {
-    @apply py-12 sm:py-16 lg:py-20;
+    padding-block: clamp(1.75rem, 5.5svh, 4.5rem);
   }
 
   .titulo-secao {
@@ -836,13 +837,13 @@
 .captura button, .captura label { touch-action: manipulation; }
 
 /* ===== Movimento: frase da clínica lida no ritmo da rolagem ===== */
-.manifesto { position: relative; height: 230vh; }
+.manifesto { position: relative; height: 160vh; }
 .manifesto__palco { position: sticky; top: 0; display: flex; align-items: center; height: 100svh; }
 .manifesto__frase {
   max-width: 19ch;
   margin: 0 auto;
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(2.3rem, 1.1rem + 5vw, 5.6rem);
+  font-size: clamp(2rem, min(5.4vw, 8.5svh), 5.2rem);
   font-style: italic;
   font-weight: 300;
   line-height: 1.06;
@@ -853,7 +854,7 @@
 .manifesto--estatico { height: auto; padding: 6rem 0; }
 
 /* ===== Movimento: o espaço da clínica em zoom ===== */
-.ambientes { position: relative; height: 300vh; }
+.ambientes { position: relative; height: 210vh; }
 .ambientes__palco { position: sticky; top: 0; height: 100svh; overflow: hidden; background: rgb(var(--cor-fundo)); }
 .ambientes__camada { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; will-change: transform; }
 .ambientes__moldura { position: relative; width: 25vw; height: 25vh; overflow: hidden; border-radius: 4px; }
@@ -867,7 +868,7 @@
 .ambientes__veu { position: absolute; inset: 0; background: rgb(30 18 14); pointer-events: none; }
 .ambientes__legenda { position: absolute; inset: auto 0 12vh; padding: 0 1.25rem; text-align: center; }
 @media (max-width: 767px) {
-  .ambientes { height: 260vh; }
+  .ambientes { height: 190vh; }
   .ambientes__moldura { width: 44vw; height: 26vh; }
   .ambientes__foto--1 .ambientes__moldura { top: -31vh; left: 4vw; width: 52vw; height: 22vh; }
   .ambientes__foto--2 .ambientes__moldura { top: -8vh; left: -36vw; width: 26vw; height: 34vh; }
@@ -878,23 +879,25 @@
 }
 
 /* ===== Movimento: primeira dobra em cena (computador) ===== */
-.hero-cinema { position: relative; height: 260vh; }
+.hero-cinema { position: relative; height: 190vh; }
 .hero-cinema__palco { position: sticky; top: 0; height: 100svh; overflow: hidden; background: rgb(var(--cor-fundo)); }
 .hero-cinema__vaga { width: 100%; height: calc(100svh - 9rem); max-height: 52rem; }
 .hero-cinema__foto { position: absolute; inset: 0; z-index: 2; margin: 0; overflow: hidden; }
-.hero-cinema__imagem { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 24%; }
-.hero-cinema__veu { position: absolute; inset: 0; background: rgb(30 18 14); pointer-events: none; }
+.hero-cinema__imagem { display: block; width: 100%; height: auto; }
+.hero-cinema__veu { position: absolute; inset: 0; background: linear-gradient(90deg, rgb(30 18 14) 0%, rgb(30 18 14 / 0.55) 45%, rgb(30 18 14 / 0.15) 75%); pointer-events: none; }
 .hero-cinema__final {
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: max(1.5rem, calc((100vw - 76rem) / 2));
   z-index: 2;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 0 1.5rem;
-  text-align: center;
-  text-shadow: 0 2px 24px rgb(0 0 0 / 0.25);
+  width: min(40vw, 34rem);
+  text-align: left;
+  text-shadow: 0 2px 24px rgb(0 0 0 / 0.3);
 }
 
 /* ===== Movimento: imagens que abrem como cortina ===== */
@@ -906,5 +909,59 @@
   from { transform: scale(1.16); }
   to { transform: scale(1); }
 }
-.revelar-imagem { animation: revelar-imagem 1.5s var(--curva-saida) both; }
-.revelar-imagem img { animation: revelar-imagem-zoom 2.2s var(--curva-saida) both; }
+.revelar-imagem { animation: revelar-imagem 0.9s var(--curva-saida) both; }
+.revelar-imagem img { animation: revelar-imagem-zoom 1.3s var(--curva-saida) both; }
+
+/* ===== Blocos que cabem na tela =====
+   Mídias limitadas pela altura da tela (não só pela largura), para que cada bloco
+   apareça inteiro ao rolar, em notebook, monitor grande ou celular. */
+.sorriso-comparador.sorriso-comparador { width: min(100%, calc(var(--altura-max, 64svh) * var(--proporcao, 1))); max-width: none; margin-inline: auto; }
+.sorriso-comparador--rosto { --proporcao: 1.1; }
+@media (max-width: 640px) { .sorriso-comparador--rosto { --proporcao: 1; } }
+.detalhes-comparador { --altura-max: calc(100svh - 12rem); }
+.caso-completo .sorriso-comparador { --altura-max: calc(100svh - 26rem); }
+@media (max-width: 1023px) { .caso-completo .sorriso-comparador { --altura-max: calc(100svh - 21rem); } }
+.resultados-destaque .sorriso-comparador { --altura-max: calc(100svh - 11rem); }
+.sobre-retrato { width: min(100%, 520px, calc((100svh - 8rem) * 0.8)); }
+
+/* Listas longas no celular: deslizar para o lado em vez de empilhar telas. */
+@media (max-width: 639px) {
+  .trilho {
+    display: flex !important;
+    gap: 0.75rem;
+    margin-inline: -1.25rem;
+    padding: 0.25rem 1.25rem 0.75rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 1.25rem;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .trilho::-webkit-scrollbar { display: none; }
+  .trilho > * { flex: 0 0 82%; scroll-snap-align: start; }
+}
+
+/* Diferenciais do hero em linha, abaixo dos botões (só computador). */
+.hero-selos-linha { display: none; }
+@media (min-width: 1024px) {
+  .hero-selos-linha { display: flex; flex-wrap: wrap; gap: 0.6rem 1.4rem; margin-top: 1.75rem; list-style: none; padding: 0; }
+  .hero-selos-linha li { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; color: rgb(var(--cor-conteudo-suave)); }
+}
+/* No celular a frase da foto fica no alto, para não cobrir o sorriso. */
+@media (max-width: 1023px) {
+  .hero-foto img { object-position: 50% 32%; }
+  .hero-foto__legenda { top: 0.9rem; bottom: auto; }
+}
+.hero-cinema__vaga { height: calc(100svh - 8.5rem); max-height: 50rem; }
+
+/* Instagram: o quadro do app encolhe em telas baixas para caber inteiro. */
+@media (max-height: 860px) { .ig-app { zoom: 0.86; } }
+@media (max-width: 640px) { .ig-app { zoom: 0.8; } }
+@media (max-height: 760px) { .ig-app { zoom: 0.76; } }
+@media (max-width: 640px) { .ig-app__grade li:nth-child(n+4) { display: none; } }
+
+/* Sobre: no celular a foto fica mais baixa, com o rosto e o sorriso. */
+@media (max-width: 1023px) {
+  .sobre-retrato { aspect-ratio: 5 / 4; }
+  .sobre-retrato img { object-position: 50% 30%; }
+}

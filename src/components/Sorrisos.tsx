@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import type { PointerEvent, ReactNode } from 'react'
+import type { CSSProperties, PointerEvent, ReactNode } from 'react'
 import { IconImagem, IconPausa, IconPlay } from './Icon'
 import { CreditosMidiaPaciente, MarcaMidiaPaciente } from './MarcaMidiaPaciente'
 import './sorrisos.css'
@@ -107,7 +107,7 @@ export function ComparadorSorriso({
   const depois = 100 - antes
 
   return (
-    <figure className={`sorriso-comparador ${className}`}>
+    <figure className={`sorriso-comparador ${className}`} style={{ '--proporcao': registro.largura / (registro.altura / 2) } as CSSProperties}>
       <div className="sorriso-janela" style={{ aspectRatio: `${registro.largura} / ${registro.altura / 2}` }}
         onPointerDown={(e) => {
           if (e.button !== 0 || bloqueado) return

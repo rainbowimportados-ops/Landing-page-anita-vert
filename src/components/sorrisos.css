@@ -62,3 +62,14 @@
 @media(max-width:640px){.detalhes-comparador .sorriso-janela,.caso-completo .sorriso-janela:not(.rosto-janela){aspect-ratio:4/3!important}}
 
 @media(max-width:640px){.sorriso-barra{width:100%;justify-content:space-between}.sorriso-barra button{flex:1;padding:.4rem .35rem;font-size:.75rem;gap:.3rem}.sorriso-barra .rotulo-longo{display:none}.sorriso-barra .rotulo-curto{display:inline}}
+
+/* Caso completo: abas só no celular; no computador as duas vistas lado a lado. */
+.caso-completo__abas{display:none}
+@media(max-width:1023px){
+  .caso-completo__abas{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:.9rem;padding:4px;border:1px solid rgb(var(--cor-borda-forte));border-radius:14px;background:rgb(var(--cor-superficie))}
+  .caso-completo__abas button{min-height:44px;border-radius:10px;font-size:.85rem;color:rgb(var(--cor-conteudo-suave))}
+  .caso-completo__abas button[aria-selected=true]{background:rgb(var(--cor-marca-forte));color:rgb(var(--cor-conteudo-inverso))}
+  .caso-completo__grade[data-aba=perto]>section:nth-child(2),.caso-completo__grade[data-aba=rosto]>section:nth-child(1){display:none}
+  .caso-completo__subtitulo{display:none}
+}
+.caso-completo__cabecalho{margin-bottom:.9rem}

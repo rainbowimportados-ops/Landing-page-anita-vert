@@ -24,9 +24,9 @@ export function Ambientes() {
   const reduzir = useReducedMotion()
   const secao = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({ target: secao, offset: ['start start', 'end end'] })
-  const legenda = useTransform(scrollYProgress, [0.72, 0.92], [0, 1])
-  const legendaY = useTransform(scrollYProgress, [0.72, 0.92], [24, 0])
-  const veu = useTransform(scrollYProgress, [0.6, 0.9], [0, 0.45])
+  const legenda = useTransform(scrollYProgress, [0.62, 0.86], [0, 1])
+  const legendaY = useTransform(scrollYProgress, [0.62, 0.86], [20, 0])
+  const veu = useTransform(scrollYProgress, [0.52, 0.82], [0, 0.45])
 
   if (reduzir) {
     return (
@@ -63,7 +63,7 @@ export function Ambientes() {
 }
 
 function FotoZoom({ foto, progresso }: { foto: Foto; progresso: ReturnType<typeof useScroll>['scrollYProgress'] }) {
-  const escala = useTransform(progresso, [0, 0.85], [1, foto.escala])
+  const escala = useTransform(progresso, [0, 0.78], [1, foto.escala])
   return (
     <m.div className={`ambientes__camada ${foto.classe}`} style={{ scale: escala }}>
       <div className="ambientes__moldura">

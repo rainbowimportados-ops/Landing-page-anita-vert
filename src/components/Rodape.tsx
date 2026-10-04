@@ -22,12 +22,12 @@ export function Rodape() {
   const { clinica, unidades, rodapeLegal, instagram } = useConteudo()
 
   return (
-    <footer className="bg-superficie-rodape pb-8 pt-12 text-conteudo-inverso-suave">
+    <footer className="bg-superficie-rodape pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-10 text-conteudo-inverso-suave sm:pb-8 sm:pt-12">
       <div className="container-vert">
-        <div className="grid gap-8 border-b border-borda-inversa pb-10 lg:grid-cols-[1.2fr_2fr]">
+        <div className="grid gap-6 border-b border-borda-inversa pb-8 sm:gap-8 sm:pb-10 lg:grid-cols-[1.2fr_2fr]">
           <div>
-            <MarcaVert versao="circular" className="h-24 text-conteudo-inverso" />
-            <p className="mt-6 font-display text-2xl italic leading-snug text-conteudo-inverso">
+            <MarcaVert versao="circular" className="h-16 text-conteudo-inverso sm:h-24" />
+            <p className="mt-4 font-display text-xl italic leading-snug text-conteudo-inverso sm:mt-6 sm:text-2xl">
               Sorrisos que
               <br />
               transformam histórias.
@@ -35,10 +35,10 @@ export function Rodape() {
             <p className="mt-3 max-w-xs text-sm leading-relaxed">{clinica.tagline} em Franca e Ribeirão Preto.</p>
           </div>
 
-          <div className="grid min-w-0 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <nav aria-label="Rodapé">
+          <div className="grid min-w-0 grid-cols-2 gap-x-5 gap-y-6 sm:gap-8 lg:grid-cols-4">
+            <nav aria-label="Rodapé" className="hidden sm:block">
               <h3 className={titulo}>Navegação</h3>
-              <ul className="mt-2">
+              <ul className="mt-1 grid grid-cols-1">
                 {navegacao.map((item) => (
                   <li key={item.href}>
                     <a href={item.href} className={classeLink}>{item.rotulo}</a>

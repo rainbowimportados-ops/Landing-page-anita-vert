@@ -62,7 +62,7 @@ export function ComparadorRosto({
   }[modo]
 
   return (
-    <figure className={`sorriso-comparador ${className}`}>
+    <figure className={`sorriso-comparador sorriso-comparador--rosto ${className}`}>
       <div className="sorriso-janela rosto-janela">
         <div className="rosto-foto" role="img" aria-label={descricao} style={{ backgroundImage: `url(${url})`, backgroundPosition: `50% ${focoVertical}%` }} />
         <MarcaMidiaPaciente />

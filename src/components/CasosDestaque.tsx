@@ -46,6 +46,8 @@ export function CasoCompleto() {
   const [rosto, setRosto] = useState(0)
   const vistaPerto = sorrisoPerto[perto]
   const vistaRosto = rostoInteiro[rosto]
+  // No celular as duas vistas não cabem juntas na tela: abas escolhem uma.
+  const [aba, setAba] = useState<'perto' | 'rosto'>('perto')
 
   return (
     <article className="caso-completo glass-card" aria-labelledby="caso-completo-titulo">
@@ -53,7 +55,11 @@ export function CasoCompleto() {
         <p className="resultado-card__label">Um caso, todos os ângulos</p>
         <h3 id="caso-completo-titulo" className="caso-destaque__titulo">Do detalhe do sorriso ao rosto inteiro.</h3>
       </header>
-      <div className="caso-completo__grade">
+      <div className="caso-completo__abas" role="tablist" aria-label="Escolha a vista">
+        <button type="button" role="tab" aria-selected={aba === 'perto'} onClick={() => setAba('perto')}>Sorriso de perto</button>
+        <button type="button" role="tab" aria-selected={aba === 'rosto'} onClick={() => setAba('rosto')}>Rosto inteiro</button>
+      </div>
+      <div className="caso-completo__grade" data-aba={aba}>
         <section aria-label="Sorriso de perto">
           <p className="caso-completo__subtitulo">Sorriso de perto · {sorrisoPerto.length} vistas</p>
           <ComparadorSorriso key={vistaPerto.url} registro={{ ...vistaPerto, titulo: `Sorriso de perto, vista ${perto + 1}` }} />

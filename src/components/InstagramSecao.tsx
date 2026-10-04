@@ -231,8 +231,9 @@ export function InstagramSecao() {
 
   return (
     <section id="instagram" className="secao" aria-labelledby="instagram-titulo">
-      <div className="container-vert">
-        <Reveal className="mx-auto max-w-2xl text-center">
+      {/* No computador o título fica à esquerda e os dois perfis à direita: o bloco cabe numa tela. */}
+      <div className="container-vert lg:grid lg:grid-cols-[0.75fr_1.6fr] lg:items-center lg:gap-10">
+        <Reveal className="mx-auto max-w-2xl text-center lg:mx-0 lg:text-left">
           <p className="olho">No Instagram</p>
           <h2 id="instagram-titulo" className="titulo-secao mt-4">Acompanhe o dia a dia do Instituto Vert</h2>
           <p className="lead mt-4">
@@ -240,7 +241,7 @@ export function InstagramSecao() {
           </p>
         </Reveal>
 
-        <div role="tablist" aria-label="Escolha o perfil" className="unidades-abas mx-auto mt-8 grid max-w-sm grid-cols-2 gap-1 rounded-2xl p-1 lg:hidden">
+        <div role="tablist" aria-label="Escolha o perfil" className="unidades-abas mx-auto mt-5 grid max-w-sm grid-cols-2 gap-1 rounded-2xl p-1 lg:hidden">
           {perfisInstagram.map((perfil, i) => (
             <button
               key={perfil.usuario}
@@ -258,7 +259,7 @@ export function InstagramSecao() {
           ))}
         </div>
 
-        <div className="mt-6 grid gap-8 lg:mt-12 lg:grid-cols-2 lg:items-start">
+        <div className="mt-5 grid gap-6 lg:mt-0 lg:grid-cols-2 lg:items-start">
           {perfisInstagram.map((perfil, i) => (
             <Reveal key={perfil.usuario} delay={i * 80} className={i === ativo ? '' : 'hidden lg:block'}>
               <div role="tabpanel" id={`ig-painel-${perfil.pasta}`} aria-labelledby={`ig-aba-${perfil.pasta}`}>

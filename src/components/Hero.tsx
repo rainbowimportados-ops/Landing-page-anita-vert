@@ -17,6 +17,10 @@ const atributos = [
 const MENSAGEM = 'Olá! Vim pelo site e gostaria de agendar uma avaliação.'
 const ALT = 'Dra. Anita Matias de Almeida, do Instituto Vert, sorrindo'
 const curva = [0.16, 1, 0.3, 1] as const
+/** Altura ÷ largura da foto do hero (1200 × 1800). */
+const PROPORCAO = 1800 / 1200
+/** Altura do recorte na foto: 0 = topo, 1 = base. Mantém olhos e sorriso no quadro. */
+const FOCO = 0.38
 
 function useMidia(consulta: string): boolean {
   return useSyncExternalStore(
@@ -45,33 +49,42 @@ function Texto({ animar }: { animar: boolean }) {
   const { clinica } = useConteudo()
   const entra = (atraso: number) =>
     animar
-      ? { initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { duration: 1, delay: atraso, ease: curva } }
+      ? { initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.8, delay: atraso, ease: curva } }
       : {}
 
   return (
     <>
       <m.p className="olho-linha" {...entra(0.1)}>Resultados reais</m.p>
       <h1 className="mt-5 font-display text-display-lg font-light tracking-[-0.02em] text-conteudo">
-        <PalavrasReveladas texto="Sorrisos que transformam histórias." atraso={0.25} />
+        <PalavrasReveladas texto="Sorrisos que transformam histórias." atraso={0.15} passo={0.06} />
       </h1>
-      <m.p className="mt-6 max-w-md font-display text-xl leading-snug text-conteudo-suave sm:text-2xl" {...entra(0.75)}>
+      <m.p className="mt-6 max-w-md font-display text-xl leading-snug text-conteudo-suave sm:text-2xl" {...entra(0.55)}>
         Mais que estética, devolvemos confiança, bem-estar e qualidade de vida. Resultados reais, com planejamento e segurança.
       </m.p>
-      <m.div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center" {...entra(0.95)}>
+      <m.div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center" {...entra(0.7)}>
         <BotaoWhatsApp
           rastreio="hero_agendar"
           intencao="avaliacao"
           numero={clinica.whatsappComercial}
           mensagem={MENSAGEM}
           icone="seta"
-          className="w-full px-7 sm:w-auto"
+          className="w-full whitespace-nowrap px-7 sm:w-auto"
         >
           Agendar avaliação
         </BotaoWhatsApp>
-        <BotaoAncora href="#unidades" className="w-full sm:w-auto">
+        <BotaoAncora href="#unidades" className="w-full whitespace-nowrap sm:w-auto">
           Conheça nossas unidades
         </BotaoAncora>
       </m.div>
+      {/* No computador, abaixo dos botões. No celular a faixa logo abaixo já traz isso. */}
+      <m.ul className="hero-selos-linha" {...entra(0.85)}>
+        {atributos.map(({ Icone, texto }) => (
+          <li key={texto}>
+            <Icone className="h-5 w-5 shrink-0 text-conteudo" />
+            {texto}
+          </li>
+        ))}
+      </m.ul>
     </>
   )
 }
@@ -99,17 +112,17 @@ function HeroPadrao({ animar }: { animar: boolean }) {
 
   return (
     <section id="topo" ref={secao} className="hero-claro relative overflow-hidden pt-[5.5rem]">
-      <div className="container-vert relative grid gap-6 pb-10 pt-4 sm:gap-8 sm:pt-10">
+      <div className="container-vert relative grid gap-6 pb-10 pt-4 sm:gap-8 sm:pt-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12">
         <div>
           <Texto animar={animar} />
         </div>
-        <figure className="hero-foto order-first">
+        <figure className="hero-foto order-first lg:order-none">
           {/* Entrada em câmera lenta: a foto assenta devagar, sem pressa. */}
           <m.div
             className="absolute inset-0"
             initial={animar ? { scale: 1.14, opacity: 0 } : false}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 2.6, ease: curva }}
+            transition={{ duration: 1.8, ease: curva }}
             style={animar ? { y: deslocamento } : undefined}
           >
             <Imagem />
@@ -161,25 +174,38 @@ function HeroCinema() {
   }, [topo, direita, base, esquerda, largura, altura])
 
   const { scrollYProgress } = useScroll({ target: secao, offset: ['start start', 'end end'] })
-  const abre = useTransform(scrollYProgress, [0.06, 0.66], [0, 1], { ease: (v) => v * v * (3 - 2 * v) })
+  const abre = useTransform(scrollYProgress, [0.03, 0.62], [0, 1], { ease: (v) => v * v * (3 - 2 * v) })
 
   const recorte = useTransform([abre, topo, direita, base, esquerda] as MotionValue<number>[], ([e, t, r, b, l]: number[]) => {
     const k = 1 - e
     return `inset(${t * k}px ${r * k}px ${b * k}px ${l * k}px round ${28 * k}px)`
   })
-  // A foto acompanha o cartão: centralizada nele e na escala certa, até virar tela cheia.
-  const fotoX = useTransform([abre, direita, esquerda] as MotionValue<number>[], ([e, r, l]: number[]) => ((l - r) / 2) * (1 - e))
-  const fotoY = useTransform([abre, topo, base] as MotionValue<number>[], ([e, t, b]: number[]) => ((t - b) / 2) * (1 - e))
-  const fotoEscala = useTransform([abre, topo, direita, base, esquerda, largura, altura] as MotionValue<number>[], ([e, t, r, b, l, w, h]: number[]) => {
-    const inicial = Math.max((w - l - r) / w, (h - t - b) / h)
-    return inicial + (1 - inicial) * e
+  // A foto tem a largura da tela e altura natural (retrato 2:3). No cartão ela é
+  // reduzida para cobri-lo, e na tela cheia volta ao tamanho real; nos dois casos o
+  // recorte vertical é o mesmo (FOCO), então o rosto e o sorriso ficam sempre no quadro.
+  const quadro = useTransform([abre, topo, direita, base, esquerda, largura, altura] as MotionValue<number>[], ([e, t, r, b, l, w, h]: number[]) => {
+    const alturaFoto = w * PROPORCAO
+    const cw = w - l - r
+    const ch = h - t - b
+    const sCartao = Math.max(cw / w, ch / alturaFoto)
+    const sTela = Math.max(1, h / alturaFoto)
+    const cartao = { x: l + (cw - sCartao * w) / 2, y: t - (sCartao * alturaFoto - ch) * FOCO, s: sCartao }
+    const tela = { x: (w - sTela * w) / 2, y: -(sTela * alturaFoto - h) * FOCO, s: sTela }
+    return {
+      x: cartao.x + (tela.x - cartao.x) * e,
+      y: cartao.y + (tela.y - cartao.y) * e,
+      s: cartao.s + (tela.s - cartao.s) * e,
+    }
   })
+  const fotoX = useTransform(quadro, (q) => q.x)
+  const fotoY = useTransform(quadro, (q) => q.y)
+  const fotoEscala = useTransform(quadro, (q) => q.s)
 
-  const textoOpacidade = useTransform(scrollYProgress, [0, 0.28], [1, 0])
-  const textoY = useTransform(scrollYProgress, [0, 0.28], [0, -60])
-  const veu = useTransform(scrollYProgress, [0.4, 0.78], [0, 0.42])
-  const finalOpacidade = useTransform(scrollYProgress, [0.6, 0.8], [0, 1])
-  const finalY = useTransform(scrollYProgress, [0.6, 0.8], [36, 0])
+  const textoOpacidade = useTransform(scrollYProgress, [0, 0.24], [1, 0])
+  const textoY = useTransform(scrollYProgress, [0, 0.24], [0, -50])
+  const veu = useTransform(scrollYProgress, [0.35, 0.7], [0, 0.7])
+  const finalOpacidade = useTransform(scrollYProgress, [0.52, 0.72], [0, 1])
+  const finalY = useTransform(scrollYProgress, [0.52, 0.72], [28, 0])
   const finalCliques = useTransform(finalOpacidade, (v) => (v > 0.6 ? 'auto' : 'none'))
 
   return (
@@ -199,9 +225,9 @@ function HeroCinema() {
           animate={{ opacity: 1 }}
           transition={{ duration: 1.4, delay: 0.15, ease: curva }}
         >
-          <m.div className="absolute inset-0 will-change-transform" style={{ x: fotoX, y: fotoY, scale: fotoEscala }}>
+          <m.div className="absolute left-0 top-0 w-full will-change-transform" style={{ x: fotoX, y: fotoY, scale: fotoEscala, transformOrigin: '0 0' }}>
             {/* Entrada em câmera lenta: a foto assenta devagar enquanto o título aparece. */}
-            <m.div className="absolute inset-0" initial={{ scale: 1.12 }} animate={{ scale: 1 }} transition={{ duration: 3.2, ease: curva }}>
+            <m.div style={{ transformOrigin: `50% ${FOCO * 100}%` }} initial={{ scale: 1.1 }} animate={{ scale: 1 }} transition={{ duration: 2.2, ease: curva }}>
               <Imagem className="hero-cinema__imagem" />
             </m.div>
           </m.div>
@@ -212,14 +238,6 @@ function HeroCinema() {
             <br />
             vidas reais.
           </m.p>
-          <m.ul className="hero-selos grid" style={{ opacity: textoOpacidade, left: cartao.l + 20, bottom: cartao.b + 20, right: 'auto', width: '26rem' }}>
-            {atributos.map(({ Icone, texto }) => (
-              <li key={texto}>
-                <Icone className="h-6 w-6 text-conteudo" />
-                {texto}
-              </li>
-            ))}
-          </m.ul>
 
           <m.div className="hero-cinema__final" style={{ opacity: finalOpacidade, y: finalY, pointerEvents: finalCliques }}>
             <p className="font-display text-display-lg font-light italic leading-none text-white">

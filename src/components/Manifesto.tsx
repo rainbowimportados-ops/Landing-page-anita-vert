@@ -29,10 +29,10 @@ export function Manifesto() {
     <section ref={secao} className="manifesto" aria-label="Nossa frase">
       <div className="manifesto__palco">
         <div className="container-vert">
-          <MarcaVert versao="circular" className="mx-auto mb-10 h-14 text-conteudo/70" />
+          <MarcaVert versao="circular" className="mx-auto mb-[4svh] h-12 text-conteudo/70" />
           <p className="manifesto__frase" aria-label={FRASE}>
             {palavras.map((palavra, i) => (
-              <Palavra key={`${palavra}-${i}`} progresso={scrollYProgress} inicio={0.1 + (i / palavras.length) * 0.7} fim={0.1 + ((i + 1) / palavras.length) * 0.7}>
+              <Palavra key={`${palavra}-${i}`} progresso={scrollYProgress} inicio={0.04 + (i / palavras.length) * 0.72} fim={0.04 + ((i + 1) / palavras.length) * 0.72}>
                 {palavra}
               </Palavra>
             ))}

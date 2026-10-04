@@ -22,15 +22,15 @@ export function Dentistas() {
           <p className="mt-4 text-base leading-relaxed text-conteudo-inverso-suave">{profissionais.texto}</p>
         </Reveal>
 
-        <div className="mt-8 grid gap-4 sm:mt-10 lg:grid-cols-[1.35fr_0.65fr]">
+        <div className="trilho mt-6 grid gap-4 sm:mt-8 lg:grid-cols-[1.35fr_0.65fr]">
           <Reveal>
-            <article className="cursos-painel glass-card glass-card--dark flex h-full flex-col rounded-card border border-borda-inversa p-7 sm:p-10">
+            <article className="cursos-painel glass-card glass-card--dark flex h-full flex-col rounded-card border border-borda-inversa p-6 sm:p-8">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-realce">Formação</p>
               <h3 className="mt-3 font-display text-3xl sm:text-4xl">{cursos.titulo}</h3>
               <p className="mt-4 max-w-xl text-base leading-relaxed text-conteudo-inverso-suave">{cursos.texto}</p>
-              <ul className="mt-8 grid gap-3 sm:grid-cols-3">
+              <ul className="mt-5 flex flex-wrap gap-2 sm:grid sm:grid-cols-3 sm:gap-3">
                 {['Estética e reabilitação', 'Prática clínica', 'Turmas reduzidas'].map((item) => (
-                  <li key={item} className="rounded-2xl border border-borda-inversa bg-superficie-inversa/60 px-4 py-3 text-sm text-conteudo-inverso">
+                  <li key={item} className="rounded-2xl border border-borda-inversa bg-superficie-inversa/60 px-3.5 py-2 text-sm text-conteudo-inverso sm:px-4 sm:py-3">
                     {item}
                   </li>
                 ))}
@@ -41,7 +41,7 @@ export function Dentistas() {
                 numero={clinica.whatsappComercial}
                 mensagem={cursos.mensagem}
                 variante="clara"
-                className="mt-8 self-start"
+                className="mt-6 self-start"
               >
                 {cursos.botao}
               </BotaoWhatsApp>
@@ -49,7 +49,7 @@ export function Dentistas() {
           </Reveal>
 
           <Reveal delay={60}>
-            <article className="glass-card glass-card--dark flex h-full flex-col rounded-card border border-borda-inversa bg-superficie-inversa-suave/50 p-7">
+            <article className="glass-card glass-card--dark flex h-full flex-col rounded-card border border-borda-inversa bg-superficie-inversa-suave/50 p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-conteudo-inverso-tenue">Estrutura</p>
               <h3 className="mt-3 font-display text-2xl">{locacao.titulo}</h3>
               <p className="mt-3 flex-1 text-sm leading-relaxed text-conteudo-inverso-suave">{locacao.texto}</p>

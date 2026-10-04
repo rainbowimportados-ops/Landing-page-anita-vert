@@ -17,7 +17,7 @@ export function PalavrasReveladas({ texto, atraso = 0, passo = 0.075 }: { texto:
           className="inline-block will-change-transform"
           initial={{ opacity: 0, y: '0.35em', filter: 'blur(10px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          transition={{ duration: 1.1, delay: atraso + i * passo, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.8, delay: atraso + i * passo, ease: [0.16, 1, 0.3, 1] }}
         >
           {palavra}
           {i < texto.split(' ').length - 1 ? ' ' : ''}
