@@ -3,10 +3,15 @@ import { VideoCameraLenta } from './movimento/VideoCameraLenta'
 import posterVideo from '../../assets/video-poster.webp'
 import { CasoCompleto } from './CasosDestaque'
 import { ComparadorRosto } from './ComparadorRosto'
+import { ComparadorAlinhado } from './ComparadorAlinhado'
+import { camadaDe } from '../lib/casos'
+import { useConteudo } from '../lib/ConteudoContexto'
 import { CreditosMidiaPaciente, MarcaMidiaPaciente } from './MarcaMidiaPaciente'
 import { Reveal } from './Reveal'
 
 export function Resultados() {
+  // Caso publicado pelo painel (aba Casos); sem ele, as fotos fixas do site.
+  const { resultados: campanha } = useConteudo()
   return (
     <section id="resultados" className="secao resultados-cenario" aria-labelledby="resultados-titulo">
       <span id="sorrisos" className="block scroll-mt-24" />
@@ -18,7 +23,15 @@ export function Resultados() {
 
         <Reveal variante="imagem">
           <article className="resultados-destaque grid gap-6 lg:items-center lg:gap-14">
-            <ComparadorRosto url="/assets/comparadores/caso-rosto-2.webp" titulo="Resultado real de paciente do Instituto Vert" />
+            {campanha ? (
+              <ComparadorAlinhado
+                par={{ antes: camadaDe(campanha.destaque.antes), depois: camadaDe(campanha.destaque.depois) }}
+                titulo="Resultado real de paciente do Instituto Vert"
+                proporcao={0.8}
+              />
+            ) : (
+              <ComparadorRosto url="/assets/comparadores/caso-rosto-2.webp" titulo="Resultado real de paciente do Instituto Vert" />
+            )}
             <div className="order-first lg:order-none">
               <p className="olho">Sorrisos reais · Antes e depois</p>
               <h2 id="resultados-titulo" className="titulo-secao mt-3">Resultados reais</h2>

@@ -21,6 +21,8 @@ import {
   type Unidade,
 } from '../config/site'
 
+import type { CampanhaResultados, FotoPublicada, ParPublicado } from './casos'
+
 const SUPABASE_URL = 'https://xiskevunqbvmoclygppc.supabase.co'
 const CHAVE_PUBLICA = 'sb_publishable_aDaa3WVZP7siuPw8IbK_Wg_Y68x-MHH'
 export const SLUG = 'instituto-vert'
@@ -85,6 +87,8 @@ export type Ajustes = {
   marca?: Marca
   /** Campanha em destaque. Sem imagem nem título, não aparece. */
   banner?: Banner
+  /** Caso de antes e depois publicado pelo painel (aba Casos). Ausente: fotos fixas do site. */
+  resultados?: CampanhaResultados | null
 }
 
 export type Conteudo = {
@@ -97,6 +101,7 @@ export type Conteudo = {
   galeria: ImagemCaso[]
   marca: Marca
   banner: Banner | null
+  resultados: CampanhaResultados | null
 }
 
 /** Parte do cadastro do cartão que a landing usa. */
@@ -117,6 +122,7 @@ export const conteudoPadrao: Conteudo = {
   galeria: [],
   marca: { logo: '/assets/marca/logo-circular-principal.png' },
   banner: null,
+  resultados: null,
 }
 
 /** Aplica cartão e ajustes sobre os padrões, campo a campo. */
@@ -179,7 +185,19 @@ export function aplicar(entrada: Ajustes | null | undefined, cartao?: Cartao | n
       ajustes.banner && (ajustes.banner.imagem || ajustes.banner.titulo)
         ? ajustes.banner
         : null,
+
+    // Dado malformado não derruba a seção: volta para as fotos fixas.
+    resultados: campanhaValida(ajustes.resultados) ? ajustes.resultados : null,
   }
+}
+
+const numero = (v: unknown) => typeof v === 'number' && Number.isFinite(v)
+const fotoValida = (f: FotoPublicada | undefined) =>
+  !!f && typeof f.src === 'string' && f.src !== '' && numero(f.largura) && numero(f.altura) && !!f.dentes && numero(f.dentes.x) && numero(f.dentes.y)
+const parValido = (p: ParPublicado | undefined) => !!p && fotoValida(p.antes) && fotoValida(p.depois)
+
+function campanhaValida(c: CampanhaResultados | null | undefined): c is CampanhaResultados {
+  return !!c && parValido(c.destaque) && Array.isArray(c.perto) && Array.isArray(c.rosto) && [...c.perto, ...c.rosto].every(parValido)
 }
 
 /** Lê o cadastro do cartão (fonte única de unidades e contatos). Null em qualquer falha. */

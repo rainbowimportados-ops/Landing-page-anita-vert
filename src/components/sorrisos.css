@@ -69,3 +69,5 @@
   .caso-completo__subtitulo{display:none}
 }
 .caso-completo__cabecalho{margin-bottom:.9rem}
+
+@media(min-width:1024px){.caso-completo__grade--uma{grid-template-columns:1fr}}

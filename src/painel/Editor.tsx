@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   clinica as clinicaPadrao,
   faq as faqPadrao,
@@ -15,7 +15,7 @@ const rotulo = 'block text-sm font-medium text-conteudo'
 const campo =
   'mt-1.5 w-full rounded-lg border border-borda-forte bg-superficie px-3 py-2.5 text-sm text-conteudo'
 
-export function Editor({ email, aoSair }: { email: string; aoSair: () => void }) {
+export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => void; abas?: ReactNode }) {
   const integrado = new URLSearchParams(window.location.search).has('embed')
   const [ajustes, setAjustes] = useState<Ajustes>({})
   // Guarda o que veio do banco, para saber se os seguidores mudaram de fato.
@@ -57,6 +57,12 @@ export function Editor({ email, aoSair }: { email: string; aoSair: () => void })
         },
       }
     }
+
+    // O caso de antes e depois é publicado pela aba Casos: preserva o que está no
+    // banco agora, para salvar aqui nunca desfazer uma publicação feita depois
+    // que esta tela abriu.
+    const { data: atual } = await supabase.from('landing_content').select('content').eq('slug', SLUG).maybeSingle()
+    paraSalvar.resultados = (atual?.content as Ajustes | undefined)?.resultados ?? null
 
     const { error } = await supabase
       .from('landing_content')
@@ -117,6 +123,7 @@ export function Editor({ email, aoSair }: { email: string; aoSair: () => void })
             </button>
           </div>
         </div>
+        {abas}
       </header>}
 
       <main className="container-vert max-w-3xl space-y-10 py-6">

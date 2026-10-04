@@ -5,12 +5,7 @@
  * mesmo lugar. Ao trocar uma foto, meça de novo.
  */
 export type PontoDentes = { x: number; y: number }
-export type Alinhamento = {
-  antes: PontoDentes
-  depois: PontoDentes
-  /** Altura dos dentes no quadro (0 = topo, 1 = base). Padrão 0,6. */
-  dentesNoQuadro?: number
-}
+export type Alinhamento = { antes: PontoDentes; depois: PontoDentes }
 
 export const alinhamentosRosto: Record<string, Alinhamento> = {
   // Rostos em posições bem diferentes nas duas metades: alinhar exigiria ampliar
