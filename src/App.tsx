@@ -5,7 +5,6 @@ import { AvisoPrivacidade } from './components/AvisoPrivacidade'
 import { ProvedorDeCaptura } from './components/Captura'
 import { BotaoFlutuante } from './components/BotaoFlutuante'
 import { ChamadaFinal } from './components/ChamadaFinal'
-import { Confianca } from './components/Confianca'
 import { Dentistas } from './components/Dentistas'
 import { Detalhes } from './components/Detalhes'
 import { Depoimentos } from './components/Depoimentos'
@@ -45,7 +44,6 @@ export default function App() {
       <main>
         <Hero />
         <Detalhes />
-        <Confianca />
         <Manifesto />
         <Banner />
         <Servicos />

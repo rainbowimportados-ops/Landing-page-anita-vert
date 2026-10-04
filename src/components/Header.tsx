@@ -15,6 +15,8 @@ const navegacao = [
 export function Header() {
   const { clinica } = useConteudo()
   const [rolou, setRolou] = useState(false)
+  // Enquanto a primeira dobra (escura) está sob o cabeçalho, ele fica transparente e claro.
+  const [sobreHero, setSobreHero] = useState(true)
   const [menuAberto, setMenuAberto] = useState(false)
   const [secaoAtiva, setSecaoAtiva] = useState<string | null>(null)
   const [progresso, setProgresso] = useState(0)
@@ -28,6 +30,8 @@ export function Header() {
         const valor = maximo > 0 ? Math.min(1, window.scrollY / maximo) : 0
         document.documentElement.style.setProperty('--scroll-y', `${window.scrollY}px`)
         setRolou(window.scrollY > 24)
+        const topo = document.getElementById('topo')
+        setSobreHero(topo ? topo.getBoundingClientRect().bottom > 80 : false)
         setProgresso(valor)
         frame = 0
       })
@@ -63,13 +67,16 @@ export function Header() {
   }, [])
 
   const topo = !rolou && !menuAberto
+  const escuro = sobreHero && !menuAberto
 
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,box-shadow,backdrop-filter] duration-padrao ease-saida ${
-        topo
-          ? 'border-b border-transparent bg-fundo/[0.35] backdrop-blur-md'
-          : 'border-b border-borda/70 bg-fundo/[0.82] shadow-2 backdrop-blur-xl backdrop-saturate-150'
+        escuro
+          ? 'border-b border-transparent bg-transparent'
+          : topo
+            ? 'border-b border-transparent bg-fundo/[0.35] backdrop-blur-md'
+            : 'border-b border-borda/70 bg-fundo/[0.82] shadow-2 backdrop-blur-xl backdrop-saturate-150'
       }`}
     >
       <div className="container-vert flex h-[5rem] items-center justify-between gap-4">
@@ -79,10 +86,13 @@ export function Header() {
           aria-label={`${clinica.nome} — início`}
         >
           {/* Versão circular oficial, sozinha, em todos os tamanhos. */}
-          <MarcaVert versao="circular" className="h-14 text-conteudo sm:h-16" />
+          <MarcaVert versao="circular" className={`h-14 sm:h-16 ${escuro ? 'text-white' : 'text-conteudo'}`} />
         </a>
 
-        <nav className="hidden items-center gap-1 xl:flex" aria-label="Seções da página">
+        <nav
+          className={`hidden items-center gap-1 xl:flex ${escuro ? 'rounded-xl border border-white/15 bg-[rgba(28,16,10,0.34)] p-1 backdrop-blur-md' : ''}`}
+          aria-label="Seções da página"
+        >
           {navegacao.map((item) => {
             const ativo = secaoAtiva === item.id
             return (
@@ -91,7 +101,11 @@ export function Header() {
                 href={`#${item.id}`}
                 aria-current={ativo ? 'true' : undefined}
                 className={`relative px-3 py-2 text-[0.8125rem] transition-colors duration-rapido after:absolute after:inset-x-3 after:-bottom-0.5 after:h-px after:origin-left after:bg-conteudo after:transition-transform after:duration-padrao ${
-                  ativo ? 'text-conteudo after:scale-x-100' : 'text-conteudo-suave after:scale-x-0 hover-fino:hover:text-conteudo'
+                  escuro
+                    ? `rounded-lg bg-white/[0.05] text-white/85 after:bg-white hover-fino:hover:bg-white/[0.14] hover-fino:hover:text-white ${ativo ? 'after:scale-x-100' : 'after:scale-x-0'}`
+                    : ativo
+                      ? 'text-conteudo after:scale-x-100'
+                      : 'text-conteudo-suave after:scale-x-0 hover-fino:hover:text-conteudo'
                 }`}
               >
                 {item.rotulo}
@@ -107,7 +121,8 @@ export function Header() {
             numero={clinica.whatsappComercial}
             mensagem="Olá! Vim pelo site e gostaria de agendar uma avaliação."
             icone="seta"
-            className="hidden px-6 sm:inline-flex"
+            variante={escuro ? 'clara' : 'primaria'}
+            className="hidden rounded-full px-6 sm:inline-flex"
           >
             Agendar avaliação
           </BotaoWhatsApp>
@@ -117,7 +132,8 @@ export function Header() {
             numero={clinica.whatsappComercial}
             mensagem="Olá! Vim pelo site e gostaria de agendar uma avaliação."
             icone="nenhum"
-            className="px-4 sm:hidden"
+            variante={escuro ? 'clara' : 'primaria'}
+            className="rounded-full px-4 sm:hidden"
           >
             Agendar
           </BotaoWhatsApp>
@@ -129,7 +145,7 @@ export function Header() {
             aria-controls="menu-mobile"
             aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
             className={`inline-flex h-11 w-11 items-center justify-center rounded-full border transition duration-rapido active:scale-95 xl:hidden ${
-              'border-borda-forte text-conteudo'
+              escuro ? 'border-white/30 bg-[rgba(28,16,10,0.4)] text-white backdrop-blur-md' : 'border-borda-forte text-conteudo'
             }`}
           >
             <svg

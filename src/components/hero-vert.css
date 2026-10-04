@@ -1,0 +1,320 @@
+/* Primeira dobra no formato "tela cheia com véu": composição inspirada no modelo
+   Fluxora (fundo de mídia, véu assimétrico, título com uma palavra em itálico,
+   pílula com seta, cartões de vidro, faixa de rodapé), nas cores da Vert:
+   espresso no lugar do preto-brasa e caramelo/rosé no lugar do laranja. */
+.hv {
+  --s: 1;                     /* escala do tipo grande e do ritmo vertical */
+  --hv-chao: #2b1b14;
+  --hv-fundo: #120a07;
+  --hv-tinta: #fff;
+  --hv-tinta-suave: rgba(255, 255, 255, 0.74);
+  --hv-tinta-fraca: rgba(255, 255, 255, 0.5);
+  --hv-linha: rgba(255, 255, 255, 0.14);
+  --hv-linha-fraca: rgba(255, 255, 255, 0.08);
+  --hv-caramelo: #8b5b40;
+  --hv-rose: #e0a284;
+  --hv-vidro: rgba(58, 36, 26, 0.42);
+  --hv-curva: cubic-bezier(0.16, 1, 0.3, 1);
+  --hv-margem: max(1.25rem, calc((100vw - 76rem) / 2));
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  overflow: hidden;
+  padding: calc(6rem * var(--s)) var(--hv-margem) calc(1.4rem * var(--s));
+  background: linear-gradient(165deg, var(--hv-chao) 0%, var(--hv-fundo) 72%);
+  color: var(--hv-tinta);
+}
+
+/* ---------- mídia ---------- */
+.hv__midia { position: absolute; inset: 0; z-index: -1; }
+
+/* A foto ocupa a direita e some em degradê para o espresso, sob o texto. */
+.hv__foto {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 62%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  transform-origin: 55% 45%;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 30%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 30%);
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 1.1s var(--hv-curva), transform 2.4s var(--hv-curva);
+}
+/* Depois de entrar, respira devagar — o "câmera lenta" da primeira dobra. */
+.hv__foto.is-pronta {
+  opacity: 1;
+  transform: scale(1);
+  animation: hv-respira 16s ease-in-out 2.4s infinite alternate;
+}
+@keyframes hv-respira {
+  from { transform: scale(1); }
+  to { transform: scale(1.045); }
+}
+
+/* Véu assimétrico: forte sob o texto, leve sob o rodapé e no topo (cabeçalho),
+   quase nada sobre o rosto e o sorriso. */
+.hv__veu {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(96deg, rgba(18, 10, 7, 0.94) 0%, rgba(20, 12, 8, 0.72) 30%,
+      rgba(24, 14, 10, 0.18) 50%, rgba(24, 14, 10, 0) 64%),
+    linear-gradient(0deg, rgba(14, 8, 5, 0.8) 0%, rgba(14, 8, 5, 0.1) 24%, rgba(0, 0, 0, 0) 40%),
+    linear-gradient(180deg, rgba(14, 8, 5, 0.45) 0%, rgba(0, 0, 0, 0) 18%);
+}
+
+.hv__linhas {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 30%;
+  pointer-events: none;
+}
+.hv__linhas span { width: 1px; background: rgba(255, 255, 255, 0.05); }
+.hv__linhas span:nth-child(2) { margin-left: 14px; }
+
+/* ---------- disposição ---------- */
+.hv__miolo {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2.5rem;
+}
+.hv__texto { max-width: 40rem; }
+
+/* ---------- nota ---------- */
+.hv__nota {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: fit-content;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--hv-linha-fraca);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  color: var(--hv-tinta-fraca);
+}
+.hv__nota-icone { width: 1.15rem; height: 1.15rem; flex: none; color: var(--hv-rose); }
+
+/* ---------- título ---------- */
+.hv__titulo {
+  margin-top: calc(1.4rem * var(--s));
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-size: calc(clamp(2.5rem, min(6vw, 10.5svh), 5.8rem) * var(--s));
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  text-shadow: 0 6px 40px rgba(0, 0, 0, 0.4);
+}
+/* A única palavra em serifa itálica — o gesto tipográfico da página. */
+.hv__titulo em {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.14em;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: #f4dccd;
+}
+
+.hv__sub {
+  margin-top: calc(1.2rem * var(--s));
+  max-width: 27rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--hv-tinta-suave);
+}
+
+/* ---------- ações ---------- */
+.hv__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: calc(1.6rem * var(--s));
+}
+
+/* Pílula clara com a seta numa bolinha caramelo (sobrepõe o estilo base do botão). */
+.hv .hv__ir {
+  gap: 0.75rem;
+  min-height: 0;
+  padding: 0.42rem 0.42rem 0.42rem 1.5rem;
+  border-radius: 999px;
+  background: #f7efe6;
+  color: #2b1b14;
+  font-size: 0.92rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+  transition: transform 0.35s var(--hv-curva), box-shadow 0.35s var(--hv-curva), background-color 0.35s var(--hv-curva);
+}
+.hv .hv__ir:hover { transform: translateY(-2px); background: #fff; box-shadow: 0 20px 52px rgba(0, 0, 0, 0.45); }
+.hv__ir-seta {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--hv-caramelo), var(--hv-rose));
+  color: #fff;
+}
+.hv__ir-seta svg { width: 1.05rem; height: 1.05rem; }
+
+.hv__prova { display: flex; align-items: center; gap: 0.6rem; min-height: 44px; }
+.hv__pontos { display: flex; }
+.hv__pontos i {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-left: -0.55rem;
+  border: 2px solid rgba(22, 12, 8, 0.85);
+  border-radius: 999px;
+  background: linear-gradient(140deg, var(--hv-rose), #f3d3bf);
+}
+.hv__pontos i:first-child { margin-left: 0; background: linear-gradient(140deg, var(--hv-caramelo), #c08463); }
+.hv__prova-texto { display: grid; font-size: 0.68rem; line-height: 1.4; color: var(--hv-tinta-fraca); }
+.hv__prova-texto strong { font-size: 0.78rem; font-weight: 600; color: rgba(255, 255, 255, 0.92); }
+.hv__prova:hover .hv__prova-texto strong { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- cartões de vidro ---------- */
+.hv__fatos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin: calc(1.9rem * var(--s)) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.hv__fato {
+  position: relative;
+  display: grid;
+  align-content: space-between;
+  gap: 0.9rem;
+  width: 13rem;
+  min-height: calc(7.5rem * var(--s));
+  padding: 1.1rem;
+  border: 1px solid var(--hv-linha);
+  border-radius: 16px;
+  background: var(--hv-vidro);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  backdrop-filter: blur(16px) saturate(1.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+.hv__fato:nth-child(2) { background: linear-gradient(150deg, rgba(139, 91, 64, 0.5), rgba(43, 27, 20, 0.5)); }
+.hv__fato-marca { position: absolute; top: 0.8rem; right: 1rem; font-size: 0.95rem; color: var(--hv-tinta-fraca); }
+.hv__fato-valor {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: calc(clamp(1.5rem, 2.1vw, 1.95rem) * var(--s));
+  font-weight: 500;
+  line-height: 1;
+}
+.hv__fato-rotulo { max-width: 80%; font-size: 0.72rem; line-height: 1.4; color: var(--hv-tinta-fraca); }
+.hv__fato-traco { position: absolute; right: 1rem; bottom: 1.35rem; width: 14px; height: 1px; background: rgba(255, 255, 255, 0.28); }
+
+/* ---------- legenda da foto ---------- */
+.hv__legenda {
+  align-self: end;
+  display: grid;
+  gap: 0.15rem;
+  max-width: 17rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.72);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+}
+.hv__legenda strong {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  font-weight: 500;
+  color: #fff;
+}
+
+/* ---------- faixa de rodapé ---------- */
+.hv__rodape {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: calc(1.2rem * var(--s));
+}
+.hv__marca-dagua {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 300;
+  line-height: 0.8;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.06);
+  user-select: none;
+}
+.hv__unidades { text-align: right; }
+.hv__unidades-rotulo { display: block; margin-bottom: 0.6rem; font-size: 0.68rem; color: var(--hv-tinta-fraca); }
+.hv__unidades ul { display: flex; gap: clamp(1rem, 2.2vw, 2rem); margin: 0; padding: 0; list-style: none; }
+.hv__unidades a { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; font-size: 0.9rem; color: rgba(255, 255, 255, 0.88); }
+.hv__unidades a:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.hv__unidades svg { width: 1rem; height: 1rem; color: var(--hv-rose); }
+
+/* ---------- entrada em sequência ---------- */
+.hv__nota, .hv__titulo, .hv__sub, .hv__acoes, .hv__fatos, .hv__legenda, .hv__rodape {
+  animation: hv-sobe 0.95s var(--hv-curva) both;
+}
+.hv__titulo { animation-delay: 0.06s; }
+.hv__sub { animation-delay: 0.14s; }
+.hv__acoes { animation-delay: 0.2s; }
+.hv__fatos { animation-delay: 0.28s; }
+.hv__legenda { animation-delay: 0.5s; }
+.hv__rodape { animation-delay: 0.36s; }
+@keyframes hv-sobe {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- telas baixas: tudo cabe na primeira tela ---------- */
+@media (max-height: 820px) { .hv { --s: 0.86; } }
+@media (max-height: 760px) and (min-width: 900px) {
+  .hv { --s: 0.76; }
+  .hv__marca-dagua { font-size: 3.2rem; }
+  .hv__fato { padding: 0.9rem; gap: 0.6rem; }
+}
+@media (max-height: 660px) and (min-width: 900px) { .hv__nota, .hv__marca-dagua { display: none; } }
+
+/* ---------- celular e tablet: foto no alto, texto embaixo ---------- */
+@media (max-width: 899px) {
+  .hv { justify-content: flex-end; padding-top: 5.5rem; }
+  .hv__foto {
+    width: 100%;
+    height: 64%;
+    object-position: 50% 26%;
+    -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 60%, transparent 100%);
+  }
+  .hv__veu {
+    background:
+      linear-gradient(180deg, rgba(14, 8, 5, 0.4) 0%, rgba(14, 8, 5, 0) 16%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0) 34%, rgba(18, 10, 7, 0.82) 54%, var(--hv-fundo) 70%);
+  }
+  .hv__linhas, .hv__legenda, .hv__nota { display: none; }
+  .hv__miolo { flex: 0 0 auto; grid-template-columns: minmax(0, 1fr); }
+  .hv__titulo { margin-top: 0; font-size: clamp(2.3rem, min(11vw, 6.2svh), 3.4rem); }
+  .hv__sub { font-size: 0.9rem; }
+  .hv__acoes { gap: 0.9rem; }
+  .hv__fatos { flex-wrap: nowrap; margin-top: 1.1rem; }
+  .hv__fato { flex: 1 1 0; width: auto; min-height: 0; padding: 0.85rem; gap: 0.5rem; }
+  .hv__fato-rotulo { max-width: none; font-size: 0.66rem; }
+  .hv__rodape { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hv__foto, .hv__foto.is-pronta { opacity: 1; transform: none; animation: none; transition: none; }
+  .hv__nota, .hv__titulo, .hv__sub, .hv__acoes, .hv__fatos, .hv__legenda, .hv__rodape { animation: none; }
+}
