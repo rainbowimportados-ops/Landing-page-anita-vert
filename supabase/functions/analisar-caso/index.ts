@@ -12,8 +12,9 @@ import { encodeBase64 } from 'jsr:@std/encoding/base64'
  * Só administradores (digital_card_admins) podem chamar. As fotos ficam no
  * bucket privado casos-pacientes e são lidas aqui com a chave de serviço.
  *
- * Secrets necessários: OPENAI_API_KEY (além dos padrões do Supabase).
- * Opcional: OPENAI_MODEL para trocar o modelo sem mudar o código.
+ * Secrets: OPENAI_FOTOS_API_KEY (chave só para as fotos); se não existir, usa a
+ * OPENAI_API_KEY que o projeto já tem.
+ * Opcional: OPENAI_FOTOS_MODEL para trocar o modelo sem mudar o código.
  */
 
 const BUCKET = 'casos-pacientes'
@@ -108,9 +109,9 @@ Deno.serve(async (req) => {
   const url = Deno.env.get('SUPABASE_URL')
   const servico = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!url || !servico) return responder(500, { ok: false, erro: 'Ambiente sem SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY.' })
-  const chave = Deno.env.get('OPENAI_API_KEY')
+  const chave = Deno.env.get('OPENAI_FOTOS_API_KEY') || Deno.env.get('OPENAI_API_KEY')
   if (!chave) {
-    return responder(500, { ok: false, erro: 'A chave da IA (OPENAI_API_KEY) ainda não foi cadastrada nos secrets do Supabase.' })
+    return responder(500, { ok: false, erro: 'A chave da IA (OPENAI_FOTOS_API_KEY) ainda não foi cadastrada nos secrets do Supabase.' })
   }
   const db = { apikey: servico, Authorization: `Bearer ${servico}`, 'Content-Type': 'application/json' }
 
@@ -174,7 +175,7 @@ async function analisar(
       method: 'POST',
       headers: { Authorization: `Bearer ${chave}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: Deno.env.get('OPENAI_MODEL') || MODELO_PADRAO,
+        model: Deno.env.get('OPENAI_FOTOS_MODEL') || MODELO_PADRAO,
         instructions: INSTRUCOES,
         input: [{ role: 'user', content: conteudo }],
         max_output_tokens: 16000,
@@ -226,7 +227,7 @@ async function analisar(
     const mensagem =
       erro instanceof ErroIA
         ? erro.status === 401
-          ? 'A chave da OpenAI (OPENAI_API_KEY) foi recusada. Confira o secret no Supabase.'
+          ? 'A chave da OpenAI foi recusada. Confira o secret OPENAI_FOTOS_API_KEY no Supabase.'
           : erro.status === 429
             ? 'Limite ou crédito da OpenAI esgotado. Confira o saldo em platform.openai.com.'
             : `IA indisponível (${erro.status}). Tente de novo em instantes.`
