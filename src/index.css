@@ -774,3 +774,6 @@
 @media (hover: hover) { .captura__principal:hover:not(:disabled) { background: rgb(var(--cor-conteudo)); } }
 .captura__principal:focus-visible { outline: 2px solid rgb(var(--cor-marca-forte)); outline-offset: 3px; }
 .captura__opcao span { min-height: 42px; }
+
+.captura { overscroll-behavior: contain; touch-action: manipulation; }
+.captura button, .captura label { touch-action: manipulation; }
