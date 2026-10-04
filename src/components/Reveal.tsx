@@ -11,13 +11,15 @@ type Props = {
    * tela deixar de anunciar a contagem de itens.
    */
   as?: ElementType
+  /** `imagem`: abre como uma cortina, com a foto assentando devagar. */
+  variante?: 'texto' | 'imagem'
 }
 
 /**
  * Revela o conteúdo quando ele entra na viewport.
  * Respeita `prefers-reduced-motion`: nesse caso aparece já visível, sem atraso.
  */
-export function Reveal({ children, delay = 0, className = '', as: Tag = 'div' }: Props) {
+export function Reveal({ children, delay = 0, className = '', as: Tag = 'div', variante = 'texto' }: Props) {
   const ref = useRef<HTMLElement>(null)
   const [visivel, setVisivel] = useState(false)
 
@@ -49,7 +51,7 @@ export function Reveal({ children, delay = 0, className = '', as: Tag = 'div' }:
     <Tag
       ref={ref}
       style={visivel ? { animationDelay: `${delay}ms` } : undefined}
-      className={`${visivel ? 'animate-fade-up' : 'opacity-0'} ${className}`}
+      className={`${visivel ? (variante === 'imagem' ? 'revelar-imagem' : 'animate-fade-up') : 'opacity-0'} ${className}`}
     >
       {children}
     </Tag>

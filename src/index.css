@@ -46,6 +46,18 @@
     -webkit-text-size-adjust: 100%;
   }
 
+  /* Com a rolagem suave ligada, o próprio Lenis anima a página. */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  html.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  html.lenis.lenis-stopped {
+    overflow: clip;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
@@ -822,3 +834,77 @@
 
 .captura { overscroll-behavior: contain; touch-action: manipulation; }
 .captura button, .captura label { touch-action: manipulation; }
+
+/* ===== Movimento: frase da clínica lida no ritmo da rolagem ===== */
+.manifesto { position: relative; height: 230vh; }
+.manifesto__palco { position: sticky; top: 0; display: flex; align-items: center; height: 100svh; }
+.manifesto__frase {
+  max-width: 19ch;
+  margin: 0 auto;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.3rem, 1.1rem + 5vw, 5.6rem);
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1.06;
+  letter-spacing: -0.01em;
+  text-align: center;
+  color: rgb(var(--cor-conteudo));
+}
+.manifesto--estatico { height: auto; padding: 6rem 0; }
+
+/* ===== Movimento: o espaço da clínica em zoom ===== */
+.ambientes { position: relative; height: 300vh; }
+.ambientes__palco { position: sticky; top: 0; height: 100svh; overflow: hidden; background: rgb(var(--cor-fundo)); }
+.ambientes__camada { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; will-change: transform; }
+.ambientes__moldura { position: relative; width: 25vw; height: 25vh; overflow: hidden; border-radius: 4px; }
+.ambientes__moldura img { width: 100%; height: 100%; object-fit: cover; }
+.ambientes__foto--1 .ambientes__moldura { top: -30vh; left: 5vw; width: 35vw; height: 30vh; }
+.ambientes__foto--2 .ambientes__moldura { top: -10vh; left: -25vw; width: 20vw; height: 45vh; }
+.ambientes__foto--3 .ambientes__moldura { left: 27.5vw; width: 25vw; height: 25vh; }
+.ambientes__foto--4 .ambientes__moldura { top: 27.5vh; left: 5vw; width: 20vw; height: 25vh; }
+.ambientes__foto--5 .ambientes__moldura { top: 27.5vh; left: -22.5vw; width: 30vw; height: 25vh; }
+.ambientes__foto--6 .ambientes__moldura { top: 22.5vh; left: 25vw; width: 15vw; height: 15vh; }
+.ambientes__veu { position: absolute; inset: 0; background: rgb(30 18 14); pointer-events: none; }
+.ambientes__legenda { position: absolute; inset: auto 0 12vh; padding: 0 1.25rem; text-align: center; }
+@media (max-width: 767px) {
+  .ambientes { height: 260vh; }
+  .ambientes__moldura { width: 44vw; height: 26vh; }
+  .ambientes__foto--1 .ambientes__moldura { top: -31vh; left: 4vw; width: 52vw; height: 22vh; }
+  .ambientes__foto--2 .ambientes__moldura { top: -8vh; left: -36vw; width: 26vw; height: 34vh; }
+  .ambientes__foto--3 .ambientes__moldura { left: 38vw; width: 30vw; height: 22vh; }
+  .ambientes__foto--4 .ambientes__moldura { top: 26vh; left: 6vw; width: 34vw; height: 20vh; }
+  .ambientes__foto--5 .ambientes__moldura { top: 25vh; left: -32vw; width: 34vw; height: 18vh; }
+  .ambientes__foto--6 .ambientes__moldura { top: 22vh; left: 38vw; width: 22vw; height: 14vh; }
+}
+
+/* ===== Movimento: primeira dobra em cena (computador) ===== */
+.hero-cinema { position: relative; height: 260vh; }
+.hero-cinema__palco { position: sticky; top: 0; height: 100svh; overflow: hidden; background: rgb(var(--cor-fundo)); }
+.hero-cinema__vaga { width: 100%; height: calc(100svh - 9rem); max-height: 52rem; }
+.hero-cinema__foto { position: absolute; inset: 0; z-index: 2; margin: 0; overflow: hidden; }
+.hero-cinema__imagem { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 24%; }
+.hero-cinema__veu { position: absolute; inset: 0; background: rgb(30 18 14); pointer-events: none; }
+.hero-cinema__final {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.5rem;
+  text-align: center;
+  text-shadow: 0 2px 24px rgb(0 0 0 / 0.25);
+}
+
+/* ===== Movimento: imagens que abrem como cortina ===== */
+@keyframes revelar-imagem {
+  from { opacity: 0.15; clip-path: inset(12% 8% 12% 8% round 2rem); }
+  to { opacity: 1; clip-path: inset(0 0 0 0 round 0); }
+}
+@keyframes revelar-imagem-zoom {
+  from { transform: scale(1.16); }
+  to { transform: scale(1); }
+}
+.revelar-imagem { animation: revelar-imagem 1.5s var(--curva-saida) both; }
+.revelar-imagem img { animation: revelar-imagem-zoom 2.2s var(--curva-saida) both; }

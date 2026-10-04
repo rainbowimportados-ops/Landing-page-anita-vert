@@ -1,4 +1,5 @@
 import videoResultado from '../../assets/resultado.mp4'
+import { VideoCameraLenta } from './movimento/VideoCameraLenta'
 import posterVideo from '../../assets/video-poster.webp'
 import { CasoCompleto } from './CasosDestaque'
 import { ComparadorRosto } from './ComparadorRosto'
@@ -23,7 +24,7 @@ export function Resultados() {
           </p>
         </Reveal>
 
-        <Reveal className="mt-8 sm:mt-10">
+        <Reveal variante="imagem" className="mt-8 sm:mt-10">
           <article className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr] lg:items-center lg:gap-12">
             <ComparadorRosto url="/assets/comparadores/rosto-antes-depois.webp" titulo="Resultado real de paciente do Instituto Vert" focoVertical={36} />
             <div>
@@ -40,26 +41,21 @@ export function Resultados() {
           <CasoCompleto />
         </Reveal>
 
-        <Reveal className="mt-5">
+        <Reveal variante="imagem" className="mt-5">
           <figure className="tratamento-card grid overflow-hidden rounded-[1.5rem] border border-white/70 md:grid-cols-[0.6fr_1.4fr] md:items-center">
             <div className="midia-paciente__video">
-              <video
-                controls
-                playsInline
-                preload="none"
+              <VideoCameraLenta
+                src={videoResultado}
                 poster={posterVideo}
-                aria-label="Vídeo de resultado real do Instituto Vert"
+                rotulo="Vídeo de resultado real do Instituto Vert, em câmera lenta"
                 className="aspect-[4/5] w-full bg-conteudo object-contain md:max-h-[28rem]"
-              >
-                <source src={videoResultado} type="video/mp4" />
-                Seu navegador não suporta vídeo.
-              </video>
+              />
               <MarcaMidiaPaciente />
             </div>
             <figcaption className="p-7 sm:p-10">
               <p className="olho-linha">Resultado em vídeo</p>
               <p className="mt-4 font-display text-3xl font-light text-conteudo">Veja o sorriso em movimento.</p>
-              <p className="mt-3 text-sm text-conteudo-suave">Reprodução manual, sem áudio automático.</p>
+              <p className="mt-3 text-sm text-conteudo-suave">Em câmera lenta e sem som. Toque no vídeo para controlar.</p>
               <CreditosMidiaPaciente />
             </figcaption>
           </figure>

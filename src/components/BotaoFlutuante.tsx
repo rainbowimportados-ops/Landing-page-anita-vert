@@ -7,7 +7,7 @@ import { IconWhatsApp } from './Icon'
 const MENSAGEM = 'Olá! Vim pelo site e gostaria de agendar uma avaliação.'
 
 /**
- * Atalho fixo para agendar, exibido depois que o visitante rola a dobra.
+ * Atalho fixo para agendar, exibido depois que o visitante passa da primeira dobra.
  * No celular é uma barra na base, na altura do polegar e acima da barra de gestos (§5);
  * no computador é uma pílula no canto. Some quando o rodapé aparece, porque ele já tem
  * os contatos e não deve ficar coberto.
@@ -19,11 +19,19 @@ export function BotaoFlutuante() {
   const [noRodape, setNoRodape] = useState(false)
   const visivel = rolou && !noRodape
 
+  // Aparece só depois que a primeira dobra sai da tela: no computador ela é uma
+  // cena longa e já termina com o próprio botão de agendar.
   useEffect(() => {
-    const aoRolar = () => setRolou(window.scrollY > 600)
-    aoRolar()
-    window.addEventListener('scroll', aoRolar, { passive: true })
-    return () => window.removeEventListener('scroll', aoRolar)
+    const topo = document.getElementById('topo')
+    if (!topo) {
+      const aoRolar = () => setRolou(window.scrollY > 600)
+      aoRolar()
+      window.addEventListener('scroll', aoRolar, { passive: true })
+      return () => window.removeEventListener('scroll', aoRolar)
+    }
+    const observador = new IntersectionObserver(([entrada]) => setRolou(!entrada.isIntersecting))
+    observador.observe(topo)
+    return () => observador.disconnect()
   }, [])
 
   useEffect(() => {

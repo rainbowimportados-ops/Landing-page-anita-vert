@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { LazyMotion, domAnimation } from 'motion/react'
 import { Banner } from './components/Banner'
 import { AvisoPrivacidade } from './components/AvisoPrivacidade'
 import { ProvedorDeCaptura } from './components/Captura'
@@ -19,9 +21,15 @@ import { Servicos } from './components/Servicos'
 import { Sobre } from './components/Sobre'
 import { ProvedorDeConteudo } from './lib/ConteudoContexto'
 import { Unidades } from './components/Unidades'
+import { Ambientes } from './components/Ambientes'
+import { Manifesto } from './components/Manifesto'
+import { iniciarRolagemSuave } from './lib/rolagemSuave'
 
 export default function App() {
+  useEffect(() => iniciarRolagemSuave(), [])
+
   return (
+    <LazyMotion features={domAnimation} strict>
     <ProvedorDeConteudo>
       <ProvedorDeCaptura>
       <a
@@ -38,6 +46,7 @@ export default function App() {
         <Hero />
         <Detalhes />
         <Confianca />
+        <Manifesto />
         <Banner />
         <Servicos />
         <Resultados />
@@ -46,6 +55,7 @@ export default function App() {
         <Etapas />
         <InstagramSecao />
         <Depoimentos />
+        <Ambientes />
         <Unidades />
         <Dentistas />
         <Duvidas />
@@ -56,5 +66,6 @@ export default function App() {
       <BotaoFlutuante />
       </ProvedorDeCaptura>
     </ProvedorDeConteudo>
+    </LazyMotion>
   )
 }
