@@ -7,6 +7,10 @@ import { supabase } from './supabase'
 
 type Aba = 'conteudo' | 'casos'
 
+/** Aberto dentro do painel administrativo (/admin), num iframe: sem cabeçalho próprio. */
+const integrado = new URLSearchParams(window.location.search).has('embed')
+if (integrado) document.documentElement.classList.add('painel-admin')
+
 function abaDaUrl(): Aba {
   return new URLSearchParams(window.location.search).get('aba') === 'casos' ? 'casos' : 'conteudo'
 }
@@ -67,6 +71,16 @@ export default function Painel() {
   const sair = () => {
     void supabase.auth.signOut()
   }
+  // No /admin o menu lateral já escolhe a área: aqui entra só o conteúdo.
+  if (integrado) {
+    if (aba === 'conteudo') return <Editor email={email} aoSair={sair} />
+    return (
+      <main className="min-h-full bg-fundo px-4 py-5 sm:px-6">
+        <Casos integrado />
+      </main>
+    )
+  }
+
   const abas = <Abas aba={aba} mudar={mudar} />
 
   if (aba === 'conteudo') return <Editor email={email} aoSair={sair} abas={abas} />

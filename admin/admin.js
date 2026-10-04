@@ -13,6 +13,7 @@ const navIconPaths = {
   origens:'<path d="M4 19 19 4m-8 0h8v8M4 12v7h7"/>',
   relatorios:'<path d="M4 20V10m5 10V4m5 16v-7m5 7V8M3 21h18"/>',
   site:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18m-14-3h.01m3 0h.01"/>',
+  casos:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16M7 15l2-2 2 2m2-4 2-2 3 3"/>',
   empresa:'<path d="M4 21V6l8-3 8 3v15M2 21h20M9 21v-7h6v7M8 8h.01M16 8h.01"/>',
   unidades:'<path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0z"/><circle cx="12" cy="10" r="2"/>',
   links:'<path d="M10 13a5 5 0 0 0 7 .3l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7-.3l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
@@ -263,6 +264,7 @@ const sectionDetails = {
   relatorios: { title: 'Relatórios', context: 'Resultados de captação' },
   equipe: { title: 'Equipe e acesso', context: 'Permissões' },
   site: { title: 'Editar site', context: 'Conteúdo e identidade' },
+  casos: { title: 'Antes e depois', context: 'Resultados do site' },
   campanhas: { title: 'Campanhas e promoções', context: 'Conteúdo do cartão' },
   depoimentos: { title: 'Depoimentos', context: 'Conteúdo do cartão' },
   resultados: { title: 'Resultados e trabalhos', context: 'Conteúdo do cartão' },
@@ -279,11 +281,10 @@ function activatePanel(section, shouldScroll = false) {
   if (window.location.search !== `?section=${encodeURIComponent(section)}`) {
     window.history.replaceState(null, '', `?section=${encodeURIComponent(section)}`);
   }
-  if (section === 'site') {
-    const frame = document.querySelector('#site-editor-frame');
-    if (frame && !frame.src) frame.src = frame.dataset.src;
-  }
-  saveButton.hidden = ['site', 'contatos', 'pipeline', 'avaliacoes', 'pacientes', 'agenda', 'campanhas-crm', 'origens', 'relatorios', 'equipe', 'acessos', 'visao-geral'].includes(section);
+  // Editores embutidos (/config) só carregam quando a área é aberta.
+  const frame = panel.querySelector('iframe.site-editor-frame[data-src]');
+  if (frame && !frame.src) frame.src = frame.dataset.src;
+  saveButton.hidden = ['site', 'casos', 'contatos', 'pipeline', 'avaliacoes', 'pacientes', 'agenda', 'campanhas-crm', 'origens', 'relatorios', 'equipe', 'acessos', 'visao-geral'].includes(section);
   saveStatus.hidden = saveButton.hidden;
   document.querySelector('.preview-pane').hidden = saveButton.hidden;
   operations?.activate(section);

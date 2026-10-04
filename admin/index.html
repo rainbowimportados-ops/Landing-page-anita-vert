@@ -81,6 +81,7 @@
           <button class="nav-link" data-section="relatorios"><span aria-hidden="true">▤</span>Relatórios</button>
           <span class="nav-group-label">Site e cartão</span>
           <button class="nav-link" data-section="site"><span aria-hidden="true">▣</span>Editar site</button>
+          <button class="nav-link" data-section="casos"><span aria-hidden="true">◐</span>Antes e depois</button>
           <button class="nav-link" data-section="empresa"><span aria-hidden="true">◇</span>Dados da empresa</button>
           <button class="nav-link" data-section="unidades"><span aria-hidden="true">⌖</span>Unidades</button>
           <button class="nav-link" data-section="links"><span aria-hidden="true">↗</span>WhatsApp e contatos</button>
@@ -105,6 +106,7 @@
             <option value="relatorios">Relatórios</option>
             <option value="equipe">Equipe e acesso</option>
             <option value="site">Editar site</option>
+            <option value="casos">Antes e depois</option>
             <option value="acessos">Instagram e acessos</option>
             <option value="contatos">Leads</option>
             <option value="empresa">Dados da empresa</option>
@@ -383,6 +385,12 @@
               <div class="panel__heading"><div><p class="eyebrow">Conteúdo público</p><h2>Editar site</h2></div><a class="small-action" href="/" target="_blank" rel="noopener">Ver site ↗</a></div>
               <p class="helper">Textos, imagens, horários, dúvidas frequentes e depoimentos. Use o botão Salvar dentro do editor; as alterações aparecem no site após salvar.</p>
               <iframe class="site-editor-frame" id="site-editor-frame" title="Editor do site" data-src="/config/?embed=1"></iframe>
+            </section>
+
+            <section class="panel" data-panel="casos">
+              <div class="panel__heading"><div><p class="eyebrow">Conteúdo público</p><h2>Antes e depois</h2></div><a class="small-action" href="/#resultados" target="_blank" rel="noopener">Ver no site ↗</a></div>
+              <p class="helper">Arraste as pastas dos pacientes: a IA separa antes e depois e alinha pelos dentes. Você revisa, confirma a autorização do paciente e escolhe o caso que aparece na seção Resultados do site.</p>
+              <iframe class="site-editor-frame" id="casos-frame" title="Casos de antes e depois" data-src="/config/?embed=1&aba=casos"></iframe>
             </section>
 
             <section class="panel" data-panel="campanhas">

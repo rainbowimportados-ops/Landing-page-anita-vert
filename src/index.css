@@ -772,3 +772,68 @@
 @media (min-width: 1024px) {
   .resultados-destaque { grid-template-columns: minmax(0, min(52%, calc((100svh - 11rem) * 0.8))) minmax(0, 1fr); }
 }
+
+/*
+ * Painel /config aberto dentro do /admin (?embed=1): mesma linguagem do
+ * painel administrativo — fundo neutro, cartões brancos com borda fina,
+ * títulos em Montserrat e botões com cantos de 8px.
+ */
+.painel-admin {
+  --cor-fundo: 247 245 242;
+  --cor-superficie: 255 255 255;
+  --cor-superficie-suave: 250 248 245;
+  --cor-conteudo: 37 28 23;
+  --cor-conteudo-suave: 109 91 80;
+  --cor-conteudo-tenue: 140 121 109;
+  --cor-marca: 112 81 62;
+  --cor-marca-forte: 75 48 35;
+  --cor-marca-tenue: 242 233 223;
+  --cor-borda: 230 223 216;
+  --cor-borda-forte: 214 201 189;
+  font-size: 14px;
+}
+
+.painel-admin body,
+.painel-admin main {
+  background: rgb(var(--cor-fundo));
+  background-image: none;
+}
+
+.painel-admin .font-display,
+.painel-admin .titulo-secao {
+  font-family: Montserrat, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.painel-admin .titulo-secao {
+  font-size: 1.2rem;
+  line-height: 1.3;
+}
+
+.painel-admin .font-display.text-2xl {
+  font-size: 1.05rem;
+}
+
+.painel-admin .font-display.text-xl,
+.painel-admin .font-display.text-lg {
+  font-size: 0.95rem;
+}
+
+.painel-admin .lead {
+  font-size: 0.9rem;
+}
+
+.painel-admin .rounded-card {
+  border-radius: 12px;
+}
+
+.painel-admin button.rounded-full,
+.painel-admin a.rounded-full {
+  border-radius: 8px;
+}
+
+.painel-admin .border-dashed {
+  border-width: 1.5px;
+  border-radius: 14px;
+}

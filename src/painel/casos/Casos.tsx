@@ -15,7 +15,7 @@ const rotuloStatus: Record<Caso['status'], string> = {
  * Aba Casos do /config: arraste pastas (uma por paciente), a IA organiza
  * antes, depois e o alinhamento, e você escolhe o que vai para o site.
  */
-export function Casos() {
+export function Casos({ integrado = false }: { integrado?: boolean }) {
   const [casos, setCasos] = useState<Caso[]>([])
   const [noSite, setNoSite] = useState<string | null>(null)
   const [aberto, setAberto] = useState<string | null>(null)
@@ -118,8 +118,8 @@ export function Casos() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
+    <div className={integrado ? 'space-y-6' : 'space-y-8'}>
+      <div hidden={integrado}>
         <h2 className="titulo-secao">Casos de antes e depois</h2>
         <p className="lead mt-2">
           Arraste as pastas dos pacientes — uma pasta por paciente, com as fotos de antes e de depois. A IA separa antes e
