@@ -239,3 +239,12 @@
 @media (prefers-reduced-motion: reduce) {
   .digital-card .contact-button--primary, .service-action, .unit-detail__actions a, .digital-card .quick-links a { transition: none; }
 }
+
+/* Caso de antes e depois publicado no /admin (o mesmo da seção Resultados do site). */
+.card-extras .published-case__pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: start; }
+.card-extras .published-case__pair figure { position: relative; margin: 0; overflow: hidden; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; background: rgba(255,255,255,.04); }
+.card-extras .published-case__pair img { display: block; width: 100%; height: auto; }
+.card-extras .published-case__pair figcaption { position: absolute; top: 8px; left: 8px; padding: 4px 9px; border-radius: 999px; background: rgba(20,12,9,.62); color: #f6e9dc; font-size: .6rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; backdrop-filter: blur(6px); }
+.card-extras .published-case__note { margin: 12px 0 0; color: #bfa58c; font-size: .7rem; line-height: 1.5; }
+.card-extras .published-case__link { display: flex; min-height: 50px; align-items: center; justify-content: space-between; margin-top: 12px; padding: 0 16px; border: 1px solid rgba(255,255,255,.16); border-radius: 12px; color: #f6e9dc; font-size: .72rem; font-weight: 600; letter-spacing: .04em; text-decoration: none; }
+.card-extras .published-case__link:hover { background: rgba(255,255,255,.06); }

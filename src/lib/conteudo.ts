@@ -2,10 +2,13 @@
  * Conteúdo da landing page, em três camadas (a de cima vence):
  *
  * 1. Cadastro do cartão (`digital_card_content`, editado em /admin):
- *    FONTE ÚNICA de endereço e WhatsApp das unidades, telefone da clínica e
- *    Instagram — o mesmo dado aparece no cartão e na landing.
- * 2. Ajustes da landing (`landing_content`, editado em /config): horários,
- *    FAQ, depoimentos, rodapé legal, Instagram da Dra., galeria, banner.
+ *    FONTE ÚNICA de endereço e WhatsApp das unidades, telefone da clínica,
+ *    Instagram (clínica e Dra. Anita) e depoimentos — o mesmo dado aparece no
+ *    cartão e na landing.
+ * 2. Ajustes da landing (`landing_content`, editado em /admin → Editar site e
+ *    Antes e depois): horários, FAQ, rodapé legal, banner e o caso publicado.
+ *    Campos antigos (galeria, marca, prévia do Instagram) podem continuar
+ *    gravados, mas não são mais exibidos nem editáveis.
  * 3. Padrões do código (src/config/site.ts).
  *
  * Se o Supabase estiver fora do ar, a página abre com os padrões — nunca em branco.
@@ -106,8 +109,16 @@ export type Conteudo = {
 
 /** Parte do cadastro do cartão que a landing usa. */
 export type Cartao = {
-  company?: { phone?: string; instagram?: string; whatsappMode?: string }
+  company?: { phone?: string; instagram?: string; anitaInstagram?: string; whatsappMode?: string }
   units?: Array<{ id?: string; active?: boolean; address?: string; phone?: string }>
+  testimonials?: Array<{ author?: string; text?: string; treatment?: string; active?: boolean }>
+}
+
+/** Depoimentos ativos do cadastro do cartão, no formato da landing. */
+function depoimentosDoCartao(cartao?: Cartao | null): Depoimento[] {
+  return (cartao?.testimonials ?? [])
+    .filter((d) => d.active !== false && d.text?.trim())
+    .map((d) => ({ nome: d.author?.trim() || 'Paciente', texto: d.text!.trim(), tratamento: d.treatment?.trim() ?? '' }))
 }
 
 const soDigitos = (valor?: string) => (valor ?? '').replace(/\D/g, '')
@@ -129,7 +140,8 @@ export const conteudoPadrao: Conteudo = {
 export function aplicar(entrada: Ajustes | null | undefined, cartao?: Cartao | null): Conteudo {
   const ajustes: Ajustes = entrada ?? {}
   const telefoneCartao = soDigitos(cartao?.company?.phone)
-  const compartilhado = cartao?.company?.whatsappMode !== 'separate'
+  // O /admin grava 'shared' (um número para tudo) ou 'byUnit' (um por unidade).
+  const compartilhado = !['byUnit', 'separate'].includes(cartao?.company?.whatsappMode ?? '')
 
   const clinica = { ...clinicaPadrao, ...(ajustes.clinica ?? {}) }
   if (telefoneCartao) clinica.whatsappComercial = telefoneCartao
@@ -145,7 +157,7 @@ export function aplicar(entrada: Ajustes | null | undefined, cartao?: Cartao | n
       const endereco = doCartao?.address?.trim() || ajuste.endereco?.trim() || unidade.endereco
       const whatsapp =
         (compartilhado ? telefoneCartao : soDigitos(doCartao?.phone)) ||
-        soDigitos(doCartao?.phone) || soDigitos(ajuste.whatsapp) || unidade.whatsapp
+        soDigitos(doCartao?.phone) || soDigitos(ajuste.whatsapp) || telefoneCartao || unidade.whatsapp
       return {
         ...unidade,
         endereco,
@@ -164,7 +176,13 @@ export function aplicar(entrada: Ajustes | null | undefined, cartao?: Cartao | n
       }))
       .filter((item) => item.resposta.trim() !== ''),
 
-    depoimentos: ajustes.depoimentos ?? depoimentosPadrao,
+    // Cadastrados em /admin → Depoimentos (valem para o cartão e o site). A lista
+    // antiga do /config só é usada se o cartão ainda não tiver nenhum.
+    depoimentos: depoimentosDoCartao(cartao).length
+      ? depoimentosDoCartao(cartao)
+      : ajustes.depoimentos?.length
+        ? ajustes.depoimentos
+        : depoimentosPadrao,
 
     // String vazia no painel volta ao padrão, em vez de sumir com a
     // identificação que o CFO exige.
@@ -172,7 +190,7 @@ export function aplicar(entrada: Ajustes | null | undefined, cartao?: Cartao | n
 
     instagram: {
       clinica: clinica.instagram,
-      anita: ajustes.instagram?.anita?.trim() || undefined,
+      anita: cartao?.company?.anitaInstagram?.trim() || ajustes.instagram?.anita?.trim() || undefined,
       perfil: ajustes.instagram?.perfil,
       posts: (ajustes.instagram?.posts ?? []).filter((u) => u.trim() !== ''),
     },

@@ -96,6 +96,8 @@ function normalizeInstagramHandle(value) {
   return handle ? `@${handle}` : '';
 }
 
+const DEFAULT_HERO_IMAGE = '/assets/cartao/dra-anita.webp';
+
 function applyImageSource(image, value, fallback) {
   if (!image) return;
   image.onerror = () => {
@@ -291,7 +293,7 @@ function renderCards(sectionId, listId, items, kind) {
   active.forEach((item) => {
     const card = document.createElement('article'); card.className = kind === 'campaign' ? 'campaign-card' : 'testimonial-card';
     if (kind === 'campaign') { const title = document.createElement('h3'); title.textContent = item.title; const copy = document.createElement('p'); copy.textContent = item.description || ''; card.append(title, copy); if (item.url) { const link = trackableLink(item.url, 'campanha'); link.textContent = item.buttonLabel || 'Saiba mais'; card.append(link); } }
-    else { const quote = document.createElement('blockquote'); quote.textContent = `“${item.text}”`; const author = document.createElement('cite'); author.textContent = item.author || 'Paciente'; card.append(quote, author); }
+    else { const quote = document.createElement('blockquote'); quote.textContent = `“${item.text}”`; const author = document.createElement('cite'); author.textContent = [item.author || 'Paciente', item.treatment].filter(Boolean).join(' · '); card.append(quote, author); }
     list.append(card);
   });
 }
@@ -363,6 +365,8 @@ function renderContent(content) {
   const selectedVariant = company.logoVariant || 'primaryDark';
   const selectedLogo = logoSources[selectedVariant] || logoSources.primaryDark;
   applyImageSource(logo, selectedLogo, DEFAULT_LOGOS.primaryDark);
+  // Foto do topo: a de "Dados da empresa" no /admin; vazia, fica a foto padrão da Dra. Anita.
+  applyImageSource(document.querySelector('.profile__photo img'), company.heroImage || DEFAULT_HERO_IMAGE, DEFAULT_HERO_IMAGE);
   const cities = units.filter((unit) => unit.active !== false).map((unit) => unit.city).filter(Boolean); setText('.identity-meta span', company.identityLine || cities.join(' • '));
   renderUnits(units); renderCards('campanhas', 'campaign-list', content.campaigns, 'campaign'); renderCards('depoimentos', 'testimonial-list', content.testimonials, 'testimonial'); renderFormations(content.formations, formationSettings, company); renderExtraLinks(content.links); renderWhatsApp(units, company); renderServiceActions(company);
   const instagram = document.querySelector('.quick-links a[data-track="instagram"]'); if (instagram && company.instagram) { instagram.href = safeUrl(company.instagram); const label = instagram.querySelector('small'); if (label) label.textContent = company.instagramLabel || '@institutovert.br'; }
@@ -783,8 +787,35 @@ leadForm.addEventListener('submit', async (event) => {
   window.setTimeout(() => { leadForm.reset(); submit.disabled = false; window.location.href = destination; }, salvo ? 400 : 2200);
 });
 
+/**
+ * Caso de antes e depois publicado em /admin → Antes e depois. É o mesmo que
+ * aparece na seção Resultados do site: uma publicação, dois lugares. As fotos
+ * aparecem inteiras, sem recorte.
+ */
+async function renderPublishedCase() {
+  const section = document.getElementById('resultados-cartao');
+  if (!section) return;
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/landing_content?slug=eq.instituto-vert&select=resultados:content->resultados`, { headers: { apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}` } });
+    if (!response.ok) return;
+    const pair = (await response.json())[0]?.resultados?.destaque;
+    if (!pair?.antes?.src || !pair?.depois?.src) { section.hidden = true; return; }
+    const list = document.getElementById('resultados-cartao-par'); list.replaceChildren();
+    [['Antes', pair.antes], ['Depois', pair.depois]].forEach(([label, photo]) => {
+      const figure = document.createElement('figure');
+      const image = document.createElement('img');
+      image.src = safeUrl(photo.src, ''); image.alt = `${label} do tratamento`; image.loading = 'lazy'; image.decoding = 'async';
+      if (photo.mini) { image.srcset = `${safeUrl(photo.mini, '')} 360w, ${safeUrl(photo.src, '')} 1800w`; image.sizes = '(max-width: 520px) 46vw, 240px'; }
+      if (photo.largura && photo.altura) { image.width = photo.largura; image.height = photo.altura; }
+      const caption = document.createElement('figcaption'); caption.textContent = label;
+      figure.append(image, caption); list.append(figure);
+    });
+    section.hidden = false;
+  } catch { /* sem conexão: a seção continua oculta */ }
+}
+
 window.addEventListener('message', (event) => { if (event.origin === window.location.origin && event.data?.type === 'vert-card-preview') renderContent(event.data.content); });
-bindTracking(); initializeScrollMotion(); initializePrivacy(); loadCardContent().then(({ content }) => renderContent(content)).catch(() => {
+bindTracking(); initializeScrollMotion(); initializePrivacy(); void renderPublishedCase(); loadCardContent().then(({ content }) => renderContent(content)).catch(() => {
   renderContent({ company: { phone: '5516999657667' }, units: [
     { id: 'franca', name: 'Unidade Franca', city: 'Franca', mapsUrl: 'https://share.google/h4z7z9tEyG4lLo7gp' },
     { id: 'ribeirao-preto', name: 'Unidade Ribeirão Preto', city: 'Ribeirão Preto', mapsUrl: 'https://share.google/FDO4JcaSOvqew78Sh' },

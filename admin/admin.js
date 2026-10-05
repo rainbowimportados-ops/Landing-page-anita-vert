@@ -43,7 +43,7 @@ const saveStatus = document.querySelector('#save-status');
 const preview = document.querySelector('#card-preview');
 
 const DEFAULT_IDENTITY_ASSETS = {
-  heroImage: new URL('../assets/hero.webp', import.meta.url).href,
+  heroImage: '/assets/cartao/dra-anita.webp',
   logoPrimaryDark: new URL('../assets/logo-principal-marrom.jpeg', import.meta.url).href,
   logoPrimaryLight: new URL('../assets/logo-principal-clara.jpeg', import.meta.url).href,
   logoHorizontal: new URL('../assets/logo-secundaria-marrom.jpeg', import.meta.url).href,
@@ -72,7 +72,7 @@ const blankItems = {
   links: () => ({ id: crypto.randomUUID(), title: 'Novo link', url: '', preMessage: '', collectLead: true, active: true }),
   formations: () => ({ id: crypto.randomUUID(), category: 'course', title: 'Nova formação', eyebrow: 'Para dentistas e estudantes', description: '', format: 'Presencial', schedule: '', location: '', whatsappPhone: '', buttonLabel: 'Quero informações', whatsappMessage: '', active: true }),
   campaigns: () => ({ id: crypto.randomUUID(), title: 'Nova campanha', description: '', url: '', buttonLabel: 'Saiba mais', active: true }),
-  testimonials: () => ({ id: crypto.randomUUID(), author: 'Paciente', text: '', active: true }),
+  testimonials: () => ({ id: crypto.randomUUID(), author: 'Paciente', treatment: '', text: '', active: true }),
   portfolio: () => ({ id: crypto.randomUUID(), title: 'Novo resultado', procedure: '', description: '', details: '', mediaUrl: '', fileName: '', posterUrl: '', mediaType: 'image', active: true }),
 };
 
@@ -267,12 +267,13 @@ const sectionDetails = {
   casos: { title: 'Antes e depois', context: 'Resultados do site' },
   campanhas: { title: 'Campanhas e promoções', context: 'Conteúdo do cartão' },
   depoimentos: { title: 'Depoimentos', context: 'Conteúdo do cartão' },
-  resultados: { title: 'Resultados e trabalhos', context: 'Conteúdo do cartão' },
 };
 
 function activatePanel(section, shouldScroll = false) {
   const button = document.querySelector(`.nav-link[data-section="${section}"]`);
   const panel = document.querySelector(`[data-panel="${section}"]`);
+  // Link antigo para uma área que saiu do painel: abre a visão geral.
+  if ((!button || !panel) && section !== 'visao-geral') return activatePanel('visao-geral', shouldScroll);
   if (!button || !panel) return;
   document.querySelectorAll('.nav-link, .panel').forEach((element) => element.classList.remove('is-active'));
   button.classList.add('is-active');
@@ -345,8 +346,8 @@ function textareaField(label, key, value, options = {}) {
   return `<label class="field${wide ? ' wide' : ''}">${label}<textarea data-key="${key}" rows="${rows}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(value)}</textarea></label>`;
 }
 
-function toggle(value) {
-  return `<label class="toggle"><input data-key="active" type="checkbox" ${value ? 'checked' : ''} /> Mostrar no cartão</label>`;
+function toggle(value, label = 'Mostrar no cartão') {
+  return `<label class="toggle"><input data-key="active" type="checkbox" ${value ? 'checked' : ''} /> ${label}</label>`;
 }
 
 function leadToggle(value) {
@@ -379,6 +380,7 @@ function renderUnitContacts() {
 
 function renderList(type) {
   const list = document.querySelector(`#${type}-list`);
+  if (!list) return; // área removida do painel (ex.: portfolio, substituído por Antes e depois)
   const items = content[type] || [];
   if (!items.length) {
     list.replaceChildren(document.querySelector('#empty-template').content.cloneNode(true));
@@ -413,14 +415,14 @@ function renderList(type) {
       textareaField('Mensagem enviada ao WhatsApp', 'whatsappMessage', item.whatsappMessage || '', { wide: true, rows: 4, placeholder: 'Olá! Meu nome é {nome}. Quero informações sobre {curso}. Sou {perfil}. {curso_anterior}' }),
     ].join('');
     if (type === 'campaigns') fields = field('Título', 'title', item.title) + field('Texto', 'description', item.description, { wide: true }) + field('Texto do botão', 'buttonLabel', item.buttonLabel) + field('Link', 'url', item.url, { type: 'url' });
-    if (type === 'testimonials') fields = field('Nome', 'author', item.author) + field('Depoimento', 'text', item.text, { wide: true });
+    if (type === 'testimonials') fields = field('Nome', 'author', item.author) + field('Tratamento (opcional)', 'treatment', item.treatment || '') + field('Depoimento', 'text', item.text, { wide: true });
     if (type === 'portfolio') fields = field('Título do resultado', 'title', item.title) + field('Procedimento ou trabalho', 'procedure', item.procedure || '') + field('Descrição do resultado', 'description', item.description || '', { wide: true, placeholder: 'Conte o que foi realizado e o objetivo do caso.' }) + field('Informações complementares', 'details', item.details || '', { wide: true, placeholder: 'Ex.: planejamento individualizado, período ou técnica.' }) + field('URL da mídia ou documento', 'mediaUrl', item.mediaUrl, { wide: true, type: 'url' }) + `<label class="field">Tipo<select data-key="mediaType"><option value="image" ${item.mediaType === 'image' || !item.mediaType ? 'selected' : ''}>Imagem</option><option value="video" ${item.mediaType === 'video' ? 'selected' : ''}>Vídeo</option><option value="document" ${item.mediaType === 'document' ? 'selected' : ''}>Documento</option></select></label>` + field('Capa do vídeo', 'posterUrl', item.posterUrl || '', { type: 'url' });
 
     const media = type === 'portfolio'
       ? `<div class="media-preview">${mediaPreview(item)}<span>${item.mediaType === 'document' ? 'Documento anexado' : 'Prévia da mídia'}</span><label class="upload">Anexar ou trocar arquivo<input type="file" data-upload accept="${PORTFOLIO_ACCEPT}" /></label></div>`
       : '';
 
-    return `<article class="repeat-card" data-type="${type}" data-index="${index}">${media}<div><div class="repeat-card__top"><strong>${escapeHtml(title)}</strong><button class="remove" type="button" data-remove>Remover</button></div><div class="fields">${fields}<div class="field wide">${toggle(item.active !== false)}</div></div></div></article>`;
+    return `<article class="repeat-card" data-type="${type}" data-index="${index}">${media}<div><div class="repeat-card__top"><strong>${escapeHtml(title)}</strong><button class="remove" type="button" data-remove>Remover</button></div><div class="fields">${fields}<div class="field wide">${toggle(item.active !== false, type === 'testimonials' ? 'Mostrar no site e no cartão' : 'Mostrar no cartão')}</div></div></div></article>`;
   }).join('');
 }
 
