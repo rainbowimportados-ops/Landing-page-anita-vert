@@ -696,7 +696,7 @@
 /* ===== Blocos que cabem na tela =====
    Mídias limitadas pela altura da tela (não só pela largura), para que cada bloco
    apareça inteiro ao rolar, em notebook, monitor grande ou celular. */
-.sorriso-comparador.sorriso-comparador { width: min(100%, calc(var(--altura-max, 64svh) * var(--proporcao, 1))); max-width: none; margin-inline: auto; }
+.sorriso-comparador.sorriso-comparador { width: min(100%, var(--largura-nitida, 100%), calc(var(--altura-max, 64svh) * var(--proporcao, 1))); max-width: none; margin-inline: auto; }
 .sorriso-comparador--rosto { --proporcao: 0.8; }
 .detalhes-comparador { --altura-max: calc(100svh - 12rem); }
 .caso-completo .sorriso-comparador { --altura-max: calc(100svh - 26rem); }

@@ -1,8 +1,9 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import type { CSSProperties, PointerEvent, ReactNode } from 'react'
 import { IconImagem, IconPausa, IconPlay } from './Icon'
 import { CreditosMidiaPaciente, MarcaMidiaPaciente } from './MarcaMidiaPaciente'
 import './sorrisos.css'
+import { useLarguraNitida, useTransicao } from './useTransicao'
 
 // Montagens originais: antes em cima e depois embaixo. A janela apenas revela
 // cada metade; não há retoque, morphing ou geração de dentes.
@@ -62,52 +63,24 @@ export function ComparadorSorriso({
   className?: string
   children?: ReactNode
 }) {
-  const [divisor, setDivisor] = useState(50)
-  const [reproduzindo, setReproduzindo] = useState(false)
   const [carregou, setCarregou] = useState(false)
   const [falhou, setFalhou] = useState(false)
-  const quadro = useRef(0)
-  const id = useId()
+  const figura = useRef<HTMLElement>(null)
   const bloqueado = !carregou || falhou
-  useEffect(() => () => cancelAnimationFrame(quadro.current), [])
+  const { divisor, reproduzindo, mover, alternar } = useTransicao(figura, !bloqueado)
+  const larguraMaxima = useLarguraNitida(registro.largura)
+  const id = useId()
 
-  function parar() {
-    cancelAnimationFrame(quadro.current)
-    setReproduzindo(false)
-  }
-  function mover(valor: number) {
-    parar()
-    setDivisor(Math.max(0, Math.min(100, valor)))
-  }
   function arrastar(evento: PointerEvent<HTMLDivElement>) {
     const area = evento.currentTarget.getBoundingClientRect()
     mover(((evento.clientX - area.left) / area.width) * 100)
-  }
-  /** Transição do antes para o depois: a linha corre da direita para a esquerda. */
-  function reproduzir() {
-    parar()
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setDivisor(0)
-      return
-    }
-    setReproduzindo(true)
-    const inicio = performance.now()
-    setDivisor(100)
-    function passo(agora: number) {
-      const progresso = Math.min(1, (agora - inicio) / 2400)
-      const suave = progresso * progresso * (3 - 2 * progresso)
-      setDivisor(100 - suave * 100)
-      if (progresso < 1) quadro.current = requestAnimationFrame(passo)
-      else setReproduzindo(false)
-    }
-    quadro.current = requestAnimationFrame(passo)
   }
 
   const antes = Math.round(divisor)
   const depois = 100 - antes
 
   return (
-    <figure className={`sorriso-comparador ${className}`} style={{ '--proporcao': registro.largura / (registro.altura / 2) } as CSSProperties}>
+    <figure ref={figura} className={`sorriso-comparador ${className}`} style={{ '--proporcao': registro.largura / (registro.altura / 2), '--largura-nitida': `${larguraMaxima}px` } as CSSProperties}>
       <div className="sorriso-janela" style={{ aspectRatio: `${registro.largura} / ${registro.altura / 2}` }}
         onPointerDown={(e) => {
           if (e.button !== 0 || bloqueado) return
@@ -129,7 +102,7 @@ export function ComparadorSorriso({
         {children}
       </div>
       <BarraControles reproduzindo={reproduzindo} bloqueado={bloqueado}
-        aoVerAntes={() => mover(100)} aoReproduzir={reproduzindo ? parar : reproduzir} aoVerDepois={() => mover(0)} />
+        aoVerAntes={() => mover(100)} aoReproduzir={alternar} aoVerDepois={() => mover(0)} />
       {falhou && <p role="status" className="mt-2 text-sm">Não foi possível carregar a foto. Tente atualizar a página.</p>}
       {/* O arraste é visual; teclado e leitores de tela usam este controle. */}
       <label htmlFor={id} className="sr-only">Comparar antes e depois: {registro.titulo}</label>

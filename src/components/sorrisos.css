@@ -71,3 +71,12 @@
 .caso-completo__cabecalho{margin-bottom:.9rem}
 
 @media(min-width:1024px){.caso-completo__grade--uma{grid-template-columns:1fr}}
+
+/* O comparador pode ficar estreito (foto de resolução menor não é esticada):
+   a barra encurta o rótulo do meio para caber sem vazar. */
+.sorriso-comparador{container-type:inline-size}
+@container (max-width: 470px){
+  .sorriso-barra .rotulo-longo{display:none}
+  .sorriso-barra .rotulo-curto{display:inline}
+  .sorriso-barra button{padding-inline:.7rem}
+}

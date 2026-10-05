@@ -166,7 +166,7 @@ export async function importarCaso(
     progresso('preparando', i)
     try {
       const imagem = await abrirImagem(arquivo)
-      prontas.push({ arquivo, foto: await reduzir(imagem, LADO_MAXIMO, 0.88), mini: await reduzir(imagem, LADO_MINI, 0.8) })
+      prontas.push({ arquivo, foto: await reduzir(imagem, LADO_MAXIMO, 0.92), mini: await reduzir(imagem, LADO_MINI, 0.8) })
       imagem.close()
     } catch {
       puladas.push(arquivo.name)

@@ -1,14 +1,9 @@
-import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
+import { useId, useRef, type CSSProperties, type PointerEvent } from 'react'
 import { enquadrar, proporcaoDoPar, type ParAlinhado } from '../lib/casos'
 import { BarraControles, RotulosAntesDepois } from './Sorrisos'
 import { CreditosMidiaPaciente, MarcaMidiaPaciente } from './MarcaMidiaPaciente'
+import { useLarguraNitida, useTransicao } from './useTransicao'
 
-/**
- * Comparador de arrastar com antes e depois sobrepostos e os dentes no mesmo
- * ponto. Cada foto ocupa o quadro inteiro: arrastar para a direita mostra mais
- * do antes, para a esquerda mais do depois; no meio ficam lado a lado.
- * Serve tanto para montagens (metades de uma imagem) quanto para fotos soltas.
- */
 export function ComparadorAlinhado({
   par,
   titulo,
@@ -23,50 +18,25 @@ export function ComparadorAlinhado({
   className?: string
   creditos?: boolean
 }) {
-  const [divisor, setDivisor] = useState(50)
-  const [reproduzindo, setReproduzindo] = useState(false)
-  const quadro = useRef(0)
+  const figura = useRef<HTMLElement>(null)
+  const { divisor, reproduzindo, mover, alternar } = useTransicao(figura)
   const id = useId()
   const razao = proporcao ?? proporcaoDoPar(par)
   const camadas = enquadrar(par, razao)
-  useEffect(() => () => cancelAnimationFrame(quadro.current), [])
+  const larguraMaxima = useLarguraNitida(
+    Math.min(par.antes.largura * (par.antes.recorte?.w ?? 1), par.depois.largura * (par.depois.recorte?.w ?? 1)),
+  )
 
-  function parar() {
-    cancelAnimationFrame(quadro.current)
-    setReproduzindo(false)
-  }
-  function mover(valor: number) {
-    parar()
-    setDivisor(Math.max(0, Math.min(100, valor)))
-  }
   function arrastar(evento: PointerEvent<HTMLDivElement>) {
     const area = evento.currentTarget.getBoundingClientRect()
     mover(((evento.clientX - area.left) / area.width) * 100)
-  }
-  /** Transição do antes para o depois: a linha corre da direita para a esquerda. */
-  function reproduzir() {
-    parar()
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setDivisor(0)
-      return
-    }
-    setReproduzindo(true)
-    const inicio = performance.now()
-    setDivisor(100)
-    function passo(agora: number) {
-      const progresso = Math.min(1, (agora - inicio) / 2600)
-      const suave = progresso * progresso * (3 - 2 * progresso)
-      setDivisor(100 - suave * 100)
-      if (progresso < 1) quadro.current = requestAnimationFrame(passo)
-      else setReproduzindo(false)
-    }
-    quadro.current = requestAnimationFrame(passo)
   }
 
   const antes = Math.round(divisor)
 
   return (
-    <figure className={`sorriso-comparador sorriso-comparador--rosto ${className}`} style={{ '--proporcao': razao } as CSSProperties}>
+    <figure ref={figura} className={`sorriso-comparador sorriso-comparador--rosto ${className}`}
+      style={{ '--proporcao': razao, '--largura-nitida': `${larguraMaxima}px` } as CSSProperties}>
       <div
         className="sorriso-janela rosto-janela"
         style={{ aspectRatio: String(razao) }}
@@ -91,7 +61,7 @@ export function ComparadorAlinhado({
       <BarraControles
         reproduzindo={reproduzindo}
         aoVerAntes={() => mover(100)}
-        aoReproduzir={reproduzindo ? parar : reproduzir}
+        aoReproduzir={alternar}
         aoVerDepois={() => mover(0)}
       />
       {/* O arraste é visual; teclado e leitores de tela usam este controle. */}
