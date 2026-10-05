@@ -131,19 +131,39 @@ async function abrirImagem(arquivo: File): Promise<ImageBitmap> {
 }
 
 /**
- * Redimensiona no navegador, sem cortar e respeitando a orientação da câmera.
- * Só reduz o tamanho do arquivo: a foto continua sendo a que foi enviada.
+ * Só reduz o tamanho em pixels para caber na tela, sem cortar, sem filtro, sem
+ * retoque e sem IA: a foto continua sendo a original, na orientação da câmera.
+ *
+ * A redução usa interpolação de alta qualidade, em etapas de no máximo 2x (o
+ * padrão do navegador é rápido e serrilha contornos finos, como os dos dentes).
  */
 async function reduzir(imagem: ImageBitmap, lado: number, qualidade: number) {
   const escala = Math.min(1, lado / Math.max(imagem.width, imagem.height))
   const largura = Math.round(imagem.width * escala)
   const altura = Math.round(imagem.height * escala)
+
+  let origem: CanvasImageSource = imagem
+  let w = imagem.width
+  let h = imagem.height
+  while (w / 2 > largura) {
+    w = Math.round(w / 2)
+    h = Math.round(h / 2)
+    origem = desenhar(origem, w, h)
+  }
+  const tela = desenhar(origem, largura, altura)
+  const blob = await new Promise<Blob>((ok, falha) => tela.toBlob((b) => (b ? ok(b) : falha(new Error('Falha ao converter a foto.'))), 'image/webp', qualidade))
+  return { blob, largura, altura }
+}
+
+function desenhar(origem: CanvasImageSource, largura: number, altura: number) {
   const tela = document.createElement('canvas')
   tela.width = largura
   tela.height = altura
-  tela.getContext('2d')!.drawImage(imagem, 0, 0, largura, altura)
-  const blob = await new Promise<Blob>((ok, falha) => tela.toBlob((b) => (b ? ok(b) : falha(new Error('Falha ao converter a foto.'))), 'image/webp', qualidade))
-  return { blob, largura, altura }
+  const contexto = tela.getContext('2d')!
+  contexto.imageSmoothingEnabled = true
+  contexto.imageSmoothingQuality = 'high'
+  contexto.drawImage(origem, 0, 0, largura, altura)
+  return tela
 }
 
 /** Limite de fotos por caso (o mesmo da função analisar-caso). */
@@ -166,7 +186,7 @@ export async function importarCaso(
     progresso('preparando', i)
     try {
       const imagem = await abrirImagem(arquivo)
-      prontas.push({ arquivo, foto: await reduzir(imagem, LADO_MAXIMO, 0.92), mini: await reduzir(imagem, LADO_MINI, 0.8) })
+      prontas.push({ arquivo, foto: await reduzir(imagem, LADO_MAXIMO, 0.95), mini: await reduzir(imagem, LADO_MINI, 0.8) })
       imagem.close()
     } catch {
       puladas.push(arquivo.name)
