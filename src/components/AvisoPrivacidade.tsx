@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { MarcaVert } from './MarcaVert'
 import { registrarClique } from '../lib/analytics'
+import { ativarGoogle } from '../lib/google'
 import { origemDaVisita } from '../lib/origem'
 import { escolhaPrivacidade, guardarEscolha } from '../lib/privacidade'
 
@@ -12,6 +13,7 @@ export function AvisoPrivacidade() {
     if (!inicializado.current) {
       inicializado.current = true
       if (escolhaPrivacidade() === 'accepted') {
+        ativarGoogle()
         origemDaVisita()
         registrarClique('visualizacao_pagina', null, 'page_view')
       } else if (!escolhaPrivacidade()) {
@@ -27,6 +29,7 @@ export function AvisoPrivacidade() {
     guardarEscolha(opcao)
     dialogo.current?.close()
     if (opcao === 'accepted') {
+      ativarGoogle()
       origemDaVisita()
       registrarClique('visualizacao_pagina', null, 'page_view')
     }

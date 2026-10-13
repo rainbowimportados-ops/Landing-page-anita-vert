@@ -2,6 +2,19 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Consent Mode v2: tudo negado até o aceite no aviso de privacidade.
+      // Precisa vir antes de qualquer tag do Google.
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('consent', 'default', {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        wait_for_update: 500,
+      });
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" sizes="32x32" href="/icones/vert-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/icones/vert-16.png" />

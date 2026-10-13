@@ -1,3 +1,4 @@
+import { enviarEventoGoogle } from './google'
 import { escolhaPrivacidade } from './privacidade'
 
 /**
@@ -56,6 +57,8 @@ function detectarOrigem(): string {
  */
 export function registrarClique(botao: string, unidade?: string | null, evento: Evento = 'cta_click'): void {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY || escolhaPrivacidade() !== 'accepted') return
+
+  enviarEventoGoogle(evento, botao, unidade)
 
   const payload = {
     superficie: 'landing',
