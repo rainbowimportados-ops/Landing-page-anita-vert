@@ -61,7 +61,12 @@ export function ativarGoogle(): void {
   if (ADS_ID) gtag('config', ADS_ID)
 }
 
-/** Retirada do consentimento: o Google para de gravar e de enviar. */
+/**
+ * Retirada do consentimento. Com o gtag.js já carregado, negar o consentimento
+ * ainda permitiria pings sem cookies; o único jeito de parar de vez é descarregar
+ * a tag. Por isso a página recarrega, depois que a escolha "recusada" foi gravada,
+ * e sem aceite o gtag.js nem é baixado.
+ */
 export function revogarGoogle(): void {
   if (typeof window === 'undefined' || !ativa) return
   gtag('consent', 'update', {
@@ -70,6 +75,9 @@ export function revogarGoogle(): void {
     ad_user_data: 'denied',
     ad_personalization: 'denied',
   })
+  ativa = false
+  // Adiado para o chamador gravar a escolha antes do recarregamento.
+  window.setTimeout(() => window.location.reload(), 0)
 }
 
 const EVENTOS_GA4: Partial<Record<Evento, string>> = {

@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 const CHAVE_PRIVACIDADE = 'vert_privacy_choice_v1'
-const VERSAO = '2026-09-v5'
+const VERSAO = '2026-10-v6'
 
 /** Corpo enviado à função `site_capturar_lead`, capturado pelo mock. */
 type Lead = { p: Record<string, unknown> }
