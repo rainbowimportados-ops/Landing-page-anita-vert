@@ -1,3 +1,4 @@
+import { ativarGoogle, enviarEventoGoogle, revogarGoogle } from './src/lib/google.ts';
 import { loadCardContent, supabase, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from './lib/supabase.js';
 
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -405,9 +406,11 @@ function eventoPadrao(botao) {
 function registrarClique(botao, unidade = null, evento = null) {
   if (new URLSearchParams(window.location.search).get('preview') === 'admin') return;
   if (!trackingConsent || storageGet(PRIVACY_STORAGE_KEY) !== `accepted:${CONSENT_VERSION}`) return;
+  const eventoFinal = evento || eventoPadrao(botao);
+  enviarEventoGoogle(eventoFinal, String(botao).slice(0, 40), unidade);
   const payload = {
     superficie: 'digital_card',
-    evento: evento || eventoPadrao(botao),
+    evento: eventoFinal,
     pagina: window.location.pathname.slice(0, 300),
     botao: String(botao).slice(0, 40),
     unidade: unidade ? String(unidade).slice(0, 40) : null,
@@ -429,7 +432,10 @@ function initializePrivacy() {
   const choice = storageGet(PRIVACY_STORAGE_KEY);
   visitorInstagram = normalizeInstagramHandle(storageGet(INSTAGRAM_STORAGE_KEY));
   trackingConsent = choice === `accepted:${CONSENT_VERSION}`;
-  if (trackingConsent) registrarClique('visualizacao_pagina');
+  if (trackingConsent) {
+    ativarGoogle();
+    registrarClique('visualizacao_pagina');
+  }
   if (!trackingConsent && choice !== `declined:${CONSENT_VERSION}`) openPrivacyDialog();
 }
 
@@ -438,6 +444,7 @@ privacyForm.addEventListener('submit', (event) => {
   const wasTracking = trackingConsent;
   storageSet(PRIVACY_STORAGE_KEY, `accepted:${CONSENT_VERSION}`);
   trackingConsent = true;
+  ativarGoogle();
   privacyDialog.close();
   // Só após a escolha afirmativa os eventos passam a ser registrados.
   registrarClique(wasTracking ? 'preferencias_privacidade' : 'consentimento_autorizado');
@@ -445,6 +452,7 @@ privacyForm.addEventListener('submit', (event) => {
 
 document.querySelector('[data-privacy-decline]').addEventListener('click', () => {
   trackingConsent = false;
+  revogarGoogle();
   visitorInstagram = '';
   storageSet(PRIVACY_STORAGE_KEY, `declined:${CONSENT_VERSION}`);
   storageRemove(VISITOR_STORAGE_KEY);

@@ -14,7 +14,8 @@ import type { Evento } from './analytics'
  */
 
 const GA4_ID = import.meta.env.VITE_GA4_ID
-const ADS_ID = import.meta.env.VITE_GADS_ID
+// ID público da conta de conversão do Google Ads; a variável de ambiente tem prioridade.
+const ADS_ID = import.meta.env.VITE_GADS_ID || 'AW-18462515909'
 const ROTULO_LEAD = import.meta.env.VITE_GADS_LABEL_LEAD
 
 declare global {
