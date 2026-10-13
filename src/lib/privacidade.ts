@@ -1,3 +1,5 @@
+import { revogarGoogle } from './google'
+
 export const PRIVACY_STORAGE_KEY = 'vert_privacy_choice_v1'
 export const CONSENT_VERSION = '2026-09-v5'
 
@@ -16,6 +18,7 @@ export function guardarEscolha(escolha: 'accepted' | 'declined'): void {
   try {
     window.localStorage.setItem(PRIVACY_STORAGE_KEY, `${escolha}:${CONSENT_VERSION}`)
     if (escolha === 'declined') {
+      revogarGoogle()
       window.localStorage.removeItem('vert_card_visitor_id')
       window.localStorage.removeItem('vert_card_instagram')
       window.sessionStorage.removeItem('vert_origem_v1')
