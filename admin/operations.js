@@ -1,3 +1,4 @@
+import { createDashboard } from './dashboard.js';
 import { agruparPorCampanha, cliqueDoAnuncio, nomeCampanha } from './origem-campanha.js';
 
 const stages = [
@@ -27,6 +28,7 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
   let tab = 'dados';
   let agendaDate = new Date();
   let loadError = null;
+  const dashboard = createDashboard({ getLeads: () => leads, refresh, hasError: () => Boolean(loadError) });
 
   function setLeads(value) {
     loadError = null;
@@ -38,7 +40,7 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
     const notice = empty('Não foi possível carregar os dados', message);
     ['ops-dashboard','pipeline-board','evaluations-list','patients-list','agenda-calendar','agenda-list','origins-list','reports-content'].forEach((id) => {
       const target = document.getElementById(id);
-      if (target) target.innerHTML = notice;
+      if (target) target.innerHTML = notice + (id === 'ops-dashboard' ? '<button type="button" class="button" data-dashboard-action="refresh">Tentar novamente</button><p id="dashboard-feedback" role="status"></p>' : '');
     });
   }
   function renderAll() {
@@ -61,38 +63,7 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
     renderAll();
     void refresh();
   }
-  function renderDashboard() {
-    const period = Number(document.querySelector('#overview-period')?.value || 30);
-    const since = Date.now() - period * 86400000;
-    const recent = leads.filter((lead) => new Date(lead.created_at).getTime() >= since);
-    const scheduled = recent.filter((lead) => lead.appointment_at);
-    const converted = recent.filter((lead) => lead.pipeline_status === 'concluido');
-    const followups = leads.filter((lead) => lead.next_followup_at && new Date(lead.next_followup_at) <= new Date() && !['concluido','perdido'].includes(lead.pipeline_status));
-    const buckets = Array.from({length: period === 90 ? 13 : period}, (_, i) => ({count: 0, start: Date.now() - (period === 90 ? (12-i)*7+6 : period-1-i)*86400000}));
-    recent.forEach((lead) => {
-      const elapsed = Math.floor((Date.now() - new Date(lead.created_at).getTime()) / 86400000);
-      const index = period === 90 ? 12 - Math.floor(elapsed / 7) : period - 1 - elapsed;
-      if (buckets[index]) buckets[index].count++;
-    });
-    const max = Math.max(1, ...buckets.map((item) => item.count));
-    const bars = buckets.map((item, index) => `<div class="overview-bar" title="${safe(new Date(item.start).toLocaleDateString('pt-BR'))}: ${item.count} leads"><span style="height:${Math.max(item.count ? 7 : 2, Math.round(item.count / max * 100))}%"></span>${(index === 0 || index === buckets.length-1 || index % Math.ceil(buckets.length/5) === 0) ? `<small>${safe(new Date(item.start).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}))}</small>` : '<small></small>'}</div>`).join('');
-    const sources = new Map();
-    recent.forEach((lead) => sources.set(origin(lead), (sources.get(origin(lead)) || 0) + 1));
-    const palette = ['#624231','#a77f60','#cfaa86','#e1cdb7','#b49d8b','#806153'];
-    const origins = [...sources].sort((a,b) => b[1]-a[1]);
-    const shown = origins.slice(0,5);
-    if (origins.length > 5) shown.push(['Outras', origins.slice(5).reduce((sum, [,count]) => sum+count,0)]);
-    let offset = 0;
-    const gradient = shown.map(([, count], index) => { const start = offset; offset += count / Math.max(recent.length, 1)*100; return `${palette[index]} ${start}% ${offset}%`; }).join(', ');
-    const legend = shown.map(([name,count], index) => `<li><i style="background:${palette[index]}"></i><span>${safe(name)}</span><strong>${Math.round(count / Math.max(recent.length,1)*100)}%</strong></li>`).join('');
-    const top = [...recent].sort((a,b) => new Date(b.created_at)-new Date(a.created_at)).slice(0, 5).map((lead) => `<button type="button" class="overview-lead-row" data-open-lead="${safe(lead.id)}"><span class="overview-lead-person"><i class="ops-avatar">${safe(lead.name?.[0] || '?')}</i><strong>${safe(lead.name)}</strong></span><span>${safe(interest(lead))}</span><span>${safe(lead.unit || 'A definir')}</span><span>${safe(origin(lead))}</span><time>${safe(dateOnly.format(new Date(lead.created_at)))}</time><em class="crm-stage crm-stage--${safe(lead.pipeline_status || 'novo')}">${safe(stageName[lead.pipeline_status || 'novo'])}</em></button>`).join('');
-    document.querySelector('#ops-dashboard').innerHTML = `<div class="ops-stat-grid">
-      <button type="button" data-go="contatos"><strong>${recent.length}</strong><span>Novos leads</span><small>Recebidos no período</small></button>
-      <button type="button" data-go="pipeline"><strong>${leads.filter((l) => l.pipeline_status === 'em_contato').length}</strong><span>Em atendimento</span><small>Total atual de conversas</small></button>
-      <button type="button" data-go="agenda"><strong>${scheduled.length}</strong><span>Avaliações agendadas</span><small>De leads recebidos no período</small></button>
-      <button type="button" data-go="relatorios"><strong>${converted.length}</strong><span>Convertidos</span><small>Leads recebidos no período</small></button>
-    </div><div class="ops-dashboard-grid"><section class="ops-surface overview-chart"><div class="ops-section-head"><h3>Leads recebidos</h3><span>${period === 90 ? 'Por semana' : 'Por dia'}</span></div><div class="overview-chart__plot" role="img" aria-label="Gráfico de leads recebidos no período, total de ${recent.length}"><div class="overview-chart__scale"><span>${max}</span><span>${Math.ceil(max/2)}</span><span>0</span></div><div class="overview-chart__bars">${bars}</div></div></section><section class="ops-surface overview-origins"><div class="ops-section-head"><h3>Origem dos leads</h3><button type="button" data-go="origens">Detalhes →</button></div><div class="overview-origins__content"><div class="overview-donut" style="--segments:${gradient || '#ede5dc 0% 100%'}" role="img" aria-label="${recent.length} leads por origem"><div><strong>${recent.length}</strong><span>leads</span></div></div><ul>${legend || '<li>Sem origens no período</li>'}</ul></div></section></div><section class="ops-surface overview-recent"><div class="ops-section-head"><h3>Últimos leads</h3><button type="button" data-go="contatos">Ver todos →</button></div><div class="overview-table-head"><span>Nome</span><span>Interesse</span><span>Unidade</span><span>Origem</span><span>Data</span><span>Etapa</span></div>${top || empty('Nenhum lead recente', 'Os novos contatos aparecerão aqui.')}</section>${followups.length ? `<button type="button" class="overview-followups" data-go="contatos" data-followups><strong>${followups.length} ${followups.length === 1 ? 'retorno pendente' : 'retornos pendentes'}</strong><span>Abra os leads para organizar o próximo contato →</span></button>` : ''}`;
-  }
+  function renderDashboard() { dashboard.render(); }
   function filteredPipeline() {
     const term = document.querySelector('#pipeline-search').value.trim().toLowerCase();
     const unit = document.querySelector('#pipeline-unit').value;
@@ -281,3 +252,4 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
   renderAll();
   return { setLeads, setError, activate, loadCampaigns, renderAll };
 }
+
