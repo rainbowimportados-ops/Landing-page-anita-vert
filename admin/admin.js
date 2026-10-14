@@ -697,6 +697,7 @@ async function loadLeads() {
   }
   const data = leadResult.data || [];
   contactLeads = data;
+  const ownerFilter=document.querySelector('#vert-contact-owner');if(ownerFilter){const current=ownerFilter.value;ownerFilter.innerHTML='<option value="">Todos os responsáveis</option><option value="__unassigned">Não atribuídos</option>'+[...new Set(data.map(l=>l.assigned_to).filter(Boolean))].sort().map(n=>'<option value="'+escapeHtml(n)+'">'+escapeHtml(n)+'</option>').join('');ownerFilter.value=current;}
   formationLeads = data.filter((lead) => lead.lead_type === 'formation');
   visitorJourneys = aggregateVisitorJourneys(clickResult.data || [], data);
   selectedLeadIds = new Set([...selectedLeadIds].filter((id) => contactLeads.some((lead) => lead.id === id)));
@@ -814,6 +815,8 @@ function filteredContactLeads() {
   const search = document.querySelector('#lead-search').value.trim().toLocaleLowerCase('pt-BR');
   const filter = document.querySelector('#lead-filter').value;
   const stage = document.querySelector('#lead-stage-filter').value;
+  const selectedUnit=document.querySelector('#vert-contact-unit')?.value||'';
+  const selectedOwner=document.querySelector('#vert-contact-owner')?.value||'';
   return contactLeads.filter((lead) => {
     const matchesFilter = filter === 'all' || (filter === 'marked' ? lead.marked
       : filter === 'unmarked' ? !lead.marked
@@ -825,7 +828,7 @@ function filteredContactLeads() {
     const matchesStage = stage === 'all' || (stage === 'followup'
       ? lead.next_followup_at && new Date(lead.next_followup_at) <= new Date() && !['concluido', 'perdido'].includes(lead.pipeline_status)
       : (lead.pipeline_status || 'novo') === stage);
-    return matchesFilter && matchesStage && (!search || searchable.includes(search));
+    return matchesFilter && matchesStage && (!selectedUnit||lead.unit===selectedUnit) && (!selectedOwner||(lead.assigned_to||'')===selectedOwner||(selectedOwner==='__unassigned'&&!lead.assigned_to)) && (!search || searchable.includes(search));
   });
 }
 
@@ -845,7 +848,7 @@ function renderContactList() {
       ? '<div class="empty-state"><strong>Nenhum contato encontrado</strong><p>Ajuste a busca ou o filtro.</p></div>'
       : '<div class="empty-state"><strong>Nenhum contato recebido ainda</strong><p>Os novos contatos aparecerão aqui.</p></div>';
   } else {
-    list.innerHTML = `<div class="lead-list-heading" aria-hidden="true"><span></span><span>Contato</span><span>Origem e etapa</span><span>Recebido em</span><span>Ações</span></div>${leads.map(renderLeadRow).join('')}`;
+    list.innerHTML = `<div class="lead-list-heading" aria-hidden="true"><span></span><span>Nome</span><span>Telefone</span><span>Interesse</span><span>Unidade</span><span>Etapa</span><span>Responsável</span><span>Ações</span></div>${leads.map(renderLeadRow).join('')}`;
   }
   updateLeadSelectionBar();
 }
@@ -859,25 +862,23 @@ function renderLeadRow(lead) {
   const stage = lead.pipeline_status || 'novo';
   const followup = lead.next_followup_at ? new Intl.DateTimeFormat('pt-BR', { dateStyle:'short', timeStyle:'short' }).format(new Date(lead.next_followup_at)) : '';
   const due = followup && new Date(lead.next_followup_at) <= new Date() && !['concluido', 'perdido'].includes(stage);
-  return `<article class="lead-row${lead.marked ? ' is-marked' : ''}" data-lead-id="${escapeHtml(lead.id)}">
-    <label class="lead-row__select"><input class="lead-select" type="checkbox" ${selectedLeadIds.has(lead.id) ? 'checked' : ''} aria-label="Selecionar ${escapeHtml(lead.name)}" /></label>
-    <div class="lead-row__contact" data-label="Contato">
-      <strong>${escapeHtml(lead.name)}</strong>
-      <span>${escapeHtml(lead.profession || 'Profissão não informada')}</span>
-      <a href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.phone)}</a>
-      ${lead.instagram_handle ? `<a href="https://www.instagram.com/${encodeURIComponent(String(lead.instagram_handle).replace(/^@/, ''))}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.instagram_handle)}</a>` : ''}
-      ${tags ? `<div class="lead-tags">${tags}</div>` : ''}
-    </div>
-    <div class="lead-row__source" data-label="Origem e etapa"><span class="crm-stage crm-stage--${stage}">${escapeHtml(stageLabels[stage] || stage)}</span><span>${escapeHtml(lead.lead_type === 'formation' ? 'Curso' : lead.lead_type === 'rental' ? 'Locação' : lead.lead_type === 'close_friends' ? 'Close Friends' : 'Paciente')} · ${escapeHtml(lead.button)}</span><small>${escapeHtml(lead.unit || 'Sem unidade')} · ${escapeHtml(lead.source_origin || 'Origem não identificada')}</small>${resumoCampanha(lead) ? `<small class="lead-campaign" title="Campanha de origem">${escapeHtml(resumoCampanha(lead))}</small>` : ''}${followup ? `<small class="crm-followup${due ? ' is-due' : ''}">Retorno: ${escapeHtml(followup)}</small>` : ''}${lead.internal_notes ? `<small class="lead-answer">${escapeHtml(lead.internal_notes)}</small>` : ''}${answers ? `<small class="lead-answer">${escapeHtml(answers)}</small>` : ''}</div>
-    <time class="lead-row__date" data-label="Recebido em" datetime="${escapeHtml(lead.created_at)}">${escapeHtml(date)}${journey ? `<br><strong>${journey.clicks} ${journey.clicks === 1 ? 'clique' : 'cliques'}</strong>` : ''}</time>
-    <div class="lead-row__actions" data-label="Ações">
-      <button type="button" data-lead-action="mark" aria-label="${lead.marked ? 'Desmarcar' : 'Marcar'} ${escapeHtml(lead.name)}" title="${lead.marked ? 'Desmarcar' : 'Marcar'}">${lead.marked ? '★' : '☆'}</button>
-      <button type="button" data-lead-action="tag" title="Etiquetar">Etiqueta</button>
-      <button type="button" data-lead-action="edit" title="Editar">Editar</button>
-      <button type="button" data-open-lead="${escapeHtml(lead.id)}" title="Abrir ficha">Ficha</button>
-      <button type="button" class="is-danger" data-lead-action="delete" title="Excluir">Excluir</button>
-    </div>
+  const initials=String(lead.name||'?').split(/\s+/).filter(Boolean).slice(0,2).map(n=>n[0]).join('');
+  return `<article class="lead-row vert-contact-row${lead.marked?' is-marked':''}" data-lead-id="${escapeHtml(lead.id)}">
+    <label class="lead-row__select"><input class="lead-select" type="checkbox" ${selectedLeadIds.has(lead.id)?'checked':''} aria-label="Selecionar ${escapeHtml(lead.name)}"></label>
+    <button type="button" class="vert-contact-name" data-open-lead="${escapeHtml(lead.id)}"><span class="ops-avatar">${escapeHtml(initials)}</span><strong>${escapeHtml(lead.name)}</strong></button>
+    <a class="vert-contact-phone" href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.phone)}</a>
+    <span class="vert-contact-interest" title="${escapeHtml(lead.course_title||lead.answers?.interesse||lead.button)}">${escapeHtml(lead.course_title||lead.answers?.interesse||lead.button)}</span>
+    <span class="vert-contact-unit">${escapeHtml(lead.unit||'A definir')}</span>
+    <span class="crm-stage crm-stage--${escapeHtml(stage)}">${escapeHtml(stageLabels[stage]||stage)}</span>
+    <span class="vert-contact-owner">${escapeHtml(lead.assigned_to||'Não atribuído')}</span>
+    <details class="vert-row-menu"><summary aria-label="Ações de ${escapeHtml(lead.name)}">•••</summary><div>
+    <button type="button" data-open-lead="${escapeHtml(lead.id)}">Abrir ficha</button>
+    <button type="button" data-lead-action="edit">Editar contato</button>
+    <button type="button" data-lead-action="tag">Etiquetas</button>
+    <button type="button" data-lead-action="mark">${lead.marked?'Desmarcar':'Marcar contato'}</button>
+    <button type="button" class="is-danger" data-lead-action="delete">Excluir contato</button></div></details>
   </article>`;
+
 }
 
 function formatLeadAnswers(answers) {
@@ -900,6 +901,7 @@ document.querySelector('#refresh-leads').addEventListener('click', () => void lo
 document.querySelector('#refresh-accesses').addEventListener('click', () => { void loadLeads(); void loadMetrics(); });
 document.querySelector('#refresh-formation-leads').addEventListener('click', () => void loadLeads());
 document.querySelector('#lead-search').addEventListener('input', renderContactList);
+document.addEventListener('change',e=>{if(['vert-contact-unit','vert-contact-owner'].includes(e.target.id))renderContactList();});
 document.querySelector('#lead-filter').addEventListener('change', renderContactList);
 document.querySelector('#lead-stage-filter').addEventListener('change', renderContactList);
 document.querySelector('#crm-summary').addEventListener('click', (event) => {
