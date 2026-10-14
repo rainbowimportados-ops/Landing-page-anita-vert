@@ -460,6 +460,8 @@ document.querySelector('[data-privacy-decline]').addEventListener('click', () =>
   storageSet(PRIVACY_STORAGE_KEY, `declined:${CONSENT_VERSION}`);
   storageRemove(VISITOR_STORAGE_KEY);
   storageRemove(INSTAGRAM_STORAGE_KEY);
+  // Campanha e identificadores de clique também saem: sem aceite não ficam guardados.
+  try { window.sessionStorage.removeItem('vert_origem_v1'); } catch {}
   privacyDialog.close();
 });
 
