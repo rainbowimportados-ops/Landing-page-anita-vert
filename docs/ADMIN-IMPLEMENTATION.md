@@ -34,11 +34,11 @@ O editor recupera o rascunho antes do publicado. A gravação compara o timestam
 - Não há convite por e-mail nem criação de conta pelo painel. “Autorizar conta existente” depende de conta previamente cadastrada no provedor; somente a diretoria pode conceder/revogar.
 - O editor é baseado em campos fixos com prévia; não é construtor visual por arrastar, nem permite reorganização arbitrária de blocos. A prévia mantém botões e formulários ligados aos fluxos públicos.
 - Privacidade é registro e acompanhamento: concluir uma solicitação não executa exclusão, exportação, correção ou revogação nos sistemas envolvidos.
-- A biblioteca usa arquivos públicos, lista no máximo 100 itens por pasta e não oferece exclusão, busca, paginação ou gestão de direitos de uso. Casos de pacientes continuam na área própria.
-- Links rastreáveis têm criação e consulta, sem edição/exclusão na interface atual. Os formulários têm campos opcionais de catálogo fixo; editar um formulário publicado modifica imediatamente sua definição pública.
+- A biblioteca usa arquivos públicos, oferece busca e paginação de 60 itens por pasta; não oferece exclusão nem gestão de direitos de uso. Casos de pacientes continuam na área própria.
+- Links rastreáveis têm criação, edição e consulta, sem exclusão na interface atual. A edição não altera URLs já compartilhadas. Os formulários têm campos opcionais de catálogo fixo; editar um formulário publicado modifica imediatamente sua definição pública.
 - O envio de formulário preserva `utm_source`, fixa `utm_medium=form` e usa o slug como campanha; não preserva todos os parâmetros recebidos. Proteções efetivas de captação e limites dependem do capturador existente e devem ser testados no servidor.
 - Restauração disponível na interface apenas para landing; versões do cartão são consultáveis. Restaurar pode substituir rascunho existente após confirmação. Histórico é limitado na tela e não contém comparação de campos.
-- “Meu dia” reúne dados operacionais disponíveis, sem filtro por responsável; não é uma agenda pessoal com segregação de acesso. Datas usam fuso local do navegador nessa área.
+- “Meu dia” reúne dados operacionais disponíveis, sem filtro por responsável; não é uma agenda pessoal com segregação de acesso. As datas de Meu dia usam o fuso America/Sao_Paulo.
 
 ## Próximas entregas e critérios de conclusão
 
@@ -62,3 +62,14 @@ Esta documentação registra comportamento identificado em código e SQL. Não c
 - A página de login da nova prévia carregou; as 29 entradas de navegação foram montadas no DOM. A conferência visual e de fluxos internos permanece bloqueada pela ausência de sessão administrativa no navegador de teste. Não foi alterada a autenticação para contornar esse bloqueio.
 - O upload do editor sinaliza atividade ao formulário e bloqueia publicação até concluir. Remover/trocar imagem também marca edição pendente.
 - A versão ainda não foi mesclada em `main`; a interface pública em produção não foi substituída por este PR. As adições de banco já estão presentes.
+
+### Continuação — validação de 14/10/2026
+
+- Commit `b4360ec4db27115e517a6cd49df5666d5a101faf`: biblioteca com busca por pasta e paginação de 60 itens, edição de links rastreáveis, datas de Meu dia em America/Sao_Paulo, bloqueio de reenvio e fechamento durante salvamento, melhorias de leitura/foco/campos móveis.
+- Nove testes Node passaram: seis do dashboard e três do workspace (paginação e reset de busca; recuperação de erro; edição de link e escape de HTML). Estes testes usam dependências simuladas e não equivalem à homologação autenticada no navegador.
+- Vercel `dpl_7YPvr5Nhw1sZkx3rTCnVZEXmhTPW`: READY para esse commit.
+- Migrações existentes confirmadas no projeto `xiskevunqbvmoclygppc`; as seis novas tabelas administrativas têm RLS ativa.
+- Teste SQL transacional confirmou definição pública publicada, isolamento de rascunho, bloqueio de leitura anônima direta e leitura/escrita sem autorização administrativa. ROLLBACK executado, sem leads nem notificações.
+- O build local não executou por ausência de TypeScript instalado; a compilação válida é a do deployment Vercel acima.
+- A prévia autenticada permanece aguardando login na aba Chrome. Não há aceite visual desktop/móvel, nem validação ponta a ponta dos fluxos autenticados. Nenhuma mesclagem ou publicação em produção foi feita nesta continuação.
+- As limitações de papéis/unidades, convites, integrações externas e editor por blocos continuam pendentes; esta entrega não certifica a conclusão integral da proposta.
