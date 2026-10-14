@@ -52,3 +52,13 @@ O editor recupera o rascunho antes do publicado. A gravação compara o timestam
 ## Evidência disponível
 
 Esta documentação registra comportamento identificado em código e SQL. Não certifica aplicação da migração remota, entrega de notificações, políticas de armazenamento, execução dos critérios de aceite, acessibilidade completa ou fidelidade visual. Resultados de build, testes e implantação devem ser anexados pelo responsável pela entrega com o commit correspondente; resultados de versões anteriores não validam automaticamente este workspace.
+
+### Verificação registrada nesta entrega
+
+- Código funcional enviado no commit `68befd0c7c805b5600e05d79cf4b2711b916931b`, PR #40 em rascunho.
+- Migrations `site_admin_workspace` e `site_admin_media_list` aplicadas no projeto Vert em 14/10/2026.
+- Testes SQL transacionais passaram para leitura/escrita sem identidade administrativa, rejeição da RPC de membros e isolamento entre formulário publicado e rascunho. Todos os registros de teste foram revertidos; nenhum lead foi criado nem aviso enviado.
+- Os seis testes do modelo de dashboard passaram. A implantação Vercel `dpl_Df5D5M4DxHAw3oaKR8UMHdpRmyeD` concluiu o build e chegou a READY para esse commit.
+- A página de login da nova prévia carregou; as 29 entradas de navegação foram montadas no DOM. A conferência visual e de fluxos internos permanece bloqueada pela ausência de sessão administrativa no navegador de teste. Não foi alterada a autenticação para contornar esse bloqueio.
+- O upload do editor sinaliza atividade ao formulário e bloqueia publicação até concluir. Remover/trocar imagem também marca edição pendente.
+- A versão ainda não foi mesclada em `main`; a interface pública em produção não foi substituída por este PR. As adições de banco já estão presentes.
