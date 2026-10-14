@@ -108,3 +108,39 @@
   .dash-chart-bars { gap:2px; }
   .dash-chart-bars small { font-size:.58rem; }
 }
+/* Match the approved dashboard composition, retaining live CRM metrics. */
+.app .overview-heading{margin-bottom:12px}
+.app .overview-period-label{font-size:12px;gap:8px}
+.app .dash-toolbar{margin-bottom:8px;justify-content:flex-end;gap:12px}
+.app .dash-toolbar label{display:flex;align-items:center;font-size:12px;gap:8px}
+.app .dash-toolbar select{min-height:36px;min-width:175px;padding:8px 12px;border-color:#e4ddd6;font-size:12px;border-radius:5px}
+.app .dash-toolbar-actions .button{min-height:36px;font-size:12px}
+.app .dash-context{font-size:11px;margin-bottom:14px}
+.app .dash-metrics{gap:12px;padding:0;border:0;margin-bottom:18px}
+.app .dash-metrics article,.app .dash-metrics article:first-child,.app .dash-metrics article:last-child{display:grid;grid-template-columns:40px minmax(0,1fr);grid-template-rows:auto auto auto;gap:4px 12px;padding:18px 14px;border:1px solid #e6e0da;border-radius:8px;background:#fff}
+.app .dash-metric-icon{grid-column:1;grid-row:1/3;display:grid;place-items:center;align-self:start;width:40px;height:40px;border-radius:50%;background:#f7f0e7;color:#684328}
+.app .dash-metric-icon svg{width:22px;height:22px}
+.app .dash-metrics span{grid-column:2;font-size:12px;color:#2d251f;font-weight:400}
+.app .dash-metrics strong{grid-column:2;font-size:30px;color:#1f1914;line-height:1.1}
+.app .dash-metrics small{grid-column:2;font-size:10px;color:#786c62;line-height:1.4}
+.app .dash-work-grid,.app .dash-analysis-grid{grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:16px;margin-bottom:16px}
+.app .dash-section{padding:18px;border-color:#e6e0da;border-radius:8px}
+.app .dash-section-head{margin-bottom:12px}.app .dash-section-head h3{font:600 16px/1.4 Arial,sans-serif;letter-spacing:-.02em}
+.app .dash-section-head p{font-size:11px;margin-top:4px}
+.app #ops-dashboard .dash-text-button{font:400 12px/1.4 Arial,sans-serif;text-decoration:none;color:#4c3d32}
+.app .dash-tabs{gap:10px;padding-bottom:0;margin-bottom:0}
+.app .dash-tabs button{font:12px Arial,sans-serif;border-radius:0;min-height:38px;padding:8px 10px;border:0;border-bottom:2px solid transparent}
+.app .dash-tabs button[aria-pressed=true]{background:transparent;border-color:#684328;color:#442916}
+.app .dash-tabs b{display:grid;place-items:center;min-width:22px;height:22px;border-radius:50%;background:#eee9e4;font-size:11px}
+.app .dash-tabs button[aria-pressed=true] b{background:#684328;color:white}
+.app .dash-stage-list,.app .dash-source-list{gap:12px}
+.app .dash-stage-list button,.app .dash-source-list>div{grid-template-columns:minmax(90px,1fr) minmax(70px,1.2fr) auto;gap:10px;padding:4px 0;font:12px Arial,sans-serif}
+.app .dash-stage-list i,.app .dash-source-list i{grid-column:2;grid-row:1;height:19px;border-radius:3px;background:#f2efeb}
+.app .dash-stage-list strong,.app .dash-source-list strong{grid-column:3;grid-row:1;font-size:12px}
+.app .dash-stage-list i::before,.app .dash-source-list i::before{background:linear-gradient(90deg,#765338,#ac8b6b);border-radius:3px}
+.app .dash-empty{min-height:115px;font-size:13px}
+.app .dash-chart{height:160px;margin-top:16px}.app .dash-chart-bars>div>span{background:linear-gradient(90deg,#765338,#9f7a56)}
+.app .dash-queue-row{min-height:54px;padding:9px 0}.app .dash-queue-row strong{font-family:Arial,sans-serif;font-size:13px}.app .dash-queue-row small,.app .dash-queue-row time{font-size:11px}
+@media(max-width:1120px){.app .dash-metrics article{grid-template-columns:1fr}.app .dash-metric-icon{display:none}.app .dash-metrics span,.app .dash-metrics strong,.app .dash-metrics small{grid-column:1}.app .dash-work-grid,.app .dash-analysis-grid{grid-template-columns:minmax(0,1.3fr) minmax(260px,1fr)}}
+@media(max-width:900px){.app .dash-work-grid,.app .dash-analysis-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.app .dash-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.app .dash-metrics article,.app .dash-metrics article:first-child,.app .dash-metrics article:last-child{padding:14px}.app .dash-metrics strong{font-size:28px}.app .dash-toolbar{align-items:stretch}.app .dash-toolbar label{justify-content:space-between}.app .dash-toolbar select{flex:1;font-size:16px}.app .dash-section{padding:15px}.app .dash-tabs{gap:2px}.app .dash-tabs button{font-size:11px;padding-inline:7px}.app .dash-context{gap:4px}.app .dash-stage-list button,.app .dash-source-list>div{grid-template-columns:minmax(80px,1fr) minmax(60px,1.2fr) auto}}

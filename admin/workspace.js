@@ -40,6 +40,7 @@ export function mountWorkspace() {
     editor.insertAdjacentHTML('beforeend',`<section class="panel ws-panel" data-panel="${key}"><div class="panel__heading"><div><h2>${title}</h2><p>${description}</p></div>${btn('refresh','Atualizar',key)}</div><div id="ws-${key}"></div></section>`);
     nav.insertAdjacentHTML('beforeend',`<button type="button" class="nav-link" data-section="${key}"><span aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h4"/></svg></span>${title}</button>`);
   }
+  document.querySelector('.topbar').insertAdjacentHTML('afterbegin',`<div class="vert-global-search"><label for="vert-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><input id="vert-search" type="search" placeholder="Buscar contatos, páginas e campanhas" autocomplete="off" aria-controls="vert-search-results"></label><div id="vert-search-results" hidden></div></div>`);
   const buttons=new Map([...nav.querySelectorAll('button')].map(b=>[b.dataset.section,b]));nav.replaceChildren();mobile.replaceChildren();
   for(const [title,keys] of groups){const label=document.createElement('span');label.className='nav-group-label';label.textContent=title;nav.append(label);const optgroup=document.createElement('optgroup');optgroup.label=title;
     for(const key of keys){const b=buttons.get(key);if(!b)continue;b.type='button';if(names[key])b.lastChild.textContent=names[key];nav.append(b);const o=document.createElement('option');o.value=key;o.textContent=b.textContent;optgroup.append(o);}mobile.append(optgroup);
@@ -57,6 +58,11 @@ export function initWorkspace({supabase,getLeads,getSession,activatePanel,refres
     const rows=[];for(let start=0;;start+=500){const data=checked(await supabase.from(table).select(columns).order(order,{ascending:false}).range(start,start+499));rows.push(...data);if(data.length<500)return rows;}
   }
   function dialog(title,action,fields,id=null){dialogAction=action;editing=id;document.querySelector('#ws-dialog-title').textContent=title;document.querySelector('#ws-fields').innerHTML=fields;document.querySelector('#ws-feedback').textContent='';document.querySelector('#ws-form button[type=submit]').hidden=false;document.querySelector('#ws-dialog').showModal();}
+  const search=document.querySelector('#vert-search'),results=document.querySelector('#vert-search-results');
+  search?.addEventListener('input',()=>{const term=search.value.trim().toLocaleLowerCase('pt-BR');results.hidden=!term;if(!term)return;const sections=[...document.querySelectorAll('.sidebar [data-section]')].filter(b=>b.textContent.toLocaleLowerCase('pt-BR').includes(term));const leads=getLeads().filter(l=>`${l.name} ${l.phone}`.toLocaleLowerCase('pt-BR').includes(term)).slice(0,8);results.innerHTML=sections.map(b=>`<button type="button" data-go="${esc(b.dataset.section)}"><span>Área</span>${esc(b.textContent)}</button>`).join('')+leads.map(l=>`<button type="button" data-open-lead="${esc(l.id)}"><span>Contato · ${esc(l.unit||'A definir')}</span>${esc(l.name)}</button>`).join('')||'<p>Nenhum resultado encontrado.</p>';});
+  search?.addEventListener('keydown',event=>{if(event.key==='Escape'){results.hidden=true;search.blur();}if(event.key==='ArrowDown'){event.preventDefault();results.querySelector('button')?.focus();}});
+  results?.addEventListener('click',event=>{if(event.target.closest('button')){results.hidden=true;search.value='';}});
+  document.addEventListener('click',event=>{if(!event.target.closest('.vert-global-search')&&results)results.hidden=true;});
   const leadOptions=()=>getLeads().map(l=>[l.id,`${l.name} · ${l.unit||'Sem unidade'}`]);
   const leadsById=()=>new Map(getLeads().map(l=>[l.id,l]));
   function toolbar(extra=''){return `<div class="ws-toolbar">${extra}</div>`;}
