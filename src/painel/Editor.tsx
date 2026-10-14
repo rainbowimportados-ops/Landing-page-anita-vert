@@ -7,6 +7,7 @@ import {
 } from '../config/site'
 import { SLUG, type Ajustes } from '../lib/conteudo'
 import './editor-workspace.css'
+import { BLOCOS, normalizarBlocos, type BlocoId } from '../lib/blocos'
 import { CampoImagem } from './CampoImagem'
 import { supabase } from './supabase'
 
@@ -28,6 +29,15 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
   const [uploading,setUploading]=useState(false)
   const [loaded,setLoaded] = useState(false)
   const [mobilePreview, setMobilePreview] = useState(false)
+  const [painel, setPainel] = useState('topo')
+  const blocos = normalizarBlocos(ajustes.blocos)
+  function moverBloco(id: BlocoId, delta: number) {
+    const lista = normalizarBlocos(ajustes.blocos)
+    const index = lista.findIndex(b => b.id === id), destino = index + delta
+    if (destino < 0 || destino >= lista.length) return
+    ;[lista[index], lista[destino]] = [lista[destino], lista[index]]
+    setAjustes(a => ({ ...a, blocos: lista })); setChanged(true)
+  }
   const preview = useRef<HTMLIFrameElement>(null)
   function enviarPrevia() { preview.current?.contentWindow?.postMessage({type:'vert-editor-preview',ajustes},window.location.origin) }
   useEffect(() => { enviarPrevia() }, [ajustes])
@@ -124,16 +134,28 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
       </header>}
 
       <div className="vert-editor-layout">
+      <aside className="vert-block-sidebar"><h2>Blocos da página</h2><p>Escolha um bloco para editar.</p>
+        <button type="button" className={painel==='topo'?'is-selected':''} onClick={()=>setPainel('topo')}>Topo da página <small>Fixo</small></button>
+        {blocos.map((b,index)=><div className={`vert-block-row ${painel===b.id?'is-selected':''}`} key={b.id}>
+          <button type="button" onClick={()=>setPainel(b.id)}>{BLOCOS.find(([id])=>id===b.id)?.[1]}<small>{b.visivel?'Visível':'Oculto'}</small></button>
+          <div className="vert-block-controls">
+            <button type="button" disabled={index===0||estado==='salvando'} aria-label={`Mover ${b.id} para cima`} onClick={()=>moverBloco(b.id,-1)}>↑</button>
+            <button type="button" disabled={index===blocos.length-1||estado==='salvando'} aria-label={`Mover ${b.id} para baixo`} onClick={()=>moverBloco(b.id,1)}>↓</button>
+            <input type="checkbox" aria-label={`Exibir ${b.id}`} checked={b.visivel} disabled={b.id==='unidades'||estado==='salvando'} onChange={e=>{setChanged(true);setAjustes(a=>({...a,blocos:blocos.map(x=>x.id===b.id?{...x,visivel:e.target.checked}:x)}))}} />
+          </div>
+        </div>)}
+        <button type="button" className={painel==='contato'?'is-selected':''} onClick={()=>setPainel('contato')}>Contato e rodapé <small>Fixo</small></button>
+      </aside>
       <main className="vert-editor-fields container-vert space-y-10 py-6" onChangeCapture={()=>setChanged(true)}>
       <fieldset disabled={estado==='salvando'||uploading} className="space-y-10">
         <div className="vert-draft-tools"><button type="button" disabled={estado==='salvando'||uploading} onClick={()=>void descartarRascunho()}>Descartar rascunho e recarregar publicado</button><a href="/" target="_blank" rel="noopener">Conferir versão publicada ↗</a></div>
-        <nav className="vert-editor-tabs" aria-label="Seções do editor"><a href="#editor-contato">Contato</a><a href="#editor-horarios">Unidades</a><a href="#editor-faq">FAQ</a><a href="#editor-banner">Banner</a><a href="#editor-rodape">Rodapé</a></nav>
-        <p className="lead">
-          Estes campos substituem o que está no código. Deixe em branco para manter o texto
-          padrão. Salve um rascunho, confira a prévia e publique quando estiver pronto.
-        </p>
+        <section hidden={painel!=='topo'}><h2 className="titulo-secao">Topo da página</h2><p className="lead">Título e apresentação. Em branco, usamos o texto original.</p>
+          <label className={rotulo}>Título principal<input className={campo} maxLength={120} value={ajustes.topo?.titulo??''} placeholder="Sorrisos que transformam histórias." onChange={e=>setAjustes(a=>({...a,topo:{...a.topo,titulo:e.target.value}}))}/></label>
+          <label className={rotulo}>Texto de apresentação<textarea className={campo} rows={4} maxLength={500} value={ajustes.topo?.texto??''} onChange={e=>setAjustes(a=>({...a,topo:{...a.topo,texto:e.target.value}}))}/></label>
+        </section>
+        {!['topo','contato','unidades','duvidas','banner'].includes(painel)&&<section><h2 className="titulo-secao">{BLOCOS.find(([id])=>id===painel)?.[1]}</h2><p className="lead">Use as setas e a caixa de visibilidade ao lado para organizar este bloco.</p><p className="lead">{painel==='resultados'?'As fotos e os casos são editados em Antes e depois.':painel==='depoimentos'?'Os textos são editados em Depoimentos e usados no site e no cartão.':'Este bloco mantém o conteúdo e o desenho do site.'}</p></section>}
 
-        <section>
+        <section hidden={painel!=='contato'}>
           <h2 id="editor-contato" className="titulo-secao">Contato</h2>
           <p className="mt-2 rounded-card border border-borda bg-superficie-suave p-4 text-sm text-conteudo-suave">
             WhatsApp da clínica, Instagram (da clínica e da Dra. Anita), endereço e WhatsApp das
@@ -167,7 +189,7 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
           </div>
         </section>
 
-        <section>
+        <section hidden={painel!=='unidades'}>
           <h2 id="editor-horarios" className="titulo-secao">Horários das unidades</h2>
           <div className="mt-5 space-y-8">
             {unidadesPadrao.map((unidade) => (
@@ -196,7 +218,7 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
           </div>
         </section>
 
-        <section>
+        <section hidden={painel!=='duvidas'}>
           <h2 id="editor-faq" className="titulo-secao">Perguntas frequentes</h2>
           <div className="mt-5 space-y-5">
             {faqPadrao.map((item) => (
@@ -219,10 +241,10 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
           </div>
         </section>
 
-        <section>
+        <section hidden={painel!=='banner'}>
           <h2 id="editor-banner" className="titulo-secao">Campanha em destaque</h2>
           <p className="lead mt-2">
-            Um banner logo abaixo do topo. Fica oculto enquanto não houver imagem nem título.
+            Um banner na posição escolhida na lista de blocos. Fica oculto enquanto não houver imagem nem título.
           </p>
           <div className="mt-5 space-y-4">
             <CampoImagem
@@ -267,7 +289,7 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
           </div>
         </section>
 
-        <section>
+        <section hidden={painel!=='contato'}>
           <h2 id="editor-rodape" className="titulo-secao">Rodapé legal</h2>
           <p className="lead mt-2">
             Razão social, CNPJ e responsável técnico com CRO. Exigido pela resolução do CFO para
@@ -282,7 +304,7 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
           />
         </section>
 
-        <section className="rounded-card border border-borda bg-superficie-suave p-5 text-sm text-conteudo-suave">
+        <section hidden={painel!=='contato'} className="rounded-card border border-borda bg-superficie-suave p-5 text-sm text-conteudo-suave">
           <h2 className="font-display text-lg text-conteudo">O que fica em outras áreas</h2>
           <ul className="mt-3 list-disc space-y-1.5 pl-5">
             <li><strong>Depoimentos</strong>: em Depoimentos, no menu do painel. Valem para o site e o cartão.</li>

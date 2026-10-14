@@ -24,6 +24,7 @@ import {
   type Unidade,
 } from '../config/site'
 
+import { normalizarBlocos, type Bloco } from './blocos'
 import type { CampanhaResultados, FotoPublicada, ParPublicado } from './casos'
 
 const SUPABASE_URL = 'https://xiskevunqbvmoclygppc.supabase.co'
@@ -73,6 +74,8 @@ export type Banner = {
 
 /** Só os campos que a clínica pode editar pelo painel. */
 export type Ajustes = {
+  blocos?: Bloco[]
+  topo?: { titulo?: string; texto?: string }
   clinica?: Partial<Pick<
     typeof clinicaPadrao,
     'instagram' | 'email' | 'whatsappComercial' | 'whatsappAtendimento'
@@ -95,6 +98,8 @@ export type Ajustes = {
 }
 
 export type Conteudo = {
+  blocos: Bloco[]
+  topo: { titulo?: string; texto?: string }
   clinica: typeof clinicaPadrao
   unidades: Unidade[]
   faq: typeof faqPadrao
@@ -124,6 +129,8 @@ function depoimentosDoCartao(cartao?: Cartao | null): Depoimento[] {
 const soDigitos = (valor?: string) => (valor ?? '').replace(/\D/g, '')
 
 export const conteudoPadrao: Conteudo = {
+  blocos: normalizarBlocos(null),
+  topo: {},
   clinica: clinicaPadrao,
   unidades: unidadesPadrao.map((u) => ({ ...u, mapsUrl: rotaParaEndereco(u.endereco) })),
   faq: faqPadrao.filter((item) => item.resposta.trim() !== ''),
@@ -149,6 +156,8 @@ export function aplicar(entrada: Ajustes | null | undefined, cartao?: Cartao | n
   if (cartao?.company?.instagram?.trim()) clinica.instagram = cartao.company.instagram.trim()
 
   return {
+    blocos: normalizarBlocos(ajustes.blocos),
+    topo: ajustes.topo ?? {},
     clinica,
 
     unidades: unidadesPadrao.map((unidade) => {
@@ -247,3 +256,4 @@ export async function carregarAjustes(): Promise<Ajustes | null> {
     return null
   }
 }
+

@@ -150,6 +150,12 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
     const pageField = lead.entry_page ? `<div><small>Página de entrada</small><strong>${safe(lead.entry_page)}</strong></div>` : '';
     return `<h4 class="ops-subtitle">Origem da campanha</h4><div class="ops-data-grid">${fields}${pageField}${clickField}</div>`;
   }
+  function noteForm(lead) {
+    return `<form id="ops-note-form"><label class="ops-note-label">Anotações da equipe<textarea name="internal_notes" rows="8" maxlength="2000" placeholder="Registre o que foi combinado e o próximo passo">${safe(lead.internal_notes||'')}</textarea></label><p class="ops-feedback" role="status"></p><button type="submit" class="button">Salvar nota</button></form>`;
+  }
+  function activityRow(item) {
+    return `<div class="ops-timeline"><time>${safe(date(item.created_at))}</time><strong>${safe(({created:'Contato recebido',stage:'Etapa alterada',appointment:'Avaliação atualizada',note:'Nota registrada'})[item.kind]||item.kind)}</strong><p>${safe(item.kind==='stage' ? stageName[item.detail]||item.detail : item.detail||'')}</p></div>`;
+  }
   async function openDetail(id) {
     selectedId = id; tab = 'dados';
     document.querySelector('#ops-lead-detail').showModal();
@@ -159,15 +165,21 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
     const lead = leads.find((l) => l.id === selectedId);
     if (!lead) return;
     document.querySelector('#ops-detail-title').textContent = lead.name;
+    document.querySelector('#ops-lead-detail .eyebrow').textContent = 'Contatos / Ficha do contato';
+    document.querySelector('[data-detail-tab="dados"]').textContent = 'Resumo';
     document.querySelector('#ops-detail-subtitle').textContent = `${interest(lead)} · ${lead.unit || 'Sem unidade'} · recebido em ${date(lead.created_at)}`;
     document.querySelector('#ops-detail-actions').innerHTML = `<a href="https://wa.me/${phone(lead.phone)}" target="_blank" rel="noopener noreferrer">WhatsApp ↗</a><a href="tel:${phone(lead.phone)}">Ligar</a><button type="button" data-detail-tab="dados" data-focus-appointment>Agendar</button>`;
     document.querySelectorAll('.ops-tabs button').forEach((b)=>b.classList.toggle('is-active',b.dataset.detailTab===tab));
     const body = document.querySelector('#ops-detail-body');
     if (tab === 'dados') {
       const localTime = lead.appointment_at ? new Date(new Date(lead.appointment_at).getTime()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16) : '';
-      body.innerHTML = `<div class="ops-data-grid"><div><small>Telefone</small><strong>${safe(lead.phone)}</strong></div><div><small>Interesse</small><strong>${safe(interest(lead))}</strong></div><div><small>Unidade</small><strong>${safe(lead.unit || 'A definir')}</strong></div><div><small>Origem</small><strong>${safe(origin(lead))}</strong></div><div><small>Profissão</small><strong>${safe(lead.profession || 'Não informada')}</strong></div><div><small>Instagram</small><strong>${safe(lead.instagram_handle || 'Não informado')}</strong></div></div>${campaignBlock(lead)}<form id="ops-detail-form"><div class="ops-form-grid"><label>Etapa<select name="pipeline_status">${stages.map(([v,l])=>`<option value="${v}"${(lead.pipeline_status||'novo')===v?' selected':''}>${l}</option>`).join('')}</select></label><label>Próximo retorno<input type="datetime-local" name="next_followup_at" value="${lead.next_followup_at ? new Date(new Date(lead.next_followup_at).getTime()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16) : ''}" /></label><label>Data da avaliação<input id="ops-appointment-input" type="datetime-local" name="appointment_at" value="${localTime}" /></label><label>Responsável<input name="assigned_to" maxlength="100" value="${safe(lead.assigned_to||'')}" placeholder="Nome da equipe" /></label></div><p class="ops-feedback" id="ops-detail-feedback" role="status"></p><button class="button" type="submit">Salvar atendimento</button></form>`;
+      body.innerHTML = `<div class="ops-contact-summary"><section class="ops-contact-panel"><h3>Dados do contato</h3><div class="ops-data-grid"><div><small>Telefone</small><strong>${safe(lead.phone)}</strong></div><div><small>Interesse</small><strong>${safe(interest(lead))}</strong></div><div><small>Unidade</small><strong>${safe(lead.unit || 'A definir')}</strong></div><div><small>Origem</small><strong>${safe(origin(lead))}</strong></div><div><small>Profissão</small><strong>${safe(lead.profession || 'Não informada')}</strong></div><div><small>Instagram</small><strong>${safe(lead.instagram_handle || 'Não informado')}</strong></div></div>${campaignBlock(lead)}<form id="ops-detail-form"><div class="ops-form-grid"><label>Etapa<select name="pipeline_status">${stages.map(([v,l])=>`<option value="${v}"${(lead.pipeline_status||'novo')===v?' selected':''}>${l}</option>`).join('')}</select></label><label>Próximo retorno<input type="datetime-local" name="next_followup_at" value="${lead.next_followup_at ? new Date(new Date(lead.next_followup_at).getTime()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16) : ''}" /></label><label>Data da avaliação<input id="ops-appointment-input" type="datetime-local" name="appointment_at" value="${localTime}" /></label><label>Responsável<input name="assigned_to" maxlength="100" value="${safe(lead.assigned_to||'')}" placeholder="Nome da equipe" /></label></div><p class="ops-feedback" id="ops-detail-feedback" role="status"></p><button class="button" type="submit">Salvar atendimento</button></form></section><section class="ops-contact-panel"><h3>Histórico recente</h3><div id="ops-summary-history" aria-live="polite">Carregando…</div></section><section class="ops-contact-panel"><h3>Notas internas</h3>${noteForm(lead)}</section></div>`;
+      const { data, error } = await supabase.from('site_lead_activity').select('kind,detail,created_at').eq('lead_id',lead.id).order('created_at',{ascending:false}).limit(8);
+      if (selectedId !== lead.id || tab !== 'dados') return;
+      const history = document.querySelector('#ops-summary-history');
+      if (history) history.innerHTML = error ? empty('Histórico indisponível',error.message) : data?.length ? data.map(activityRow).join('') : empty('Contato recebido',date(lead.created_at));
     } else if (tab === 'notas') {
-      body.innerHTML = `<form id="ops-note-form"><label class="ops-note-label">Notas internas<textarea name="internal_notes" rows="6" maxlength="2000" placeholder="Registre o que foi combinado e o próximo passo">${safe(lead.internal_notes||'')}</textarea></label><p class="ops-feedback" id="ops-note-feedback" role="status"></p><button type="submit" class="button">Salvar nota</button></form>`;
+      body.innerHTML = noteForm(lead);
     } else if (tab === 'historico') {
       body.innerHTML = empty('Carregando histórico…');
       const { data,error } = await supabase.from('site_lead_activity').select('kind,detail,created_at').eq('lead_id',selectedId).order('created_at',{ascending:false}).limit(100);
