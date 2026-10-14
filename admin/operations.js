@@ -27,6 +27,7 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
   let selectedId = null;
   let tab = 'dados';
   let agendaDate = new Date();
+  let agendaMode = 'week';
   let loadError = null;
   const dashboard = createDashboard({ getLeads: () => leads, refresh, hasError: () => Boolean(loadError) });
 
@@ -85,6 +86,12 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
     document.querySelector('#patients-list').innerHTML = patientLeads.length ? patientLeads.map((lead) => `<button type="button" class="ops-list-row" data-open-lead="${safe(lead.id)}"><span><strong>${safe(lead.name)}</strong><small>${safe(interest(lead))} · ${safe(lead.unit || 'Sem unidade')} · ${safe(origin(lead))}</small></span><em>${safe(stageName[lead.pipeline_status || 'novo'])}</em></button>`).join('') : empty('Nenhum contato de paciente ainda');
   }
   function renderAgenda() {
+    const heading=document.querySelector('#agenda-month');
+    if (!document.querySelector('#agenda-mode')) heading.parentElement.insertAdjacentHTML('beforeend','<button type="button" class="small-action" id="agenda-today">Hoje</button><select id="agenda-mode" aria-label="Visualização da agenda"><option value="week">Semana</option><option value="month">Mês</option></select>');
+    document.querySelector('#agenda-prev').setAttribute('aria-label',agendaMode==='week'?'Semana anterior':'Mês anterior');
+    document.querySelector('#agenda-next').setAttribute('aria-label',agendaMode==='week'?'Próxima semana':'Próximo mês');
+    if(agendaMode==='week'){renderWeek();return;}
+
     const year = agendaDate.getFullYear(), month = agendaDate.getMonth();
     document.querySelector('#agenda-month').textContent = monthName.format(agendaDate);
     const start = new Date(year, month, 1).getDay();
@@ -98,6 +105,20 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
     document.querySelector('#agenda-calendar').innerHTML = '<div class="agenda-weekdays"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div><div class="agenda-grid">' + cells.join('') + '</div>';
     document.querySelector('#agenda-list').innerHTML = scheduled.length ? scheduled.sort((a,b) => new Date(a.appointment_at) - new Date(b.appointment_at)).map((l) => `<button type="button" class="ops-list-row" data-open-lead="${safe(l.id)}"><span><strong>${safe(l.name)}</strong><small>${safe(l.unit || 'Unidade a definir')} · ${safe(interest(l))}</small></span><span>${safe(date(l.appointment_at))}</span></button>`).join('') : empty('Sem avaliações neste mês');
   }
+  function renderWeek() {
+    const monday=new Date(agendaDate.getFullYear(),agendaDate.getMonth(),agendaDate.getDate());
+    monday.setDate(monday.getDate()-((monday.getDay()+6)%7));
+    const week=Array.from({length:7},(_,i)=>new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+i));
+    const key=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const clinicKey=v=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(v));
+    const hour=v=>new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit'}).format(new Date(v));
+    const selected=leads.filter(l=>l.appointment_at&&week.some(d=>key(d)===clinicKey(l.appointment_at))).sort((a,b)=>new Date(a.appointment_at)-new Date(b.appointment_at));
+    document.querySelector('#agenda-month').textContent=`${dateOnly.format(week[0])} — ${dateOnly.format(week[6])}`;
+    document.querySelector('#agenda-calendar').innerHTML=`<p class="ops-muted">Horários de Brasília · Abra um contato para ajustar a avaliação.</p><div class="vert-week">${week.map(d=>{const items=selected.filter(l=>clinicKey(l.appointment_at)===key(d));return `<section class="vert-week-day${key(d)===clinicKey(new Date())?' is-today':''}"><header>${safe(new Intl.DateTimeFormat('pt-BR',{weekday:'short'}).format(d))}<strong>${d.getDate()}</strong></header><div>${items.map(l=>`<button type="button" data-open-lead="${safe(l.id)}"><time>${safe(hour(l.appointment_at))}</time><strong>${safe(l.name)}</strong><small>${safe(l.unit||'Unidade a definir')}</small></button>`).join('')||'<p>Sem avaliações</p>'}</div></section>`;}).join('')}</div>`;
+    document.querySelector('#agenda-list').innerHTML=selected.length?selected.map(l=>`<button type="button" class="ops-list-row" data-open-lead="${safe(l.id)}"><span><strong>${safe(l.name)}</strong><small>${safe(l.unit||'Unidade a definir')}</small></span><span>${safe(new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Sao_Paulo',dateStyle:'short',timeStyle:'short'}).format(new Date(l.appointment_at)))}</span></button>`).join(''):empty('Nenhuma avaliação nesta semana');
+  }
+  document.addEventListener('change',event=>{if(event.target.id==='agenda-mode'){agendaMode=event.target.value;renderAgenda();}});
+  document.addEventListener('click',event=>{if(event.target.closest('#agenda-today')){agendaDate=new Date();renderAgenda();}});
   async function loadCampaigns() {
     const { data, error } = await supabase.from('site_campaigns').select('id,name,slug,destination,status,created_at').order('created_at',{ascending:false});
     if (error) { document.querySelector('#campaign-list').innerHTML = empty('Não foi possível carregar campanhas', error.message); return; }
@@ -205,8 +226,8 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
   document.querySelector('#pipeline-unit').addEventListener('change',renderPipeline);
   document.querySelector('#report-period').addEventListener('change',renderReports);
   document.querySelector('#overview-period')?.addEventListener('change',renderDashboard);
-  document.querySelector('#agenda-prev').addEventListener('click',()=>{ agendaDate=new Date(agendaDate.getFullYear(),agendaDate.getMonth()-1,1);renderAgenda(); });
-  document.querySelector('#agenda-next').addEventListener('click',()=>{ agendaDate=new Date(agendaDate.getFullYear(),agendaDate.getMonth()+1,1);renderAgenda(); });
+  document.querySelector('#agenda-prev').addEventListener('click',()=>{ agendaDate=agendaMode==='week'?new Date(agendaDate.getFullYear(),agendaDate.getMonth(),agendaDate.getDate()-7):new Date(agendaDate.getFullYear(),agendaDate.getMonth()-1,1);renderAgenda(); });
+  document.querySelector('#agenda-next').addEventListener('click',()=>{ agendaDate=agendaMode==='week'?new Date(agendaDate.getFullYear(),agendaDate.getMonth(),agendaDate.getDate()+7):new Date(agendaDate.getFullYear(),agendaDate.getMonth()+1,1);renderAgenda(); });
   document.addEventListener('click', async (event) => {
     const target = event.target.closest('[data-open-lead],[data-go],[data-detail-tab],[data-copy-campaign],[data-toggle-campaign],[data-task-delete]');
     if (!target) return;

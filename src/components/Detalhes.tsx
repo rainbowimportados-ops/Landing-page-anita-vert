@@ -1,3 +1,4 @@
+import { useConteudo } from '../lib/ConteudoContexto'
 import { IconCheck, IconCoracao, IconEquipe, IconEscudo } from './Icon'
 import { Reveal } from './Reveal'
 import { ComparadorSorriso } from './Sorrisos'
@@ -11,6 +12,7 @@ const itens = [
 
 /** Segunda dobra: o sorriso de perto, com o comparador de arrastar. */
 export function Detalhes() {
+  const tratamentosVisiveis = useConteudo().blocos.some(b=>b.id==='tratamentos'&&b.visivel)
   return (
     <section className="relative py-[clamp(1.5rem,5svh,3.5rem)]" aria-labelledby="detalhes-titulo">
       <div className="container-vert grid gap-6 lg:grid-cols-[1.35fr_0.65fr] lg:items-center lg:gap-12">
@@ -40,13 +42,14 @@ export function Detalhes() {
             ))}
           </ul>
           <a
-            href="#tratamentos"
+            href={tratamentosVisiveis?'#tratamentos':'#contato'}
             className="mt-6 inline-flex min-h-[48px] items-center gap-2.5 rounded-xl bg-marca-forte px-7 py-3 text-sm font-medium text-conteudo-inverso shadow-2 transition duration-padrao ease-saida hover-fino:hover:bg-conteudo active:scale-[0.98]"
           >
-            Conheça nossos tratamentos <span aria-hidden="true">→</span>
+            {tratamentosVisiveis?'Conheça nossos tratamentos':'Agende uma avaliação'} <span aria-hidden="true">→</span>
           </a>
         </Reveal>
       </div>
     </section>
   )
 }
+
