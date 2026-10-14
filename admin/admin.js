@@ -1,5 +1,6 @@
 import { ADMIN_EMAIL, ADMIN_REDIRECT_URL, loadCardContent, supabase } from '../lib/supabase.js';
 import { initOperations } from './operations.js';
+import { CABECALHO_CSV_CAMPANHA, COLUNAS_CAMPANHA, linhaCsvCampanha, resumoCampanha, textoBuscaCampanha, veioDeAnuncio } from './origem-campanha.js';
 
 const navIconPaths = {
   'visao-geral':'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
@@ -702,7 +703,7 @@ async function loadAllSiteLeads() {
   const pageSize = 500;
   for (let offset = 0; ; offset += pageSize) {
     const result = await supabase.from('digital_card_leads')
-      .select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at,visitor_id,instagram_handle,source_origin,age_range,gender,answers,pipeline_status,internal_notes,next_followup_at,appointment_at,assigned_to')
+      .select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at,visitor_id,instagram_handle,source_origin,age_range,gender,answers,pipeline_status,internal_notes,next_followup_at,appointment_at,assigned_to,' + COLUNAS_CAMPANHA)
       .order('created_at', { ascending: false }).order('id', { ascending: false }).range(offset, offset + pageSize - 1);
     if (result.error) return { data: null, error: result.error };
     rows.push(...(result.data || []));
@@ -804,9 +805,10 @@ function filteredContactLeads() {
   return contactLeads.filter((lead) => {
     const matchesFilter = filter === 'all' || (filter === 'marked' ? lead.marked
       : filter === 'unmarked' ? !lead.marked
+      : filter === 'ads' ? veioDeAnuncio(lead)
       : filter === 'appointment' ? ['appointment', 'patient', 'contact'].includes(lead.lead_type)
       : lead.lead_type === filter);
-    const searchable = [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.button, lead.unit, lead.source_origin, ...Object.values(lead.answers || {}), ...(lead.tags || [])].join(' ').toLocaleLowerCase('pt-BR');
+    const searchable = [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.button, lead.unit, lead.source_origin, textoBuscaCampanha(lead), ...Object.values(lead.answers || {}), ...(lead.tags || [])].join(' ').toLocaleLowerCase('pt-BR');
     const matchesStage = stage === 'all' || (stage === 'followup'
       ? lead.next_followup_at && new Date(lead.next_followup_at) <= new Date() && !['concluido', 'perdido'].includes(lead.pipeline_status)
       : (lead.pipeline_status || 'novo') === stage);
@@ -853,7 +855,7 @@ function renderLeadRow(lead) {
       ${lead.instagram_handle ? `<a href="https://www.instagram.com/${encodeURIComponent(String(lead.instagram_handle).replace(/^@/, ''))}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.instagram_handle)}</a>` : ''}
       ${tags ? `<div class="lead-tags">${tags}</div>` : ''}
     </div>
-    <div class="lead-row__source" data-label="Origem e etapa"><span class="crm-stage crm-stage--${stage}">${escapeHtml(stageLabels[stage] || stage)}</span><span>${escapeHtml(lead.lead_type === 'formation' ? 'Curso' : lead.lead_type === 'rental' ? 'Locação' : lead.lead_type === 'close_friends' ? 'Close Friends' : 'Paciente')} · ${escapeHtml(lead.button)}</span><small>${escapeHtml(lead.unit || 'Sem unidade')} · ${escapeHtml(lead.source_origin || 'Origem não identificada')}</small>${followup ? `<small class="crm-followup${due ? ' is-due' : ''}">Retorno: ${escapeHtml(followup)}</small>` : ''}${lead.internal_notes ? `<small class="lead-answer">${escapeHtml(lead.internal_notes)}</small>` : ''}${answers ? `<small class="lead-answer">${escapeHtml(answers)}</small>` : ''}</div>
+    <div class="lead-row__source" data-label="Origem e etapa"><span class="crm-stage crm-stage--${stage}">${escapeHtml(stageLabels[stage] || stage)}</span><span>${escapeHtml(lead.lead_type === 'formation' ? 'Curso' : lead.lead_type === 'rental' ? 'Locação' : lead.lead_type === 'close_friends' ? 'Close Friends' : 'Paciente')} · ${escapeHtml(lead.button)}</span><small>${escapeHtml(lead.unit || 'Sem unidade')} · ${escapeHtml(lead.source_origin || 'Origem não identificada')}</small>${resumoCampanha(lead) ? `<small class="lead-campaign" title="Campanha de origem">${escapeHtml(resumoCampanha(lead))}</small>` : ''}${followup ? `<small class="crm-followup${due ? ' is-due' : ''}">Retorno: ${escapeHtml(followup)}</small>` : ''}${lead.internal_notes ? `<small class="lead-answer">${escapeHtml(lead.internal_notes)}</small>` : ''}${answers ? `<small class="lead-answer">${escapeHtml(answers)}</small>` : ''}</div>
     <time class="lead-row__date" data-label="Recebido em" datetime="${escapeHtml(lead.created_at)}">${escapeHtml(date)}${journey ? `<br><strong>${journey.clicks} ${journey.clicks === 1 ? 'clique' : 'cliques'}</strong>` : ''}</time>
     <div class="lead-row__actions" data-label="Ações">
       <button type="button" data-lead-action="mark" aria-label="${lead.marked ? 'Desmarcar' : 'Marcar'} ${escapeHtml(lead.name)}" title="${lead.marked ? 'Desmarcar' : 'Marcar'}">${lead.marked ? '★' : '☆'}</button>
@@ -1046,8 +1048,8 @@ document.querySelector('#export-leads').addEventListener('click', () => {
     window.alert('Não há contatos para exportar.');
     return;
   }
-  const header = ['Nome', 'Telefone', 'Instagram', 'Profissão', 'Faixa etária', 'Sexo', 'Tipo', 'Origem', 'Unidade', 'Respostas', 'Origem do acesso', 'Recebido em', 'Etapa', 'Próximo retorno', 'Notas internas', 'Marcado', 'Etiquetas'];
-  const csvRows = rows.map((lead) => [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.age_range, lead.gender, lead.lead_type, lead.button, lead.unit, formatLeadAnswers(lead.answers), lead.source_origin, lead.created_at, stageLabels[lead.pipeline_status || 'novo'], lead.next_followup_at, lead.internal_notes, lead.marked ? 'Sim' : 'Não', (lead.tags || []).join('; ')]);
+  const header = ['Nome', 'Telefone', 'Instagram', 'Profissão', 'Faixa etária', 'Sexo', 'Tipo', 'Origem', 'Unidade', 'Respostas', 'Origem do acesso', 'Recebido em', 'Etapa', 'Próximo retorno', 'Notas internas', 'Marcado', 'Etiquetas', ...CABECALHO_CSV_CAMPANHA];
+  const csvRows = rows.map((lead) => [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.age_range, lead.gender, lead.lead_type, lead.button, lead.unit, formatLeadAnswers(lead.answers), lead.source_origin, lead.created_at, stageLabels[lead.pipeline_status || 'novo'], lead.next_followup_at, lead.internal_notes, lead.marked ? 'Sim' : 'Não', (lead.tags || []).join('; '), ...linhaCsvCampanha(lead)]);
   const csv = '\uFEFF' + [header, ...csvRows].map((row) => row.map(csvCell).join(',')).join('\r\n');
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const link = document.createElement('a');

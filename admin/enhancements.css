@@ -682,3 +682,9 @@ button.ops-list-row:hover { border-color:#aa8a72; }
   [data-panel="acessos"] .journey-row__identity { grid-column:1/-1; padding:0 0 10px!important; border-bottom:1px solid var(--border); }
   [data-panel="acessos"] .journey-row__identity::before { display:none; }
 }
+
+.lead-row__source .lead-campaign { color:var(--green, #207a55); font-weight:600; }
+.ops-data-grid .ops-data-wide { grid-column:1 / -1; }
+.ops-data-grid strong.ops-break { overflow-wrap:anywhere; font-weight:500; font-size:.78rem; }
+.ops-campaign-table .ops-report-row small { color:#806a5e; }
+.ops-subtitle { margin:16px 0 8px; font-size:.78rem; letter-spacing:.04em; color:#654b3e; }
