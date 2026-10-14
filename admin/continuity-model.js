@@ -8,10 +8,10 @@ export const existingFlows = [
 ];
 const labels={perfil:'Perfil profissional',cidade:'Cidade',profissao:'Profissão',ja_fez_curso:'Já fez curso',interesse:'Interesse',finalidade:'Finalidade da locação',frequencia:'Frequência de uso',situacao:'Situação do paciente',unidade:'Unidade',periodo_graduacao:'Período da graduação',mensagem:'Mensagem',email:'E-mail',instagram:'Instagram'};
 const values={pontual:'Uso pontual',semanal:'Semanalmente',mensal:'Mensalmente',atual:'Já é paciente',novo:'Novo paciente',dentista:'Dentista',estudante:'Estudante',saude:'Profissional da saúde',yes:'Sim',no:'Não'};
-function display(value){if(typeof value==='boolean')return value?'Sim':'Não';if(typeof value==='object')return JSON.stringify(value);return values[value]||String(value);}
+function display(value){if(typeof value==='boolean')return value?'Sim':'Não';if(typeof value==='object')return JSON.stringify(value);return Object.hasOwn(values,value)?values[value]:String(value);}
 export function contactResponses(lead={}) {
   const answers=lead.answers&&typeof lead.answers==='object'&&!Array.isArray(lead.answers)?lead.answers:{};
-  const rows=Object.entries(answers).filter(([,v])=>v!==null&&v!==undefined&&v!=='').map(([key,value])=>({label:labels[key]||key.replace(/_/g,' '),value:display(value)}));
+  const rows=Object.entries(answers).filter(([,v])=>v!==null&&v!==undefined&&v!=='').map(([key,value])=>({label:Object.hasOwn(labels,key)?labels[key]:key.replace(/_/g,' '),value:display(value)}));
   for(const [key,label] of [['course_title','Curso de interesse'],['has_previous_course','Já fez curso'],['is_dentist','É dentista'],['age_range','Faixa etária'],['gender','Gênero']]){
     const value=lead[key];if(value!==null&&value!==undefined&&value!==''&&!rows.some(r=>r.label===label))rows.push({label,value:display(value)});
   }

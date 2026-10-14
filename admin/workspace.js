@@ -137,5 +137,5 @@ export function initWorkspace({supabase,getLeads,getSession,activatePanel,refres
     document.querySelector('#ws-dialog').close();notice('Salvo com sucesso.');if(section){activatePanel(section,true);await activate(section);}if(dialogAction==='task')void refresh();
   }catch(e){feedback.textContent=e.message;}finally{saving=false;button.disabled=false;}});
   document.querySelector('#ws-dialog').addEventListener('cancel',event=>{if(saving)event.preventDefault();});
-  return {activate,onLeadsChanged(){const section=document.querySelector('#admin-app').dataset.activeSection;if(section==='meu-dia')renderDay();if(section==='tarefas')renderTasks();}};
+  return {activate,onLeadsChanged(){const section=document.querySelector('#admin-app').dataset.activeSection;if(section==='meu-dia')renderDay();if(section==='tarefas')renderTasks();if(section==='formularios')renderForms();}};
 }
