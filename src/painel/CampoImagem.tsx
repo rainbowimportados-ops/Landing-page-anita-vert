@@ -6,12 +6,13 @@ type Props = {
   dica?: string
   valor: string | undefined
   aoMudar: (url: string) => void
+  aoEnviar?: (ativo: boolean) => void
   /** Subpasta no bucket, para os arquivos não virarem um monte só. */
   pasta: string
 }
 
 /** Envia uma imagem, mostra a prévia e devolve a URL pública. */
-export function CampoImagem({ rotulo, dica, valor, aoMudar, pasta }: Props) {
+export function CampoImagem({ rotulo, dica, valor, aoMudar, pasta, aoEnviar }: Props) {
   const id = useId()
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -21,6 +22,7 @@ export function CampoImagem({ rotulo, dica, valor, aoMudar, pasta }: Props) {
     if (!arquivo) return
 
     setEnviando(true)
+    aoEnviar?.(true)
     setErro(null)
     try {
       aoMudar(await enviarImagem(arquivo, pasta))
@@ -28,6 +30,7 @@ export function CampoImagem({ rotulo, dica, valor, aoMudar, pasta }: Props) {
       setErro(e instanceof Error ? e.message : 'Não foi possível enviar.')
     } finally {
       setEnviando(false)
+      aoEnviar?.(false)
       evento.target.value = ''
     }
   }
@@ -82,3 +85,4 @@ export function CampoImagem({ rotulo, dica, valor, aoMudar, pasta }: Props) {
     </div>
   )
 }
+

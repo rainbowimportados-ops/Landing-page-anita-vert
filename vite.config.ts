@@ -15,6 +15,7 @@ export default defineConfig({
       input: {
         card: 'cartao/index.html',
         admin: 'admin/index.html',
+        formulario: 'formulario/index.html',
         landing: 'index.html',
         config: 'config/index.html',
         privacidade: 'privacidade/index.html',
@@ -24,3 +25,4 @@ export default defineConfig({
     },
   },
 })
+

@@ -19,7 +19,7 @@ const origin = (lead) => {
 };
 const interest = (lead) => lead.course_title || lead.answers?.interesse || lead.button || 'Contato';
 const empty = (title, text = '') => `<div class="ops-empty"><strong>${safe(title)}</strong><p>${safe(text)}</p></div>`;
-const csv = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+const csv = (value) => { const text=String(value??''); return `"${(/^[=+@\-\t\r]/.test(text)?"'"+text:text).replace(/"/g,'""')}"`; };
 
 export function initOperations({ supabase, refresh, activatePanel, getSession }) {
   let leads = [];
@@ -45,12 +45,12 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
   }
   function renderAll() {
     renderDashboard(); renderPipeline(); renderEvaluations(); renderPatients(); renderAgenda();
-    renderCampaigns(); renderOrigins(); renderReports(); renderTeam();
+    renderCampaigns(); renderOrigins(); renderReports();
     if (selectedId && document.querySelector('#ops-lead-detail').open) renderDetail();
   }
   function activate(section) {
     if (section === 'campanhas-crm') void loadCampaigns();
-    if (section === 'equipe') renderTeam();
+
     if (loadError) return;
     if (section === 'pipeline') renderPipeline();
     if (section === 'relatorios') renderReports();

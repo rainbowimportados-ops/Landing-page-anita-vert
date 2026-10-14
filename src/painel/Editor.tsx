@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   clinica as clinicaPadrao,
   faq as faqPadrao,
@@ -6,6 +6,7 @@ import {
   unidades as unidadesPadrao,
 } from '../config/site'
 import { SLUG, type Ajustes } from '../lib/conteudo'
+import './editor-workspace.css'
 import { CampoImagem } from './CampoImagem'
 import { supabase } from './supabase'
 
@@ -20,48 +21,73 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
   const [ajustes, setAjustes] = useState<Ajustes>({})
   const [estado, setEstado] = useState<Estado>('carregando')
   const [erro, setErro] = useState<string | null>(null)
+  const [mensagem, setMensagem] = useState('')
+  const [baseStamp, setBaseStamp] = useState<string | null>(null)
+  const [draftStamp, setDraftStamp] = useState<string | null>(null)
+  const [changed, setChanged] = useState(false)
+  const [uploading,setUploading]=useState(false)
+  const [loaded,setLoaded] = useState(false)
+  const [mobilePreview, setMobilePreview] = useState(false)
+  const preview = useRef<HTMLIFrameElement>(null)
+  function enviarPrevia() { preview.current?.contentWindow?.postMessage({type:'vert-editor-preview',ajustes},window.location.origin) }
+  useEffect(() => { enviarPrevia() }, [ajustes])
+  useEffect(() => {
+    const ready=(event:MessageEvent)=>{if(event.origin===window.location.origin&&event.source===preview.current?.contentWindow&&event.data?.type==='vert-preview-ready')enviarPrevia()}
+    window.addEventListener('message',ready);return()=>window.removeEventListener('message',ready)
+  },[ajustes])
+  useEffect(()=>{const warn=(e:BeforeUnloadEvent)=>{if(changed)e.preventDefault()};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn)},[changed])
 
   useEffect(() => {
-    supabase
-      .from('landing_content')
-      .select('content')
-      .eq('slug', SLUG)
-      .maybeSingle()
-      .then(({ data }) => {
-        const vindos = (data?.content as Ajustes) ?? {}
-        setAjustes(vindos)
-        setEstado('pronto')
-      })
+    let active=true
+    Promise.all([
+      supabase.from('landing_content').select('content,updated_at').eq('slug',SLUG).maybeSingle(),
+      supabase.from('site_content_drafts').select('content,base_updated_at,updated_at').eq('target','landing').maybeSingle(),
+    ]).then(([published,draft])=>{
+      if(!active)return
+      if(published.error||draft.error){setErro(published.error?.message||draft.error?.message||'Falha ao carregar');setEstado('erro');return}
+      setAjustes((draft.data?.content??published.data?.content??{}) as Ajustes)
+      setBaseStamp(draft.data?draft.data.base_updated_at:published.data?.updated_at??null)
+      setDraftStamp(draft.data?.updated_at??null)
+      setMensagem(draft.data?'Rascunho recuperado. O site publicado permanece igual.':'Você está editando uma cópia do conteúdo publicado.')
+      setLoaded(true)
+      setEstado('pronto')
+    })
+    return()=>{active=false}
   }, [])
 
-  async function salvar() {
+  async function salvar(publicar=false) {
+    if(uploading)return
+    setEstado('salvando');setErro(null)
+    try {
+      const user=await supabase.auth.getUser()
+      if(user.error)throw user.error
+      const record={target:'landing',content:ajustes,base_updated_at:baseStamp,updated_at:new Date().toISOString(),updated_by:user.data.user?.id}
+      const result=draftStamp
+        ? await supabase.from('site_content_drafts').update(record).eq('target','landing').eq('updated_at',draftStamp).select('updated_at').single()
+        : await supabase.from('site_content_drafts').insert(record).select('updated_at').single()
+      if(result.error)throw new Error('Não foi possível salvar. Outro editor pode ter atualizado o rascunho. Recarregue para conferir. '+result.error.message)
+      setDraftStamp(result.data.updated_at)
+      setChanged(false)
+      if(publicar){
+        const published=await supabase.rpc('site_publish_draft',{p_target:'landing',p_updated_at:result.data.updated_at})
+        if(published.error)throw published.error
+        setDraftStamp(null)
+        const current=await supabase.from('landing_content').select('updated_at').eq('slug',SLUG).single()
+        if(current.error)throw current.error
+        setBaseStamp(current.data.updated_at)
+        setMensagem('Publicado. O site já usa esta versão.')
+      } else setMensagem('Rascunho salvo. O site publicado permanece igual.')
+      setEstado('salvo')
+    }catch(e){setErro(e instanceof Error?e.message:'Não foi possível salvar');setEstado('erro')}
+  }
+
+  async function descartarRascunho() {
+    if(!window.confirm('Descartar este rascunho e carregar a versão publicada? As alterações não publicadas serão perdidas.'))return
     setEstado('salvando')
-    setErro(null)
-
-    const paraSalvar: Ajustes = { ...ajustes }
-
-    // O caso de antes e depois é publicado pela aba Casos: preserva o que está no
-    // banco agora, para salvar aqui nunca desfazer uma publicação feita depois
-    // que esta tela abriu.
-    const { data: atual } = await supabase.from('landing_content').select('content').eq('slug', SLUG).maybeSingle()
-    paraSalvar.resultados = (atual?.content as Ajustes | undefined)?.resultados ?? null
-
-    const { error } = await supabase
-      .from('landing_content')
-      .upsert({ slug: SLUG, content: paraSalvar, updated_at: new Date().toISOString() })
-
-    if (error) {
-      // O RLS recusa quem não está em digital_card_admins.
-      setErro(
-        error.message.includes('row-level security')
-          ? 'Sua conta não tem permissão para editar este conteúdo.'
-          : error.message,
-      )
-      setEstado('erro')
-      return
-    }
-    setEstado('salvo')
-    setTimeout(() => setEstado('pronto'), 2500)
+    const result=draftStamp?await supabase.from('site_content_drafts').delete().eq('target','landing').eq('updated_at',draftStamp).select('target').single():{error:null}
+    if(result.error){setErro('O rascunho mudou. Recarregue antes de descartar.');setEstado('erro');return}
+    setChanged(false)
+    window.location.reload()
   }
 
   function definirUnidade(slug: string, campo: string, valor: string | string[]) {
@@ -74,6 +100,8 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
   if (estado === 'carregando') {
     return <p className="container-vert py-20 text-sm text-conteudo-suave">Carregando…</p>
   }
+
+  if(!loaded) return <div className="p-8"><p role="alert">{erro}</p><button onClick={()=>window.location.reload()}>Tentar carregar novamente</button></div>
 
   return (
     <div className={`${integrado ? 'min-h-full' : 'min-h-dvh'} bg-fundo pb-28`}>
@@ -95,14 +123,18 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
         {abas}
       </header>}
 
-      <main className="container-vert max-w-3xl space-y-10 py-6">
+      <div className="vert-editor-layout">
+      <main className="vert-editor-fields container-vert space-y-10 py-6" onChangeCapture={()=>setChanged(true)}>
+      <fieldset disabled={estado==='salvando'||uploading} className="space-y-10">
+        <div className="vert-draft-tools"><button type="button" disabled={estado==='salvando'||uploading} onClick={()=>void descartarRascunho()}>Descartar rascunho e recarregar publicado</button><a href="/" target="_blank" rel="noopener">Conferir versão publicada ↗</a></div>
+        <nav className="vert-editor-tabs" aria-label="Seções do editor"><a href="#editor-contato">Contato</a><a href="#editor-horarios">Unidades</a><a href="#editor-faq">FAQ</a><a href="#editor-banner">Banner</a><a href="#editor-rodape">Rodapé</a></nav>
         <p className="lead">
           Estes campos substituem o que está no código. Deixe em branco para manter o texto
-          padrão. A página é atualizada assim que você salva.
+          padrão. Salve um rascunho, confira a prévia e publique quando estiver pronto.
         </p>
 
         <section>
-          <h2 className="titulo-secao">Contato</h2>
+          <h2 id="editor-contato" className="titulo-secao">Contato</h2>
           <p className="mt-2 rounded-card border border-borda bg-superficie-suave p-4 text-sm text-conteudo-suave">
             WhatsApp da clínica, Instagram (da clínica e da Dra. Anita), endereço e WhatsApp das
             unidades ficam em <strong>WhatsApp e contatos</strong> e <strong>Unidades</strong> e valem
@@ -136,7 +168,7 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
         </section>
 
         <section>
-          <h2 className="titulo-secao">Horários das unidades</h2>
+          <h2 id="editor-horarios" className="titulo-secao">Horários das unidades</h2>
           <div className="mt-5 space-y-8">
             {unidadesPadrao.map((unidade) => (
               <div key={unidade.slug} className="rounded-card border border-borda bg-superficie p-5">
@@ -165,7 +197,7 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
         </section>
 
         <section>
-          <h2 className="titulo-secao">Perguntas frequentes</h2>
+          <h2 id="editor-faq" className="titulo-secao">Perguntas frequentes</h2>
           <div className="mt-5 space-y-5">
             {faqPadrao.map((item) => (
               <div key={item.pergunta}>
@@ -188,7 +220,7 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
         </section>
 
         <section>
-          <h2 className="titulo-secao">Campanha em destaque</h2>
+          <h2 id="editor-banner" className="titulo-secao">Campanha em destaque</h2>
           <p className="lead mt-2">
             Um banner logo abaixo do topo. Fica oculto enquanto não houver imagem nem título.
           </p>
@@ -197,7 +229,8 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
               rotulo="Imagem do banner"
               pasta="campanhas"
               valor={ajustes.banner?.imagem}
-              aoMudar={(url) => setAjustes((a) => ({ ...a, banner: { ...a.banner, imagem: url } }))}
+              aoEnviar={setUploading}
+              aoMudar={(url) => {setChanged(true);setAjustes((a) => ({ ...a, banner: { ...a.banner, imagem: url } }))}}
             />
             <div>
               <label className={rotulo}>Título</label>
@@ -235,7 +268,7 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
         </section>
 
         <section>
-          <h2 className="titulo-secao">Rodapé legal</h2>
+          <h2 id="editor-rodape" className="titulo-secao">Rodapé legal</h2>
           <p className="lead mt-2">
             Razão social, CNPJ e responsável técnico com CRO. Exigido pela resolução do CFO para
             publicidade odontológica. Em branco, vale o texto padrão mostrado abaixo.
@@ -258,24 +291,29 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
             <li><strong>Logotipo e foto do topo</strong>: em Dados da empresa (cartão). O site usa a identidade fixa do layout.</li>
           </ul>
         </section>
+      </fieldset>
       </main>
+      <aside className="vert-editor-preview"><header><strong>Prévia do site</strong><div><button type="button" aria-pressed={!mobilePreview} onClick={()=>setMobilePreview(false)}>Desktop</button><button type="button" aria-pressed={mobilePreview} onClick={()=>setMobilePreview(true)}>Celular</button></div></header><iframe ref={preview} onLoad={enviarPrevia} title="Prévia do rascunho do site" src="/?preview=admin" className={mobilePreview?'is-mobile':''}/><p>Prévia visual. Formulários e botões públicos continuam levando aos fluxos do site.</p></aside>
+      </div>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-borda bg-superficie/95 backdrop-blur">
         <div className="container-vert flex max-w-3xl items-center justify-between gap-4 py-3">
           <p role="status" className="text-sm text-conteudo-suave">
-            {estado === 'salvo' && 'Salvo. A página já reflete a mudança.'}
+            {estado !== 'erro' && estado !== 'salvando' && mensagem}
             {estado === 'salvando' && 'Salvando…'}
             {estado === 'erro' && <span className="text-red-700">{erro}</span>}
           </p>
           <button
-            onClick={salvar}
-            disabled={estado === 'salvando'}
+            onClick={()=>void salvar(false)}
+            disabled={estado === 'salvando'||uploading}
             className="inline-flex min-h-[44px] items-center rounded-full bg-marca-forte px-6 text-sm font-semibold text-conteudo-inverso transition duration-padrao active:scale-[0.98] disabled:opacity-50"
           >
-            Salvar
+            Salvar rascunho
           </button>
+          <button onClick={()=>void salvar(true)} disabled={estado==='salvando'||uploading} className="vert-publish">Publicar no site</button>
         </div>
       </div>
     </div>
   )
 }
+

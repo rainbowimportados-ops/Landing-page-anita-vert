@@ -30,7 +30,7 @@
         <p>Entre para acompanhar contatos e atualizar o site e o cartão.</p>
         <form id="login-form">
           <label for="email">E-mail autorizado</label>
-          <input id="email" name="email" type="email" value="diretoria@institutovert.com.br" readonly />
+          <input id="email" name="email" type="email" value="diretoria@institutovert.com.br" required autocomplete="username" />
           <label for="password">Senha</label>
           <input id="password" name="password" type="password" minlength="8" autocomplete="current-password" required />
           <button type="submit">Entrar no painel</button>
@@ -489,3 +489,4 @@ https://institutovert.app/admin?section=contatos</pre>
     <script type="module" src="/admin/admin.js"></script>
   </body>
 </html>
+
