@@ -1,3 +1,5 @@
+import { agruparPorCampanha, cliqueDoAnuncio, nomeCampanha } from './origem-campanha.js';
+
 const stages = [
   ['novo', 'Novo'], ['em_contato', 'Em contato'], ['agendado', 'Avaliação agendada'],
   ['concluido', 'Convertido'], ['perdido', 'Perdido'],
@@ -151,14 +153,31 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
     const since = Date.now() - Number(value) * 86400000;
     return leads.filter((l) => new Date(l.created_at).getTime() >= since);
   }
+  function campaignReport(data) {
+    const rows = agruparPorCampanha(data);
+    if (!rows.length) return '<div class="ops-surface ops-campaign-table"><h3>Campanhas</h3><p class="ops-muted">Os leads que chegarem por links com campanha (utm_campaign) ou anúncios do Google aparecem aqui.</p></div>';
+    const lines = rows.map((row) => `<div class="ops-report-row"><span>${safe(row.nome)}<br><small>${row.anuncio} de anúncio · ${row.agendados} agendados</small></span><strong>${row.leads} leads · ${row.convertidos} convertidos</strong></div>`).join('');
+    return `<div class="ops-surface ops-campaign-table"><h3>Campanhas</h3>${lines}</div>`;
+  }
   function renderReports() {
     const data = reportLeads();
     const categories = [['Paciente', ['appointment','patient','contact']],['Cursos',['formation']],['Locação',['rental']],['Close Friends',['close_friends']]];
     const byStage = stages.map(([status,label])=>`<div class="ops-report-row"><span>${label}</span><strong>${data.filter(l=>(l.pipeline_status||'novo')===status).length}</strong></div>`).join('');
-    document.querySelector('#reports-content').innerHTML = `<div class="ops-stat-grid"><div><span>Leads recebidos</span><strong>${data.length}</strong></div><div><span>Em contato</span><strong>${data.filter(l=>l.pipeline_status==='em_contato').length}</strong></div><div><span>Avaliações com data</span><strong>${data.filter(l=>l.appointment_at).length}</strong></div><div><span>Convertidos</span><strong>${data.filter(l=>l.pipeline_status==='concluido').length}</strong></div></div><div class="ops-dashboard-grid"><div class="ops-surface"><h3>Etapas</h3>${byStage}</div><div class="ops-surface"><h3>Interesses</h3>${categories.map(([label,types])=>`<div class="ops-report-row"><span>${label}</span><strong>${data.filter(l=>types.includes(l.lead_type)).length}</strong></div>`).join('')}</div></div><p class="ops-muted">Conversão = lead marcado como concluído neste painel. Não representa faturamento ou consulta clínica realizada.</p>`;
+    document.querySelector('#reports-content').innerHTML = `<div class="ops-stat-grid"><div><span>Leads recebidos</span><strong>${data.length}</strong></div><div><span>Em contato</span><strong>${data.filter(l=>l.pipeline_status==='em_contato').length}</strong></div><div><span>Avaliações com data</span><strong>${data.filter(l=>l.appointment_at).length}</strong></div><div><span>Convertidos</span><strong>${data.filter(l=>l.pipeline_status==='concluido').length}</strong></div></div><div class="ops-dashboard-grid"><div class="ops-surface"><h3>Etapas</h3>${byStage}</div><div class="ops-surface"><h3>Interesses</h3>${categories.map(([label,types])=>`<div class="ops-report-row"><span>${label}</span><strong>${data.filter(l=>types.includes(l.lead_type)).length}</strong></div>`).join('')}</div></div>${campaignReport(data)}<p class="ops-muted">Conversão = lead marcado como concluído neste painel. Não representa faturamento ou consulta clínica realizada.</p>`;
   }
   function renderTeam() {
     document.querySelector('#team-list').innerHTML = `<div class="ops-list-row"><span><strong>${safe(getSession()?.user?.email || 'Conta da diretoria')}</strong><small>Conta autenticada · acesso administrativo</small></span><span class="ops-pill">Diretoria</span></div><p class="ops-muted">O acesso ao conteúdo e aos dados dos leads é controlado no banco pela lista de administradores autorizados. Convites de equipe não estão habilitados nesta versão.</p>`;
+  }
+  function campaignBlock(lead) {
+    const click = cliqueDoAnuncio(lead);
+    const items = [
+      ['Campanha', nomeCampanha(lead)], ['Meio', lead.utm_medium], ['Conteúdo do anúncio', lead.utm_content], ['Termo', lead.utm_term],
+    ].filter(([, value]) => value);
+    if (!items.length && !click && !lead.entry_page) return '';
+    const fields = items.map(([label, value]) => `<div><small>${label}</small><strong>${safe(value)}</strong></div>`).join('');
+    const clickField = click ? `<div class="ops-data-wide"><small>Clique do Google Ads (${lead.gclid ? 'gclid' : lead.gbraid ? 'gbraid' : 'wbraid'})</small><strong class="ops-break">${safe(click)}</strong></div>` : '';
+    const pageField = lead.entry_page ? `<div><small>Página de entrada</small><strong>${safe(lead.entry_page)}</strong></div>` : '';
+    return `<h4 class="ops-subtitle">Origem da campanha</h4><div class="ops-data-grid">${fields}${pageField}${clickField}</div>`;
   }
   async function openDetail(id) {
     selectedId = id; tab = 'dados';
@@ -175,7 +194,7 @@ export function initOperations({ supabase, refresh, activatePanel, getSession })
     const body = document.querySelector('#ops-detail-body');
     if (tab === 'dados') {
       const localTime = lead.appointment_at ? new Date(new Date(lead.appointment_at).getTime()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16) : '';
-      body.innerHTML = `<div class="ops-data-grid"><div><small>Telefone</small><strong>${safe(lead.phone)}</strong></div><div><small>Interesse</small><strong>${safe(interest(lead))}</strong></div><div><small>Unidade</small><strong>${safe(lead.unit || 'A definir')}</strong></div><div><small>Origem</small><strong>${safe(origin(lead))}</strong></div><div><small>Profissão</small><strong>${safe(lead.profession || 'Não informada')}</strong></div><div><small>Instagram</small><strong>${safe(lead.instagram_handle || 'Não informado')}</strong></div></div><form id="ops-detail-form"><div class="ops-form-grid"><label>Etapa<select name="pipeline_status">${stages.map(([v,l])=>`<option value="${v}"${(lead.pipeline_status||'novo')===v?' selected':''}>${l}</option>`).join('')}</select></label><label>Próximo retorno<input type="datetime-local" name="next_followup_at" value="${lead.next_followup_at ? new Date(new Date(lead.next_followup_at).getTime()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16) : ''}" /></label><label>Data da avaliação<input id="ops-appointment-input" type="datetime-local" name="appointment_at" value="${localTime}" /></label><label>Responsável<input name="assigned_to" maxlength="100" value="${safe(lead.assigned_to||'')}" placeholder="Nome da equipe" /></label></div><p class="ops-feedback" id="ops-detail-feedback" role="status"></p><button class="button" type="submit">Salvar atendimento</button></form>`;
+      body.innerHTML = `<div class="ops-data-grid"><div><small>Telefone</small><strong>${safe(lead.phone)}</strong></div><div><small>Interesse</small><strong>${safe(interest(lead))}</strong></div><div><small>Unidade</small><strong>${safe(lead.unit || 'A definir')}</strong></div><div><small>Origem</small><strong>${safe(origin(lead))}</strong></div><div><small>Profissão</small><strong>${safe(lead.profession || 'Não informada')}</strong></div><div><small>Instagram</small><strong>${safe(lead.instagram_handle || 'Não informado')}</strong></div></div>${campaignBlock(lead)}<form id="ops-detail-form"><div class="ops-form-grid"><label>Etapa<select name="pipeline_status">${stages.map(([v,l])=>`<option value="${v}"${(lead.pipeline_status||'novo')===v?' selected':''}>${l}</option>`).join('')}</select></label><label>Próximo retorno<input type="datetime-local" name="next_followup_at" value="${lead.next_followup_at ? new Date(new Date(lead.next_followup_at).getTime()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16) : ''}" /></label><label>Data da avaliação<input id="ops-appointment-input" type="datetime-local" name="appointment_at" value="${localTime}" /></label><label>Responsável<input name="assigned_to" maxlength="100" value="${safe(lead.assigned_to||'')}" placeholder="Nome da equipe" /></label></div><p class="ops-feedback" id="ops-detail-feedback" role="status"></p><button class="button" type="submit">Salvar atendimento</button></form>`;
     } else if (tab === 'notas') {
       body.innerHTML = `<form id="ops-note-form"><label class="ops-note-label">Notas internas<textarea name="internal_notes" rows="6" maxlength="2000" placeholder="Registre o que foi combinado e o próximo passo">${safe(lead.internal_notes||'')}</textarea></label><p class="ops-feedback" id="ops-note-feedback" role="status"></p><button type="submit" class="button">Salvar nota</button></form>`;
     } else if (tab === 'historico') {
