@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react'
 import { MAXIMO_FOTOS, agruparPorPasta, analisarCaso, arquivosDoArraste, casoNoSite, importarCaso, listarCasos, type Caso } from './dados'
 import { RevisarCaso } from './RevisarCaso'
 
-const botao = 'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-borda-forte px-4 text-sm font-medium text-conteudo disabled:opacity-50'
+const botao = 'inline-flex min-h-[36px] items-center justify-center gap-2 rounded-md border border-borda-forte px-3 text-xs font-medium text-conteudo disabled:opacity-50'
 
 const rotuloStatus: Record<Caso['status'], string> = {
   importado: 'Aguardando análise',
@@ -118,7 +118,7 @@ export function Casos({ integrado = false }: { integrado?: boolean }) {
   }
 
   return (
-    <div className={integrado ? 'space-y-6' : 'space-y-8'}>
+    <div className={integrado ? 'vert-cases space-y-4' : 'vert-cases space-y-6'}>
       <div hidden={integrado}>
         <h2 className="titulo-secao">Casos de antes e depois</h2>
         <p className="lead mt-2">
@@ -134,11 +134,11 @@ export function Casos({ integrado = false }: { integrado?: boolean }) {
         }}
         onDragLeave={() => setArrastando(false)}
         onDrop={aoSoltar}
-        className={`grid place-items-center gap-3 rounded-card border-2 border-dashed p-8 text-center transition-colors ${
+        className={`grid place-items-center gap-2 rounded-lg border border-dashed p-4 text-center transition-colors ${
           arrastando ? 'border-marca-forte bg-superficie' : 'border-borda-forte bg-superficie-suave'
         }`}
       >
-        <p className="font-display text-xl text-conteudo">Solte aqui as pastas dos pacientes</p>
+        <p className="font-sans text-base font-semibold text-conteudo">Solte aqui as pastas dos pacientes</p>
         <p className="text-sm text-conteudo-suave">JPG, PNG, WebP ou HEIC (iPhone). Até {MAXIMO_FOTOS} fotos por pasta. As fotos ficam privadas até você publicar.</p>
         <div className="flex flex-wrap justify-center gap-2">
           <button type="button" className={botao} disabled={!!progresso} onClick={() => pastas.current?.click()}>Escolher pastas</button>
@@ -183,26 +183,24 @@ export function Casos({ integrado = false }: { integrado?: boolean }) {
       {erro && <p role="alert" className="rounded-card border border-red-300 bg-red-50 p-3 text-sm text-red-800">{erro}</p>}
 
       <section>
-        <h3 className="font-display text-2xl text-conteudo">Casos importados</h3>
-        {casos.length === 0 ? (
-          <p className="mt-3 text-sm text-conteudo-suave">Nenhum caso ainda.</p>
-        ) : (
-          <ul className="mt-4 divide-y divide-borda rounded-card border border-borda bg-superficie">
-            {casos.map((caso) => (
-              <li key={caso.id} className="flex flex-wrap items-center gap-3 p-4">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-conteudo">{caso.nome}</p>
-                  <p className="text-xs text-conteudo-suave">
-                    {new Date(caso.criado_em).toLocaleDateString('pt-BR')} · {rotuloStatus[caso.status]}
-                    {caso.autorizacao_paciente ? ' · autorização ok' : ''}
-                  </p>
-                </div>
-                {noSite === caso.id && <span className="rounded-full bg-marca-forte px-3 py-1 text-xs font-semibold text-conteudo-inverso">No site</span>}
-                <button type="button" className={botao} onClick={() => setAberto(caso.id)}>Abrir</button>
-              </li>
-            ))}
-          </ul>
-        )}
+        <h3 className="text-base font-semibold text-conteudo">Casos e autorizações</h3>
+        <div className="mt-3 overflow-x-auto rounded-lg border border-borda bg-superficie">
+          <table className="w-full min-w-[660px] text-left text-xs">
+            <thead className="border-b border-borda bg-superficie-suave text-conteudo-suave">
+              <tr>{['Caso','Análise das fotos','Autorização','Publicação','Ações'].map(t=><th key={t} className="px-4 py-3 font-medium">{t}</th>)}</tr>
+            </thead>
+            <tbody className="divide-y divide-borda">
+              {casos.map(caso=><tr key={caso.id}>
+                <td className="px-4 py-4"><strong className="block font-semibold">{caso.nome}</strong><small className="text-conteudo-suave">{new Date(caso.criado_em).toLocaleDateString('pt-BR')}</small></td>
+                <td className="px-4 py-4">{rotuloStatus[caso.status]}</td>
+                <td className="px-4 py-4"><span className={`inline-block rounded-md px-2 py-1 ${caso.autorizacao_paciente?'bg-stone-100 text-stone-700':'bg-amber-50 text-amber-800'}`}>{caso.autorizacao_paciente?'Autorização registrada':'Autorização pendente'}</span></td>
+                <td className="px-4 py-4">{noSite===caso.id?'Publicado no site':'Não publicado'}</td>
+                <td className="px-4 py-4"><button type="button" className={botao} onClick={()=>setAberto(caso.id)}>Revisar caso</button></td>
+              </tr>)}
+            </tbody>
+          </table>
+          {casos.length===0&&<p className="px-4 py-8 text-center text-sm text-conteudo-suave">Nenhum caso importado. Adicione as fotos para iniciar a revisão.</p>}
+        </div>
       </section>
     </div>
   )
