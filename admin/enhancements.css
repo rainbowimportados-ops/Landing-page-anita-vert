@@ -688,3 +688,22 @@ button.ops-list-row:hover { border-color:#aa8a72; }
 .ops-data-grid strong.ops-break { overflow-wrap:anywhere; font-weight:500; font-size:.78rem; }
 .ops-campaign-table .ops-report-row small { color:#806a5e; }
 .ops-subtitle { margin:16px 0 8px; font-size:.78rem; letter-spacing:.04em; color:#654b3e; }
+
+/* Tela Avisos */
+.avisos-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; margin-bottom:16px; }
+.avisos-grid .ops-surface { display:grid; gap:12px; align-content:start; }
+.avisos-grid h3, [data-panel="avisos"] .ops-surface > h3 { margin:0; font-family:"Cormorant Garamond",serif; font-size:1.25rem; font-weight:500; }
+[data-panel="avisos"] > .ops-surface { margin-bottom:16px; display:grid; gap:12px; }
+.avisos-linha { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:11px 0; border-bottom:1px solid rgba(110,79,56,.12); font-size:.8rem; }
+.avisos-pill { padding:5px 10px; border-radius:999px; background:#eee4d9; color:#6c4e3b; font-size:.68rem; font-style:normal; font-weight:600; white-space:normal; text-align:right; }
+.avisos-pill.is-ok { background:#dcebe3; color:#207a55; }
+.avisos-pill.is-bad { background:#f3dcd8; color:#a33f36; }
+.avisos-alerta { margin:0; padding:12px 14px; border-radius:10px; background:#f3e6cc; color:#8a5a12; font-size:.75rem; line-height:1.6; }
+.avisos-field { display:grid; gap:7px; font-size:.72rem; font-weight:600; color:#654b3e; }
+.avisos-field input { width:100%; padding:12px 13px; border:1px solid rgba(110,79,56,.2); border-radius:10px; background:#fff; color:#2b1b14; }
+.avisos-toggle { display:flex; align-items:center; gap:9px; font-size:.78rem; }
+.avisos-toggle input { accent-color:#4a2f1f; width:17px; height:17px; }
+.avisos-actions { display:flex; flex-wrap:wrap; gap:10px; }
+.avisos-actions .button:disabled { opacity:.6; cursor:wait; }
+.avisos-exemplo { margin:0; padding:14px; border-radius:10px; background:#f7f3ee; border:1px dashed rgba(110,79,56,.25); font:inherit; font-size:.8rem; line-height:1.7; white-space:pre-wrap; overflow-wrap:anywhere; }
+.ops-feedback.is-ok { color:#207a55; }
