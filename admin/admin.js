@@ -818,6 +818,7 @@ function filteredContactLeads() {
     const matchesFilter = filter === 'all' || (filter === 'marked' ? lead.marked
       : filter === 'unmarked' ? !lead.marked
       : filter === 'ads' ? veioDeAnuncio(lead)
+      : filter === 'new-patient' ? ['appointment', 'contact'].includes(lead.lead_type)
       : filter === 'appointment' ? ['appointment', 'patient', 'contact'].includes(lead.lead_type)
       : lead.lead_type === filter);
     const searchable = [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.button, lead.unit, lead.source_origin, textoBuscaCampanha(lead), ...Object.values(lead.answers || {}), ...(lead.tags || [])].join(' ').toLocaleLowerCase('pt-BR');
