@@ -1,5 +1,6 @@
 import { ADMIN_EMAIL, ADMIN_REDIRECT_URL, loadCardContent, supabase } from '../lib/supabase.js';
 import { initOperations } from './operations.js';
+import { initAvisos } from './avisos.js';
 import { CABECALHO_CSV_CAMPANHA, COLUNAS_CAMPANHA, linhaCsvCampanha, resumoCampanha, textoBuscaCampanha, veioDeAnuncio } from './origem-campanha.js';
 
 const navIconPaths = {
@@ -22,6 +23,7 @@ const navIconPaths = {
   campanhas:'<path d="m12 2 2 7 7 3-7 2-2 8-2-8-7-2 7-3z"/>',
   depoimentos:'<path d="M4 5h16v12H8l-4 4zM8 10h8m-8 3h5"/>',
   resultados:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="1"/><path d="m3 17 5-5 4 4 3-3 6 5"/>',
+  avisos:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 0 0 4 0"/>',
   equipe:'<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2m1-13 5 2v4a5 5 0 0 1-5 4"/>',
 };
 document.querySelectorAll('.nav-link[data-section]').forEach((button) => {
@@ -67,6 +69,7 @@ let visitorJourneys = [];
 let selectedLeadIds = new Set();
 let leadDialogMode = 'edit';
 let operations = null;
+let avisos = null;
 
 const blankItems = {
   units: () => ({ id: crypto.randomUUID(), name: 'Nova unidade', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', address: '', phone: '', contactUrl: '', contactButtonLabel: '', whatsappMessage: '', collectLead: true, mapsUrl: '', mapsQuery: '', website: '', active: true }),
@@ -263,6 +266,7 @@ const sectionDetails = {
   'campanhas-crm': { title: 'Campanhas', context: 'Links de captação' },
   origens: { title: 'Origens', context: 'Aquisição de leads' },
   relatorios: { title: 'Relatórios', context: 'Resultados de captação' },
+  avisos: { title: 'Avisos', context: 'Aviso de lead novo' },
   equipe: { title: 'Equipe e acesso', context: 'Permissões' },
   site: { title: 'Editar site', context: 'Conteúdo e identidade' },
   casos: { title: 'Antes e depois', context: 'Resultados do site' },
@@ -286,10 +290,11 @@ function activatePanel(section, shouldScroll = false) {
   // Editores embutidos (/config) só carregam quando a área é aberta.
   const frame = panel.querySelector('iframe.site-editor-frame[data-src]');
   if (frame && !frame.src) frame.src = frame.dataset.src;
-  saveButton.hidden = ['site', 'casos', 'contatos', 'pipeline', 'avaliacoes', 'pacientes', 'agenda', 'campanhas-crm', 'origens', 'relatorios', 'equipe', 'acessos', 'visao-geral'].includes(section);
+  saveButton.hidden = ['site', 'casos', 'contatos', 'pipeline', 'avaliacoes', 'pacientes', 'agenda', 'campanhas-crm', 'origens', 'relatorios', 'avisos', 'equipe', 'acessos', 'visao-geral'].includes(section);
   saveStatus.hidden = saveButton.hidden;
   document.querySelector('.preview-pane').hidden = saveButton.hidden;
   operations?.activate(section);
+  avisos?.activate(section);
   if (section === 'links' && content) renderUnitContacts();
   const details = sectionDetails[section];
   const title = document.querySelector('#workspace-title');
@@ -1145,4 +1150,5 @@ supabase.auth.onAuthStateChange((_event, nextSession) => {
 });
 
 operations = initOperations({ supabase, refresh: loadLeads, activatePanel, getSession: () => session });
+avisos = initAvisos({ supabase });
 start();

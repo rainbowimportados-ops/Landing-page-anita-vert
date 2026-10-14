@@ -90,6 +90,7 @@
           <button class="nav-link" data-section="campanhas"><span aria-hidden="true">✦</span>Promoções do cartão</button>
           <button class="nav-link" data-section="depoimentos"><span aria-hidden="true">“</span>Depoimentos</button>
           <span class="nav-group-label">Administração</span>
+          <button class="nav-link" data-section="avisos"><span aria-hidden="true">◔</span>Avisos</button>
           <button class="nav-link" data-section="equipe"><span aria-hidden="true">♙</span>Equipe e acesso</button>
         </nav>
         <label class="mobile-section-picker" for="mobile-section-nav">
@@ -373,6 +374,34 @@
               <div class="panel__heading"><div><p class="eyebrow">Resultados</p><h2>Relatórios</h2></div><button type="button" class="small-action" id="report-export">Exportar CSV</button></div>
               <div class="ops-toolbar"><label>Período <select id="report-period"><option value="30">Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="365">Últimos 12 meses</option><option value="all">Todo o período</option></select></label></div>
               <div id="reports-content"></div>
+            </section>
+
+            <section class="panel" data-panel="avisos">
+              <div class="panel__heading"><div><p class="eyebrow">Atendimento</p><h2>Avisos de lead novo</h2></div><button type="button" class="small-action" id="avisos-refresh">Atualizar</button></div>
+              <p class="helper">Quando um lead novo chega pelo site ou pelo cartão, a equipe recebe uma mensagem no WhatsApp. Assim o primeiro contato sai em minutos.</p>
+              <div class="avisos-grid">
+                <div class="ops-surface" id="avisos-status" aria-live="polite"><p class="ops-muted">Carregando…</p></div>
+                <div class="ops-surface" id="avisos-form">
+                  <h3>Quem recebe</h3>
+                  <label class="avisos-field">Número da equipe ou id do grupo<input id="avisos-destino" name="destino" inputmode="tel" autocomplete="off" placeholder="(16) 99999-0000" /></label>
+                  <p class="ops-muted">Use o número com DDD. Para um grupo, cole o id que termina em @g.us.</p>
+                  <label class="avisos-toggle"><input type="checkbox" id="avisos-ativo" /> Avisar a equipe quando chegar um lead novo</label>
+                  <div class="avisos-actions"><button class="button" type="button" id="avisos-salvar">Salvar</button><button class="button button--ghost" type="button" id="avisos-testar">Enviar mensagem de teste</button></div>
+                  <p class="ops-feedback" id="avisos-feedback" role="status"></p>
+                </div>
+              </div>
+              <div class="ops-surface">
+                <h3>Como a mensagem chega</h3>
+                <pre class="avisos-exemplo">🔔 Novo lead: Maria S.
+Interesse: Lentes em resina
+Unidade: Franca
+Origem: Google Ads · pmax-lentes
+
+Abrir ficha:
+https://institutovert.app/admin?section=contatos</pre>
+                <p class="ops-muted">A mensagem leva só o primeiro nome e a inicial do sobrenome, sem telefone. A mesma pessoa enviando de novo em 10 minutos gera um aviso só.</p>
+              </div>
+              <div class="ops-surface"><h3>Últimos envios</h3><div class="ops-list" id="avisos-envios"></div></div>
             </section>
 
             <section class="panel" data-panel="equipe">
