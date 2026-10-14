@@ -39,10 +39,16 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
     setAjustes(a => ({ ...a, blocos: lista })); setChanged(true)
   }
   const preview = useRef<HTMLIFrameElement>(null)
-  function enviarPrevia() { preview.current?.contentWindow?.postMessage({type:'vert-editor-preview',ajustes},window.location.origin) }
+  const previewWindow = useRef<Window | null>(null)
+  const [previewReady, setPreviewReady] = useState(false)
+  function abrirPrevia() {
+    previewWindow.current = window.open('/preview/?preview=admin', 'vert-editor-preview')
+    enviarPrevia()
+  }
+  function enviarPrevia() { for(const target of [preview.current?.contentWindow,previewWindow.current]) if(target&&!target.closed) target.postMessage({type:'vert-editor-preview',ajustes},window.location.origin) }
   useEffect(() => { enviarPrevia() }, [ajustes])
   useEffect(() => {
-    const ready=(event:MessageEvent)=>{if(event.origin===window.location.origin&&event.source===preview.current?.contentWindow&&event.data?.type==='vert-preview-ready')enviarPrevia()}
+    const ready=(event:MessageEvent)=>{if(event.origin===window.location.origin&&[preview.current?.contentWindow,previewWindow.current].includes(event.source as Window)&&event.data?.type==='vert-preview-ready'){if(event.source===preview.current?.contentWindow)setPreviewReady(true);enviarPrevia()}}
     window.addEventListener('message',ready);return()=>window.removeEventListener('message',ready)
   },[ajustes])
   useEffect(()=>{const warn=(e:BeforeUnloadEvent)=>{if(changed)e.preventDefault()};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn)},[changed])
@@ -315,7 +321,7 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
         </section>
       </fieldset>
       </main>
-      <aside className="vert-editor-preview"><header><strong>Prévia do site</strong><div><button type="button" aria-pressed={!mobilePreview} onClick={()=>setMobilePreview(false)}>Desktop</button><button type="button" aria-pressed={mobilePreview} onClick={()=>setMobilePreview(true)}>Celular</button></div></header><iframe ref={preview} onLoad={enviarPrevia} title="Prévia do rascunho do site" src="/preview/?preview=admin" className={mobilePreview?'is-mobile':''}/><p>Prévia visual. Links externos e envios ficam desativados aqui.</p></aside>
+      <aside className="vert-editor-preview"><header><strong>Prévia do site</strong><div><button type="button" aria-pressed={!mobilePreview} onClick={()=>setMobilePreview(false)}>Desktop</button><button type="button" aria-pressed={mobilePreview} onClick={()=>setMobilePreview(true)}>Celular</button></div></header>{!previewReady&&<div className="vert-preview-loading" role="status"><strong>Carregando prévia…</strong><p>Se a visualização não aparecer, abra a prévia em outra aba.</p><button type="button" onClick={abrirPrevia}>Abrir prévia em outra aba ↗</button></div>}<iframe ref={preview} onLoad={enviarPrevia} title="Prévia do rascunho do site" src="/preview/?preview=admin" className={mobilePreview?'is-mobile':''}/><p>Links externos e envios desativados. <button type="button" onClick={abrirPrevia}>Abrir prévia em outra aba ↗</button></p></aside>
       </div>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-borda bg-superficie/95 backdrop-blur">

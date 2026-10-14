@@ -19,14 +19,15 @@ export function ProvedorDeConteudo({ children }: { children: ReactNode }) {
     let ativo = true
     let draft: Ajustes | null = null
     let card: Awaited<ReturnType<typeof carregarCartao>> = null
-    const isPreview=new URLSearchParams(window.location.search).get('preview')==='admin' && window.parent!==window
+    const previewHost = window.parent!==window ? window.parent : window.opener
+    const isPreview=new URLSearchParams(window.location.search).get('preview')==='admin' && Boolean(previewHost)
     const receive=(event:MessageEvent)=>{
-      if(!isPreview||event.origin!==window.location.origin||event.source!==window.parent||event.data?.type!=='vert-editor-preview')return
+      if(!isPreview||event.origin!==window.location.origin||event.source!==previewHost||event.data?.type!=='vert-editor-preview')return
       draft=event.data.ajustes as Ajustes
       setConteudo(aplicar(draft,card))
     }
     window.addEventListener('message',receive)
-    if(isPreview)window.parent.postMessage({type:'vert-preview-ready'},window.location.origin)
+    if(isPreview)previewHost.postMessage({type:'vert-preview-ready'},window.location.origin)
     Promise.all([carregarAjustes(), carregarCartao()]).then(([ajustes, cartao]) => {
       card=cartao
       if (ativo && (ajustes || cartao || draft)) setConteudo(aplicar(draft??ajustes, cartao))
