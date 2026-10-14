@@ -19,8 +19,12 @@ const ADS_ID = import.meta.env.VITE_GADS_ID || 'AW-18462515909'
 // Rótulo da conversão de lead (o trecho depois da barra em "AW-…/rótulo"). Um valor
 // copiado errado, como o próprio ID da conta, geraria um destino inexistente e o
 // Google Ads não registraria a conversão; nesse caso o envio fica desligado.
+// O rótulo da conversão "Contato" é público (aparece no código da tag) e é o padrão;
+// a variável de ambiente, quando bem formada, tem prioridade.
+const ROTULO_PADRAO = 'YtuhCNmch5wdEMXFzuNE'
 const ROTULO_BRUTO = (import.meta.env.VITE_GADS_LABEL_LEAD || '').trim()
-const ROTULO_LEAD = /^[A-Za-z0-9_-]{12,}$/.test(ROTULO_BRUTO) && !/^AW-/i.test(ROTULO_BRUTO) ? ROTULO_BRUTO : ''
+const ROTULO_LEAD =
+  /^[A-Za-z0-9_-]{12,}$/.test(ROTULO_BRUTO) && !/^AW-/i.test(ROTULO_BRUTO) ? ROTULO_BRUTO : ROTULO_PADRAO
 
 declare global {
   interface Window {
