@@ -1,4 +1,7 @@
-import { ADMIN_EMAIL, ADMIN_REDIRECT_URL, loadCardContent, supabase } from '../lib/supabase.js';
+import { ADMIN_REDIRECT_URL, loadCardContent, supabase } from '../lib/supabase.js';
+import { mountWorkspace, initWorkspace, workspaceSections } from './workspace.js';
+mountWorkspace();
+
 import { initOperations } from './operations.js';
 import { initAvisos } from './avisos.js';
 import { CABECALHO_CSV_CAMPANHA, COLUNAS_CAMPANHA, linhaCsvCampanha, resumoCampanha, textoBuscaCampanha, veioDeAnuncio } from './origem-campanha.js';
@@ -69,6 +72,7 @@ let visitorJourneys = [];
 let selectedLeadIds = new Set();
 let leadDialogMode = 'edit';
 let operations = null;
+let workspace = null;
 let avisos = null;
 
 const blankItems = {
@@ -184,7 +188,7 @@ loginForm.addEventListener('submit', async (event) => {
   button.disabled = true;
   loginFeedback.textContent = 'Validando acesso…';
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: ADMIN_EMAIL,
+    email: loginForm.querySelector('#email').value.trim(),
     password: loginForm.querySelector('#password').value,
   });
   if (error) {
@@ -200,7 +204,7 @@ firstAccessButton.addEventListener('click', async () => {
   firstAccessButton.disabled = true;
   loginFeedback.textContent = 'Enviando validação por e-mail…';
   const { error } = await supabase.auth.signInWithOtp({
-    email: ADMIN_EMAIL,
+    email: loginForm.querySelector('#email').value.trim(),
     options: { shouldCreateUser: false, emailRedirectTo: ADMIN_REDIRECT_URL },
   });
   loginFeedback.textContent = error
@@ -252,6 +256,7 @@ document.querySelector('#logout').addEventListener('click', async () => {
 });
 
 const sectionDetails = {
+  ...Object.fromEntries(Object.entries(workspaceSections).map(([key,[title,context]])=>[key,{title,context}])),
   'visao-geral': { title: 'Visão geral', context: 'Desempenho do cartão' },
   acessos: { title: 'Instagram e acessos', context: 'Jornada dos visitantes' },
   empresa: { title: 'Dados da empresa', context: 'Configuração do cartão' },
@@ -290,11 +295,12 @@ function activatePanel(section, shouldScroll = false) {
   // Editores embutidos (/config) só carregam quando a área é aberta.
   const frame = panel.querySelector('iframe.site-editor-frame[data-src]');
   if (frame && !frame.src) frame.src = frame.dataset.src;
-  saveButton.hidden = ['site', 'casos', 'contatos', 'pipeline', 'avaliacoes', 'pacientes', 'agenda', 'campanhas-crm', 'origens', 'relatorios', 'avisos', 'equipe', 'acessos', 'visao-geral'].includes(section);
+  saveButton.hidden = Boolean(workspaceSections[section]) || ['site', 'casos', 'contatos', 'pipeline', 'avaliacoes', 'pacientes', 'agenda', 'campanhas-crm', 'origens', 'relatorios', 'avisos', 'equipe', 'acessos', 'visao-geral'].includes(section);
   saveStatus.hidden = saveButton.hidden;
   document.querySelector('.preview-pane').hidden = saveButton.hidden;
   operations?.activate(section);
   avisos?.activate(section);
+  void workspace?.activate(section);
   if (section === 'links' && content) renderUnitContacts();
   const details = sectionDetails[section];
   const title = document.querySelector('#workspace-title');
@@ -698,6 +704,7 @@ async function loadLeads() {
   renderContactList();
   renderCrmSummary();
   operations?.setLeads(data);
+  workspace?.onLeadsChanged();
   if (formationList) formationList.innerHTML = formationLeads.length
     ? formationLeads.map(renderFormationLeadCard).join('')
     : '<div class="empty-state"><strong>Nenhum interessado ainda</strong><p>Os leads dos cursos aparecerão aqui com suas respostas.</p></div>';
@@ -1107,7 +1114,8 @@ async function openAdmin(nextSession, passwordJustConfigured = false) {
   if (loadingAdmin) return;
   loadingAdmin = true;
   session = nextSession;
-  if (session.user.email?.toLowerCase() !== ADMIN_EMAIL) {
+  const access = await supabase.from('digital_card_admins').select('user_id').eq('user_id', session.user.id).maybeSingle();
+  if (access.error || !access.data) {
     await supabase.auth.signOut();
     loginFeedback.textContent = 'Este e-mail não possui autorização.';
     showLogin();
@@ -1150,5 +1158,7 @@ supabase.auth.onAuthStateChange((_event, nextSession) => {
 });
 
 operations = initOperations({ supabase, refresh: loadLeads, activatePanel, getSession: () => session });
+workspace = initWorkspace({supabase,getLeads:()=>contactLeads,getSession:()=>session,activatePanel,refresh:loadLeads});
 avisos = initAvisos({ supabase });
 start();
+

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { aplicar, carregarAjustes, carregarCartao, conteudoPadrao, type Conteudo } from './conteudo'
+import { aplicar, carregarAjustes, carregarCartao, conteudoPadrao, type Conteudo, type Ajustes } from './conteudo'
 
 const Contexto = createContext<Conteudo>(conteudoPadrao)
 
@@ -17,13 +17,27 @@ export function ProvedorDeConteudo({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let ativo = true
+    let draft: Ajustes | null = null
+    let card: Awaited<ReturnType<typeof carregarCartao>> = null
+    const previewHost = window.parent!==window ? window.parent : window.opener
+    const isPreview=new URLSearchParams(window.location.search).get('preview')==='admin' && Boolean(previewHost)
+    const receive=(event:MessageEvent)=>{
+      if(!isPreview||event.origin!==window.location.origin||event.source!==previewHost||event.data?.type!=='vert-editor-preview')return
+      draft=event.data.ajustes as Ajustes
+      setConteudo(aplicar(draft,card))
+    }
+    window.addEventListener('message',receive)
+    if(isPreview)previewHost.postMessage({type:'vert-preview-ready'},window.location.origin)
     Promise.all([carregarAjustes(), carregarCartao()]).then(([ajustes, cartao]) => {
-      if (ativo && (ajustes || cartao)) setConteudo(aplicar(ajustes, cartao))
+      card=cartao
+      if (ativo && (ajustes || cartao || draft)) setConteudo(aplicar(draft??ajustes, cartao))
     })
     return () => {
       ativo = false
+      window.removeEventListener('message',receive)
     }
   }, [])
 
   return <Contexto.Provider value={conteudo}>{children}</Contexto.Provider>
 }
+

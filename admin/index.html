@@ -30,7 +30,7 @@
         <p>Entre para acompanhar contatos e atualizar o site e o cartão.</p>
         <form id="login-form">
           <label for="email">E-mail autorizado</label>
-          <input id="email" name="email" type="email" value="diretoria@institutovert.com.br" readonly />
+          <input id="email" name="email" type="email" value="diretoria@institutovert.com.br" required autocomplete="username" />
           <label for="password">Senha</label>
           <input id="password" name="password" type="password" minlength="8" autocomplete="current-password" required />
           <button type="submit">Entrar no painel</button>
@@ -297,7 +297,7 @@
             </section>
 
             <section class="panel" data-panel="contatos">
-              <div class="panel__heading"><div><p class="eyebrow">Site + cartão</p><h2>Leads</h2></div><div class="ops-heading-actions"><button type="button" class="small-action" data-new-lead>+ Novo lead</button><button type="button" class="small-action" id="refresh-leads">Atualizar</button></div></div>
+              <div class="panel__heading"><div><p class="eyebrow">Site + cartão</p><h2>Contatos</h2></div><div class="ops-heading-actions"><button type="button" class="small-action" data-new-lead>+ Novo contato</button><button type="button" class="small-action" id="refresh-leads">Atualizar</button></div></div>
               <p class="helper">Todos os formulários enviados. Acompanhe a etapa, registre a próxima ação e retome a conversa pelo WhatsApp.</p>
               <div class="crm-summary" id="crm-summary" aria-label="Resumo do atendimento"></div>
               <div class="lead-toolbar" aria-label="Ferramentas dos contatos">
@@ -334,7 +334,7 @@
             </section>
 
             <section class="panel" data-panel="pipeline">
-              <div class="panel__heading"><div><p class="eyebrow">Atendimento</p><h2>Pipeline</h2></div><button type="button" class="small-action" data-new-lead>+ Novo lead</button></div>
+              <div class="panel__heading"><div><p class="eyebrow">Atendimento</p><h2>Funil de atendimento</h2></div><button type="button" class="small-action" data-new-lead>+ Novo contato</button></div>
               <p class="helper">Arraste os cartões entre as etapas ou abra um lead para registrar o próximo passo.</p>
               <div class="ops-toolbar"><input id="pipeline-search" type="search" placeholder="Buscar nome, telefone ou interesse" aria-label="Buscar no pipeline" /><select id="pipeline-unit" aria-label="Filtrar unidade"><option value="all">Todas as unidades</option><option value="Franca">Franca</option><option value="Ribeirão Preto">Ribeirão Preto</option></select></div>
               <div class="pipeline-board" id="pipeline-board"></div>
@@ -411,7 +411,7 @@ https://institutovert.app/admin?section=contatos</pre>
 
             <section class="panel" data-panel="site">
               <div class="panel__heading"><div><p class="eyebrow">Conteúdo público</p><h2>Editar site</h2></div><a class="small-action" href="/" target="_blank" rel="noopener">Ver site ↗</a></div>
-              <p class="helper">Só o que é exclusivo do site: horários das unidades, perguntas frequentes, banner de campanha, e-mail e rodapé legal. Use o botão Salvar dentro do editor; as alterações aparecem no site após salvar.</p>
+              <p class="helper">Prepare as alterações, confira a prévia e salve o rascunho. O site só muda ao selecionar Publicar no site.</p>
               <iframe class="site-editor-frame" id="site-editor-frame" title="Editor do site" data-src="/config/?embed=1"></iframe>
             </section>
 
@@ -489,3 +489,4 @@ https://institutovert.app/admin?section=contatos</pre>
     <script type="module" src="/admin/admin.js"></script>
   </body>
 </html>
+

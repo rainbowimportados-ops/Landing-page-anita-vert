@@ -19,7 +19,7 @@ const navegacao = [
 ]
 
 export function Rodape() {
-  const { clinica, unidades, rodapeLegal, instagram } = useConteudo()
+  const { clinica, unidades, rodapeLegal, instagram, blocos } = useConteudo()
 
   return (
     <footer className="bg-superficie-rodape pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-10 text-conteudo-inverso-suave sm:pb-8 sm:pt-12">
@@ -37,7 +37,7 @@ export function Rodape() {
             <nav aria-label="Rodapé" className="hidden sm:block">
               <h3 className={titulo}>Navegação</h3>
               <ul className="mt-1 grid grid-cols-1">
-                {navegacao.map((item) => (
+                {navegacao.filter(item=>!blocos.some(b=>`#${b.id}`===item.href&&!b.visivel)).map((item) => (
                   <li key={item.href}>
                     <a href={item.href} className={classeLink}>{item.rotulo}</a>
                   </li>
@@ -121,3 +121,4 @@ export function Rodape() {
     </footer>
   )
 }
+
