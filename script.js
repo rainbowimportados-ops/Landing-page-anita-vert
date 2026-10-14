@@ -1,4 +1,5 @@
 import { ativarGoogle, enviarEventoGoogle, revogarGoogle } from './src/lib/google.ts';
+import { origemDaVisita } from './src/lib/origem.ts';
 import { loadCardContent, supabase, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from './lib/supabase.js';
 
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -434,6 +435,7 @@ function initializePrivacy() {
   trackingConsent = choice === `accepted:${CONSENT_VERSION}`;
   if (trackingConsent) {
     ativarGoogle();
+    origemDaVisita();
     registrarClique('visualizacao_pagina');
   }
   if (!trackingConsent && choice !== `declined:${CONSENT_VERSION}`) openPrivacyDialog();
@@ -445,6 +447,7 @@ privacyForm.addEventListener('submit', (event) => {
   storageSet(PRIVACY_STORAGE_KEY, `accepted:${CONSENT_VERSION}`);
   trackingConsent = true;
   ativarGoogle();
+  origemDaVisita();
   privacyDialog.close();
   // Só após a escolha afirmativa os eventos passam a ser registrados.
   registrarClique(wasTracking ? 'preferencias_privacidade' : 'consentimento_autorizado');
@@ -724,12 +727,8 @@ leadForm.addEventListener('submit', async (event) => {
     : pendingLead.leadType === 'patient' ? 'paciente_atual'
     : pendingLead.serviceId === 'lentes' ? 'lentes' : 'avaliacao';
   // Origem, campanha e página só acompanham o contato se as métricas foram autorizadas.
-  const params = new URLSearchParams(window.location.search);
-  const utm = {};
-  if (trackingConsent) {
-    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach((chave) => { const valor = params.get(chave); if (valor) utm[chave] = valor.slice(0, 100); });
-    if (!utm.utm_source && params.get('origem')) utm.utm_source = `instagram:${params.get('origem')}`.slice(0, 100);
-  }
+  // Mesmo registro da landing: utm, gclid/gbraid/wbraid e primeiro acesso da sessão.
+  const utm = trackingConsent ? origemDaVisita().utm : {};
   let salvo = false;
   try {
     // Mesmo motor da landing: grava no painel e no CRM, deduplicando pelo telefone.
