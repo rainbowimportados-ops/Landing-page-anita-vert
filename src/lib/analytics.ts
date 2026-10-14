@@ -56,6 +56,7 @@ function detectarOrigem(): string {
  * `keepalive` mantém a requisição viva quando a aba navega para o WhatsApp.
  */
 export function registrarClique(botao: string, unidade?: string | null, evento: Evento = 'cta_click'): void {
+  if (window.location.pathname.startsWith('/preview')) return
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY || escolhaPrivacidade() !== 'accepted') return
 
   enviarEventoGoogle(evento, botao, unidade)
@@ -89,3 +90,4 @@ export function registrarClique(botao: string, unidade?: string | null, evento: 
 export function linkWhatsApp(numero: string, mensagem: string): string {
   return `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`
 }
+

@@ -37,7 +37,7 @@ export default function App() {
       </a>
 
       <Header />
-      <AvisoPrivacidade />
+      {!window.location.pathname.startsWith('/preview') && <AvisoPrivacidade />}
 
       <Pagina />
 

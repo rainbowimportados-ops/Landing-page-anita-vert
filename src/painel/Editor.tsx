@@ -315,7 +315,7 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
         </section>
       </fieldset>
       </main>
-      <aside className="vert-editor-preview"><header><strong>Prévia do site</strong><div><button type="button" aria-pressed={!mobilePreview} onClick={()=>setMobilePreview(false)}>Desktop</button><button type="button" aria-pressed={mobilePreview} onClick={()=>setMobilePreview(true)}>Celular</button></div></header><iframe ref={preview} onLoad={enviarPrevia} title="Prévia do rascunho do site" src="/?preview=admin" className={mobilePreview?'is-mobile':''}/><p>Prévia visual. Formulários e botões públicos continuam levando aos fluxos do site.</p></aside>
+      <aside className="vert-editor-preview"><header><strong>Prévia do site</strong><div><button type="button" aria-pressed={!mobilePreview} onClick={()=>setMobilePreview(false)}>Desktop</button><button type="button" aria-pressed={mobilePreview} onClick={()=>setMobilePreview(true)}>Celular</button></div></header><iframe ref={preview} onLoad={enviarPrevia} title="Prévia do rascunho do site" src="/preview/?preview=admin" className={mobilePreview?'is-mobile':''}/><p>Prévia visual. Links externos e envios ficam desativados aqui.</p></aside>
       </div>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-borda bg-superficie/95 backdrop-blur">
