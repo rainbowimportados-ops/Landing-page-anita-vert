@@ -16,7 +16,11 @@ import type { Evento } from './analytics'
 const GA4_ID = import.meta.env.VITE_GA4_ID
 // ID público da conta de conversão do Google Ads; a variável de ambiente tem prioridade.
 const ADS_ID = import.meta.env.VITE_GADS_ID || 'AW-18462515909'
-const ROTULO_LEAD = import.meta.env.VITE_GADS_LABEL_LEAD
+// Rótulo da conversão de lead (o trecho depois da barra em "AW-…/rótulo"). Um valor
+// copiado errado, como o próprio ID da conta, geraria um destino inexistente e o
+// Google Ads não registraria a conversão; nesse caso o envio fica desligado.
+const ROTULO_BRUTO = (import.meta.env.VITE_GADS_LABEL_LEAD || '').trim()
+const ROTULO_LEAD = /^[A-Za-z0-9_-]{12,}$/.test(ROTULO_BRUTO) && !/^AW-/i.test(ROTULO_BRUTO) ? ROTULO_BRUTO : ''
 
 declare global {
   interface Window {
