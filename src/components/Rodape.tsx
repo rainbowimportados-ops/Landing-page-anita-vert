@@ -59,6 +59,18 @@ export function Rodape() {
                   Falar no WhatsApp
                   <span className="sr-only"> — {unidade.nome} (abre em uma nova aba)</span>
                 </a>
+                {unidade.avaliacaoUrl && (
+                  <a
+                    href={unidade.avaliacaoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => registrarClique(`rodape_avaliar_${unidade.slug}`, unidade.slug)}
+                    className={classeLink}
+                  >
+                    Avaliar no Google
+                    <span className="sr-only"> — {unidade.nome} (abre em uma nova aba)</span>
+                  </a>
+                )}
               </div>
             ))}
 

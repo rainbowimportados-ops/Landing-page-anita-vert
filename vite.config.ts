@@ -15,6 +15,7 @@ export default defineConfig({
       input: {
         card: 'cartao/index.html',
         admin: 'admin/index.html',
+        avaliar: 'avaliar/index.html',
         formulario: 'formulario/index.html',
         landing: 'index.html',
         preview: 'preview/index.html',
