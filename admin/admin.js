@@ -411,6 +411,7 @@ function renderList(type) {
       field('Endereço exibido no cartão', 'address', item.address, { wide: true }), field('WhatsApp', 'phone', item.phone),
       field('Mensagem pré-preenchida do WhatsApp', 'whatsappMessage', item.whatsappMessage || '', { wide: true, placeholder: 'Olá! Meu nome é {nome}…' }),
       field('Busca do mapa', 'mapsQuery', item.mapsQuery), field('Link do Google', 'mapsUrl', item.mapsUrl, { type: 'url' }),
+      field('Link de avaliação no Google', 'reviewUrl', item.reviewUrl || '', { type: 'url', wide: true, placeholder: 'https://g.page/r/…/review' }),
       field('Site da unidade', 'website', item.website, { type: 'url' }),
       `<div class="field wide">${leadToggle(item.collectLead)}</div>`,
     ].join('');

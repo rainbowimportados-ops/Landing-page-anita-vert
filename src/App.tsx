@@ -1,5 +1,6 @@
 import { Fragment, useEffect } from 'react'
 import { LazyMotion, domAnimation } from 'motion/react'
+import { ConviteAvaliacao } from './components/Avaliacoes'
 import { Banner } from './components/Banner'
 import { AvisoPrivacidade } from './components/AvisoPrivacidade'
 import { ProvedorDeCaptura } from './components/Captura'
@@ -58,6 +59,7 @@ function Pagina() {
     unidades: <Unidades />, cursos: <Dentistas />, duvidas: <Duvidas /> }
   return <main id="conteudo-principal" tabIndex={-1}><Hero />
     {blocos.filter(b => b.visivel).map(b => <Fragment key={b.id}>{componentes[b.id]}</Fragment>)}
+    <ConviteAvaliacao />
     <ChamadaFinal />
   </main>
 }
