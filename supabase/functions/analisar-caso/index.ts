@@ -22,6 +22,16 @@ const MAXIMO_FOTOS = 16
 const ANGULOS = ['frente', 'perfil_direito', 'perfil_esquerdo', 'sorriso', 'outro'] as const
 const MODELO_PADRAO = 'gpt-6-astra'
 
+/**
+ * Nome do modelo vindo do secret opcional OPENAI_FOTOS_MODEL. Se alguém colar
+ * ali a chave da API (começa com "sk-") ou qualquer coisa que não pareça nome
+ * de modelo, ignora e usa o padrão — a chave nunca é enviada como modelo.
+ */
+function modelo() {
+  const valor = (Deno.env.get('OPENAI_FOTOS_MODEL') ?? '').trim()
+  return /^[a-z0-9][a-z0-9._:-]{1,63}$/i.test(valor) && !/^sk-/i.test(valor) ? valor : MODELO_PADRAO
+}
+
 /** Erro devolvido pela API da OpenAI (status HTTP), para uma mensagem amigável. */
 class ErroIA extends Error {
   constructor(public status: number) {
@@ -175,7 +185,7 @@ async function analisar(
       method: 'POST',
       headers: { Authorization: `Bearer ${chave}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: Deno.env.get('OPENAI_FOTOS_MODEL') || MODELO_PADRAO,
+        model: modelo(),
         instructions: INSTRUCOES,
         input: [{ role: 'user', content: conteudo }],
         max_output_tokens: 16000,
@@ -183,7 +193,10 @@ async function analisar(
       }),
     })
     if (!r.ok) {
-      console.error('OpenAI', r.status, await r.text())
+      // Registra só o código do erro: a mensagem da OpenAI pode repetir dados
+      // sensíveis enviados no pedido (ex.: uma chave colada no lugar errado).
+      const codigo = await r.json().then((j) => j?.error?.code ?? j?.error?.type ?? 'sem_codigo').catch(() => 'sem_codigo')
+      console.error('OpenAI', r.status, codigo)
       throw new ErroIA(r.status)
     }
     const resposta = (await r.json()) as RespostaOpenAI
@@ -230,6 +243,8 @@ async function analisar(
           ? 'A chave da OpenAI foi recusada. Confira o secret OPENAI_FOTOS_API_KEY no Supabase.'
           : erro.status === 429
             ? 'Limite ou crédito da OpenAI esgotado. Confira o saldo em platform.openai.com.'
+            : erro.status === 404
+              ? 'O modelo de IA configurado não está disponível nesta chave da OpenAI. Apague o secret OPENAI_FOTOS_MODEL no Supabase (ou coloque nele só o nome de um modelo).'
             : `IA indisponível (${erro.status}). Tente de novo em instantes.`
         : (erro as Error).message
     await marcar({ status: 'erro', erro_analise: mensagem })

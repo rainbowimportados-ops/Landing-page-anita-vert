@@ -247,7 +247,16 @@ export function RevisarCaso({ id, aoVoltar }: { id: string; aoVoltar: () => void
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {soltas.map((foto) => (
               <li key={foto.id} className="rounded-card border border-borda bg-superficie p-3">
-                <img src={foto.urlMini} alt="" className="aspect-[4/5] w-full rounded-lg object-cover" />
+                {/* Foto inteira, sem corte, na resolução guardada (a miniatura só serve para telas pequenas). */}
+                <img
+                  src={foto.url}
+                  srcSet={`${foto.urlMini} 360w, ${foto.url} ${Math.max(foto.largura, foto.altura)}w`}
+                  sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
+                  width={foto.largura}
+                  height={foto.altura}
+                  alt=""
+                  className="h-auto w-full rounded-lg bg-superficie-suave"
+                />
                 <p className="mt-2 truncate text-xs text-conteudo-tenue">{foto.arquivo}</p>
                 <div className="mt-2 grid gap-2">
                   <select className={seletor} value={foto.momento ?? ''} onChange={(e) => void mudarFoto(foto, { momento: (e.target.value || null) as FotoVista['momento'] })} aria-label="Antes ou depois">
