@@ -128,8 +128,15 @@ function depoimentosDoCartao(cartao?: Cartao | null): Depoimento[] {
 
 const soDigitos = (valor?: string) => (valor ?? '').replace(/\D/g, '')
 
-/** Só aceita link http(s); qualquer outra coisa vira vazio e cai no padrão. */
-const linkHttp = (valor?: string) => (/^https?:\/\//i.test(valor?.trim() ?? '') ? valor!.trim() : '')
+/** Só aceita link http(s) completo; qualquer outra coisa vira vazio e cai no padrão. */
+function linkHttp(valor?: string): string {
+  try {
+    const url = new URL(valor?.trim() ?? '')
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : ''
+  } catch {
+    return ''
+  }
+}
 
 export const conteudoPadrao: Conteudo = {
   blocos: normalizarBlocos(null),
@@ -177,7 +184,8 @@ export function aplicar(entrada: Ajustes | null | undefined, cartao?: Cartao | n
         horarios: ajuste.horarios ?? unidade.horarios,
         mapsUrl: rotaParaEndereco(endereco),
         // Link de avaliação cadastrado em /admin → Unidades (vale para o site e o cartão).
-        avaliacaoUrl: linkHttp(doCartao?.reviewUrl) || unidade.avaliacaoUrl,
+        // Procurado à parte de `doCartao`: esconder a unidade no cartão não pode descartar o link.
+        avaliacaoUrl: linkHttp(cartao?.units?.find((u) => u.id === unidade.slug)?.reviewUrl) || unidade.avaliacaoUrl,
       }
     }),
 

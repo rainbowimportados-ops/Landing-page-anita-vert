@@ -240,6 +240,10 @@ const DEFAULT_REVIEW_URLS = {
   'ribeirao-preto': 'https://g.page/r/Cas7SZ28pOa_EBM/review',
 };
 
+function validHttpUrl(value) {
+  try { const url = new URL(String(value || '').trim()); return ['http:', 'https:'].includes(url.protocol) ? url.href : ''; } catch { return ''; }
+}
+
 function showUnit(unit, updateUrl = true) {
   if (!unit) return;
   activeUnitId = unit.id;
@@ -273,7 +277,7 @@ function showUnit(unit, updateUrl = true) {
     prepareLeadLink(link, { collectLead: unit.collectLead !== false, message, label: `${label} — ${city}`, unit: city, leadType: 'appointment' });
     actions.append(link);
   });
-  const reviewUrl = unit.reviewUrl || DEFAULT_REVIEW_URLS[unit.id];
+  const reviewUrl = validHttpUrl(unit.reviewUrl) || DEFAULT_REVIEW_URLS[unit.id];
   if (reviewUrl) {
     const review = trackableLink(reviewUrl, 'avaliar_google', unit.id);
     review.className = 'unit-detail__review'; review.textContent = '★ Avaliar no Google';
