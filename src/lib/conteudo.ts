@@ -115,7 +115,7 @@ export type Conteudo = {
 /** Parte do cadastro do cartão que a landing usa. */
 export type Cartao = {
   company?: { phone?: string; instagram?: string; anitaInstagram?: string; whatsappMode?: string }
-  units?: Array<{ id?: string; active?: boolean; address?: string; phone?: string }>
+  units?: Array<{ id?: string; active?: boolean; address?: string; phone?: string; reviewUrl?: string }>
   testimonials?: Array<{ author?: string; text?: string; treatment?: string; active?: boolean }>
 }
 
@@ -127,6 +127,9 @@ function depoimentosDoCartao(cartao?: Cartao | null): Depoimento[] {
 }
 
 const soDigitos = (valor?: string) => (valor ?? '').replace(/\D/g, '')
+
+/** Só aceita link http(s); qualquer outra coisa vira vazio e cai no padrão. */
+const linkHttp = (valor?: string) => (/^https?:\/\//i.test(valor?.trim() ?? '') ? valor!.trim() : '')
 
 export const conteudoPadrao: Conteudo = {
   blocos: normalizarBlocos(null),
@@ -173,6 +176,8 @@ export function aplicar(entrada: Ajustes | null | undefined, cartao?: Cartao | n
         whatsapp,
         horarios: ajuste.horarios ?? unidade.horarios,
         mapsUrl: rotaParaEndereco(endereco),
+        // Link de avaliação cadastrado em /admin → Unidades (vale para o site e o cartão).
+        avaliacaoUrl: linkHttp(doCartao?.reviewUrl) || unidade.avaliacaoUrl,
       }
     }),
 

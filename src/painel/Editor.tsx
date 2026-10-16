@@ -197,6 +197,11 @@ export function Editor({ email, aoSair, abas }: { email: string; aoSair: () => v
 
         <section hidden={painel!=='unidades'}>
           <h2 id="editor-horarios" className="titulo-secao">Horários das unidades</h2>
+          <p className="mt-2 rounded-card border border-borda bg-superficie-suave p-4 text-sm text-conteudo-suave">
+            O <strong>link de avaliação no Google</strong> de cada unidade fica no cadastro de unidades e vale
+            para o site, o cartão e o QR code.{' '}
+            <a className="vert-editor-manage" href="/admin?section=unidades" target="_top">Editar link de avaliação →</a>
+          </p>
           <div className="mt-5 space-y-8">
             {unidadesPadrao.map((unidade) => (
               <div key={unidade.slug} className="rounded-card border border-borda bg-superficie p-5">
