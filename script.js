@@ -234,6 +234,12 @@ function renderUnits(units) {
   });
 }
 
+// Link direto de avaliação no Google de cada unidade; o campo do /admin tem prioridade.
+const DEFAULT_REVIEW_URLS = {
+  franca: 'https://g.page/r/CQr_1M80nxhiEBM/review',
+  'ribeirao-preto': 'https://g.page/r/Cas7SZ28pOa_EBM/review',
+};
+
 function showUnit(unit, updateUrl = true) {
   if (!unit) return;
   activeUnitId = unit.id;
@@ -267,6 +273,13 @@ function showUnit(unit, updateUrl = true) {
     prepareLeadLink(link, { collectLead: unit.collectLead !== false, message, label: `${label} — ${city}`, unit: city, leadType: 'appointment' });
     actions.append(link);
   });
+  const reviewUrl = unit.reviewUrl || DEFAULT_REVIEW_URLS[unit.id];
+  if (reviewUrl) {
+    const review = trackableLink(reviewUrl, 'avaliar_google', unit.id);
+    review.className = 'unit-detail__review'; review.textContent = '★ Avaliar no Google';
+    review.setAttribute('aria-label', `Avaliar ${city} no Google (abre em uma nova aba)`);
+    actions.append(review);
+  }
   const other = activeUnits().find((candidate) => candidate.id !== unit.id);
   const otherButton = document.getElementById('unit-other');
   otherButton.textContent = other?.city || other?.name || '';
