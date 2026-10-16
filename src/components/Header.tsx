@@ -13,7 +13,8 @@ const navegacao = [
 ]
 
 export function Header() {
-  const { clinica } = useConteudo()
+  const { clinica, blocos } = useConteudo()
+  const itensVisiveis = navegacao.filter(item => !blocos.some(b => b.id === item.id && !b.visivel))
   const [rolou, setRolou] = useState(false)
   // Enquanto a primeira dobra (escura) está sob o cabeçalho, ele fica transparente e claro.
   const [sobreHero, setSobreHero] = useState(true)
@@ -93,7 +94,7 @@ export function Header() {
           className={`hidden items-center gap-1 xl:flex ${escuro ? 'rounded-xl border border-white/15 bg-[rgba(28,16,10,0.34)] p-1 backdrop-blur-md' : ''}`}
           aria-label="Seções da página"
         >
-          {navegacao.map((item) => {
+          {itensVisiveis.map((item) => {
             const ativo = secaoAtiva === item.id
             return (
               <a
@@ -172,7 +173,7 @@ export function Header() {
       {menuAberto && (
         <nav id="menu-mobile" className="border-t border-borda/70 bg-fundo/[0.92] backdrop-blur-xl xl:hidden" aria-label="Seções da página">
           <div className="container-vert flex flex-col py-1">
-            {navegacao.map((item) => (
+            {itensVisiveis.map((item) => (
               <a
                 key={item.id}
                 href={`#${item.id}`}
@@ -191,3 +192,4 @@ export function Header() {
     </header>
   )
 }
+

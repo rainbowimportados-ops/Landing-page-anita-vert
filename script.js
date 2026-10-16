@@ -1,3 +1,5 @@
+import { ativarGoogle, enviarEventoGoogle, revogarGoogle } from './src/lib/google.ts';
+import { origemDaVisita } from './src/lib/origem.ts';
 import { loadCardContent, supabase, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from './lib/supabase.js';
 
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -12,7 +14,7 @@ const privacyForm = document.querySelector('#privacy-form');
 const PRIVACY_STORAGE_KEY = 'vert_privacy_choice_v1';
 const VISITOR_STORAGE_KEY = 'vert_card_visitor_id';
 const INSTAGRAM_STORAGE_KEY = 'vert_card_instagram';
-const CONSENT_VERSION = '2026-09-v5';
+const CONSENT_VERSION = '2026-10-v6';
 let trackingConsent = false;
 let visitorInstagram = '';
 let pendingLead = null;
@@ -232,6 +234,16 @@ function renderUnits(units) {
   });
 }
 
+// Link direto de avaliação no Google de cada unidade; o campo do /admin tem prioridade.
+const DEFAULT_REVIEW_URLS = {
+  franca: 'https://g.page/r/CQr_1M80nxhiEBM/review',
+  'ribeirao-preto': 'https://g.page/r/Cas7SZ28pOa_EBM/review',
+};
+
+function validHttpUrl(value) {
+  try { const url = new URL(String(value || '').trim()); return ['http:', 'https:'].includes(url.protocol) ? url.href : ''; } catch { return ''; }
+}
+
 function showUnit(unit, updateUrl = true) {
   if (!unit) return;
   activeUnitId = unit.id;
@@ -265,6 +277,13 @@ function showUnit(unit, updateUrl = true) {
     prepareLeadLink(link, { collectLead: unit.collectLead !== false, message, label: `${label} — ${city}`, unit: city, leadType: 'appointment' });
     actions.append(link);
   });
+  const reviewUrl = validHttpUrl(unit.reviewUrl) || DEFAULT_REVIEW_URLS[unit.id];
+  if (reviewUrl) {
+    const review = trackableLink(reviewUrl, 'avaliar_google', unit.id);
+    review.className = 'unit-detail__review'; review.textContent = '★ Avaliar no Google';
+    review.setAttribute('aria-label', `Avaliar ${city} no Google (abre em uma nova aba)`);
+    actions.append(review);
+  }
   const other = activeUnits().find((candidate) => candidate.id !== unit.id);
   const otherButton = document.getElementById('unit-other');
   otherButton.textContent = other?.city || other?.name || '';
@@ -405,9 +424,11 @@ function eventoPadrao(botao) {
 function registrarClique(botao, unidade = null, evento = null) {
   if (new URLSearchParams(window.location.search).get('preview') === 'admin') return;
   if (!trackingConsent || storageGet(PRIVACY_STORAGE_KEY) !== `accepted:${CONSENT_VERSION}`) return;
+  const eventoFinal = evento || eventoPadrao(botao);
+  enviarEventoGoogle(eventoFinal, String(botao).slice(0, 40), unidade);
   const payload = {
     superficie: 'digital_card',
-    evento: evento || eventoPadrao(botao),
+    evento: eventoFinal,
     pagina: window.location.pathname.slice(0, 300),
     botao: String(botao).slice(0, 40),
     unidade: unidade ? String(unidade).slice(0, 40) : null,
@@ -429,7 +450,11 @@ function initializePrivacy() {
   const choice = storageGet(PRIVACY_STORAGE_KEY);
   visitorInstagram = normalizeInstagramHandle(storageGet(INSTAGRAM_STORAGE_KEY));
   trackingConsent = choice === `accepted:${CONSENT_VERSION}`;
-  if (trackingConsent) registrarClique('visualizacao_pagina');
+  if (trackingConsent) {
+    ativarGoogle();
+    origemDaVisita();
+    registrarClique('visualizacao_pagina');
+  }
   if (!trackingConsent && choice !== `declined:${CONSENT_VERSION}`) openPrivacyDialog();
 }
 
@@ -438,6 +463,8 @@ privacyForm.addEventListener('submit', (event) => {
   const wasTracking = trackingConsent;
   storageSet(PRIVACY_STORAGE_KEY, `accepted:${CONSENT_VERSION}`);
   trackingConsent = true;
+  ativarGoogle();
+  origemDaVisita();
   privacyDialog.close();
   // Só após a escolha afirmativa os eventos passam a ser registrados.
   registrarClique(wasTracking ? 'preferencias_privacidade' : 'consentimento_autorizado');
@@ -445,10 +472,13 @@ privacyForm.addEventListener('submit', (event) => {
 
 document.querySelector('[data-privacy-decline]').addEventListener('click', () => {
   trackingConsent = false;
+  revogarGoogle();
   visitorInstagram = '';
   storageSet(PRIVACY_STORAGE_KEY, `declined:${CONSENT_VERSION}`);
   storageRemove(VISITOR_STORAGE_KEY);
   storageRemove(INSTAGRAM_STORAGE_KEY);
+  // Campanha e identificadores de clique também saem: sem aceite não ficam guardados.
+  try { window.sessionStorage.removeItem('vert_origem_v1'); } catch {}
   privacyDialog.close();
 });
 
@@ -716,12 +746,8 @@ leadForm.addEventListener('submit', async (event) => {
     : pendingLead.leadType === 'patient' ? 'paciente_atual'
     : pendingLead.serviceId === 'lentes' ? 'lentes' : 'avaliacao';
   // Origem, campanha e página só acompanham o contato se as métricas foram autorizadas.
-  const params = new URLSearchParams(window.location.search);
-  const utm = {};
-  if (trackingConsent) {
-    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach((chave) => { const valor = params.get(chave); if (valor) utm[chave] = valor.slice(0, 100); });
-    if (!utm.utm_source && params.get('origem')) utm.utm_source = `instagram:${params.get('origem')}`.slice(0, 100);
-  }
+  // Mesmo registro da landing: utm, gclid/gbraid/wbraid e primeiro acesso da sessão.
+  const utm = trackingConsent ? origemDaVisita().utm : {};
   let salvo = false;
   try {
     // Mesmo motor da landing: grava no painel e no CRM, deduplicando pelo telefone.

@@ -24,6 +24,7 @@ import {
   type Unidade,
 } from '../config/site'
 
+import { normalizarBlocos, type Bloco } from './blocos'
 import type { CampanhaResultados, FotoPublicada, ParPublicado } from './casos'
 
 const SUPABASE_URL = 'https://xiskevunqbvmoclygppc.supabase.co'
@@ -73,6 +74,8 @@ export type Banner = {
 
 /** Só os campos que a clínica pode editar pelo painel. */
 export type Ajustes = {
+  blocos?: Bloco[]
+  topo?: { titulo?: string; texto?: string }
   clinica?: Partial<Pick<
     typeof clinicaPadrao,
     'instagram' | 'email' | 'whatsappComercial' | 'whatsappAtendimento'
@@ -95,6 +98,8 @@ export type Ajustes = {
 }
 
 export type Conteudo = {
+  blocos: Bloco[]
+  topo: { titulo?: string; texto?: string }
   clinica: typeof clinicaPadrao
   unidades: Unidade[]
   faq: typeof faqPadrao
@@ -110,7 +115,7 @@ export type Conteudo = {
 /** Parte do cadastro do cartão que a landing usa. */
 export type Cartao = {
   company?: { phone?: string; instagram?: string; anitaInstagram?: string; whatsappMode?: string }
-  units?: Array<{ id?: string; active?: boolean; address?: string; phone?: string }>
+  units?: Array<{ id?: string; active?: boolean; address?: string; phone?: string; reviewUrl?: string }>
   testimonials?: Array<{ author?: string; text?: string; treatment?: string; active?: boolean }>
 }
 
@@ -123,7 +128,19 @@ function depoimentosDoCartao(cartao?: Cartao | null): Depoimento[] {
 
 const soDigitos = (valor?: string) => (valor ?? '').replace(/\D/g, '')
 
+/** Só aceita link http(s) completo; qualquer outra coisa vira vazio e cai no padrão. */
+function linkHttp(valor?: string): string {
+  try {
+    const url = new URL(valor?.trim() ?? '')
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : ''
+  } catch {
+    return ''
+  }
+}
+
 export const conteudoPadrao: Conteudo = {
+  blocos: normalizarBlocos(null),
+  topo: {},
   clinica: clinicaPadrao,
   unidades: unidadesPadrao.map((u) => ({ ...u, mapsUrl: rotaParaEndereco(u.endereco) })),
   faq: faqPadrao.filter((item) => item.resposta.trim() !== ''),
@@ -149,6 +166,8 @@ export function aplicar(entrada: Ajustes | null | undefined, cartao?: Cartao | n
   if (cartao?.company?.instagram?.trim()) clinica.instagram = cartao.company.instagram.trim()
 
   return {
+    blocos: normalizarBlocos(ajustes.blocos),
+    topo: ajustes.topo ?? {},
     clinica,
 
     unidades: unidadesPadrao.map((unidade) => {
@@ -164,6 +183,9 @@ export function aplicar(entrada: Ajustes | null | undefined, cartao?: Cartao | n
         whatsapp,
         horarios: ajuste.horarios ?? unidade.horarios,
         mapsUrl: rotaParaEndereco(endereco),
+        // Link de avaliação cadastrado em /admin → Unidades (vale para o site e o cartão).
+        // Procurado à parte de `doCartao`: esconder a unidade no cartão não pode descartar o link.
+        avaliacaoUrl: linkHttp(cartao?.units?.find((u) => u.id === unidade.slug)?.reviewUrl) || unidade.avaliacaoUrl,
       }
     }),
 
@@ -247,3 +269,4 @@ export async function carregarAjustes(): Promise<Ajustes | null> {
     return null
   }
 }
+

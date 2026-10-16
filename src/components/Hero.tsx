@@ -23,7 +23,7 @@ const MENSAGEM = 'Olá! Vim pelo site e gostaria de agendar uma avaliação.'
  * `prefers-reduced-motion`.
  */
 export function Hero() {
-  const { clinica, unidades } = useConteudo()
+  const { clinica, unidades, topo } = useConteudo()
   const foto = useRef<HTMLImageElement>(null)
   const [pronta, setPronta] = useState(false)
 
@@ -61,14 +61,11 @@ export function Hero() {
           </p>
 
           <h1 className="hv__titulo">
-            Sorrisos que<br />
-            transformam<br />
-            <em>histórias.</em>
+            {topo.titulo?.trim() || <>Sorrisos que<br />transformam<br /><em>histórias.</em></>}
           </h1>
 
           <p className="hv__sub">
-            Mais que estética, devolvemos confiança, bem-estar e qualidade de vida. Resultados reais, com
-            planejamento e segurança.
+            {topo.texto?.trim() || 'Mais que estética, devolvemos confiança, bem-estar e qualidade de vida. Resultados reais, com planejamento e segurança.'}
           </p>
 
           <div className="hv__acoes">
@@ -132,3 +129,4 @@ export function Hero() {
     </section>
   )
 }
+

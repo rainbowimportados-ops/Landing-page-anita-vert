@@ -25,6 +25,11 @@ export type Unidade = {
    * certo); não depende de link colado à mão.
    */
   mapsUrl: string
+  /**
+   * Link direto de avaliação no Google (Google Meu Negócio → "Pedir avaliações").
+   * Abre a janela de avaliação já com as estrelas. Vazio esconde os botões.
+   */
+  avaliacaoUrl: string
 }
 
 /** Link de rota do Google Maps a partir do endereço. */
@@ -87,6 +92,7 @@ export const unidades: Unidade[] = [
     mensagem: 'Olá! Vim pelo site e gostaria de agendar uma avaliação na unidade de Franca.',
     horarios: [],
     mapsUrl: '',
+    avaliacaoUrl: 'https://g.page/r/CQr_1M80nxhiEBM/review',
   },
   {
     slug: 'ribeirao-preto',
@@ -98,6 +104,7 @@ export const unidades: Unidade[] = [
       'Olá! Vim pelo site e gostaria de agendar uma avaliação na unidade de Ribeirão Preto.',
     horarios: [],
     mapsUrl: '',
+    avaliacaoUrl: 'https://g.page/r/Cas7SZ28pOa_EBM/review',
   },
 ]
 

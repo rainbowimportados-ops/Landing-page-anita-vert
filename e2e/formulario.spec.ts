@@ -1,12 +1,17 @@
 import { expect, test, type Page } from '@playwright/test'
 
 const CHAVE_PRIVACIDADE = 'vert_privacy_choice_v1'
-const VERSAO = '2026-09-v5'
+const VERSAO = '2026-10-v6'
 
 /** Corpo enviado à função `site_capturar_lead`, capturado pelo mock. */
 type Lead = { p: Record<string, unknown> }
 
-async function preparar(page: Page, resposta: unknown = { ok: true }, status = 200) {
+async function preparar(
+  page: Page,
+  resposta: unknown = { ok: true },
+  status = 200,
+  opcoes: { escolha?: 'accepted' | 'declined'; url?: string } = {},
+) {
   const leads: Lead[] = []
   // Nenhum teste fala com o banco real: o lead é interceptado e o resto do Supabase recebe vazio.
   await page.route('**/*.supabase.co/**', async (route) => {
@@ -19,10 +24,10 @@ async function preparar(page: Page, resposta: unknown = { ok: true }, status = 2
   })
   // O envio bem-sucedido navega para o WhatsApp; aqui só registramos o destino.
   await page.route(/wa\.me|whatsapp\.com/, (route) => route.fulfill({ status: 200, body: 'whatsapp' }))
-  await page.addInitScript(([chave, versao]) => {
-    window.localStorage.setItem(chave, `declined:${versao}`)
-  }, [CHAVE_PRIVACIDADE, VERSAO])
-  await page.goto('/')
+  await page.addInitScript(([chave, versao, escolha]) => {
+    window.localStorage.setItem(chave, `${escolha}:${versao}`)
+  }, [CHAVE_PRIVACIDADE, VERSAO, opcoes.escolha ?? 'declined'])
+  await page.goto(opcoes.url ?? '/')
   return leads
 }
 
@@ -117,6 +122,52 @@ test('sem aceitar métricas o lead não leva origem nem campanha', async ({ page
   await modal(page).getByRole('button', { name: /enviar e falar no whatsapp/i }).click()
   await expect(modal(page).getByRole('heading', { name: 'Tudo certo!' })).toBeVisible()
   expect(leads[0].p).toMatchObject({ utm: {}, referrer: '', pagina: '' })
+})
+
+async function enviarAvaliacao(page: Page) {
+  await abrirAvaliacao(page)
+  await etapaUm(page)
+  await modal(page).getByRole('radio', { name: 'Ainda não sei', exact: true }).check()
+  await modal(page).getByRole('radio', { name: 'Ainda não', exact: true }).check()
+  await modal(page).getByRole('button', { name: /enviar e falar no whatsapp/i }).click()
+  await expect(modal(page).getByRole('heading', { name: 'Tudo certo!' })).toBeVisible()
+}
+
+test('aceitando métricas o lead leva utm e gclid do anúncio', async ({ page }) => {
+  const leads = await preparar(page, { ok: true }, 200, {
+    escolha: 'accepted',
+    url: '/?utm_source=google&utm_medium=cpc&utm_campaign=pmax-lentes&gclid=CJ0KTESTE_123&gad_source=1',
+  })
+  await enviarAvaliacao(page)
+  expect(leads[0].p.utm).toEqual({
+    utm_source: 'google',
+    utm_medium: 'cpc',
+    utm_campaign: 'pmax-lentes',
+    gclid: 'CJ0KTESTE_123',
+    gad_source: '1',
+  })
+})
+
+test('sem aceitar métricas o gclid não é lido nem enviado', async ({ page }) => {
+  const leads = await preparar(page, { ok: true }, 200, { url: '/?utm_source=google&gclid=CJ0KTESTE_123' })
+  await enviarAvaliacao(page)
+  expect(leads[0].p.utm).toEqual({})
+  expect(await page.evaluate(() => window.sessionStorage.getItem('vert_origem_v1'))).toBeNull()
+})
+
+test('um novo clique de anúncio na mesma sessão substitui a origem anterior', async ({ page }) => {
+  const leads = await preparar(page, { ok: true }, 200, { escolha: 'accepted', url: '/?utm_source=instagram' })
+  await page.goto('/?utm_source=google&utm_medium=cpc&gclid=NOVO_CLIQUE')
+  await enviarAvaliacao(page)
+  expect(leads[0].p.utm).toMatchObject({ utm_source: 'google', gclid: 'NOVO_CLIQUE' })
+})
+
+test('navegar sem parâmetros mantém a origem do primeiro acesso da sessão', async ({ page }) => {
+  const leads = await preparar(page, { ok: true }, 200, { escolha: 'accepted', url: '/?utm_source=google&gclid=PRIMEIRO' })
+  await page.waitForFunction(() => window.sessionStorage.getItem('vert_origem_v1'))
+  await page.goto('/')
+  await enviarAvaliacao(page)
+  expect(leads[0].p.utm).toMatchObject({ utm_source: 'google', gclid: 'PRIMEIRO' })
 })
 
 test('falha de rede mostra aviso, mantém as respostas e oferece WhatsApp sem registrar', async ({ page }) => {

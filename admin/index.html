@@ -30,7 +30,7 @@
         <p>Entre para acompanhar contatos e atualizar o site e o cartão.</p>
         <form id="login-form">
           <label for="email">E-mail autorizado</label>
-          <input id="email" name="email" type="email" value="diretoria@institutovert.com.br" readonly />
+          <input id="email" name="email" type="email" value="diretoria@institutovert.com.br" required autocomplete="username" />
           <label for="password">Senha</label>
           <input id="password" name="password" type="password" minlength="8" autocomplete="current-password" required />
           <button type="submit">Entrar no painel</button>
@@ -90,6 +90,7 @@
           <button class="nav-link" data-section="campanhas"><span aria-hidden="true">✦</span>Promoções do cartão</button>
           <button class="nav-link" data-section="depoimentos"><span aria-hidden="true">“</span>Depoimentos</button>
           <span class="nav-group-label">Administração</span>
+          <button class="nav-link" data-section="avisos"><span aria-hidden="true">◔</span>Avisos</button>
           <button class="nav-link" data-section="equipe"><span aria-hidden="true">♙</span>Equipe e acesso</button>
         </nav>
         <label class="mobile-section-picker" for="mobile-section-nav">
@@ -296,13 +297,13 @@
             </section>
 
             <section class="panel" data-panel="contatos">
-              <div class="panel__heading"><div><p class="eyebrow">Site + cartão</p><h2>Leads</h2></div><div class="ops-heading-actions"><button type="button" class="small-action" data-new-lead>+ Novo lead</button><button type="button" class="small-action" id="refresh-leads">Atualizar</button></div></div>
+              <div class="panel__heading"><div><p class="eyebrow">Site + cartão</p><h2>Contatos</h2></div><div class="ops-heading-actions"><button type="button" class="small-action" data-new-lead>+ Novo contato</button><button type="button" class="small-action" id="refresh-leads">Atualizar</button></div></div>
               <p class="helper">Todos os formulários enviados. Acompanhe a etapa, registre a próxima ação e retome a conversa pelo WhatsApp.</p>
               <div class="crm-summary" id="crm-summary" aria-label="Resumo do atendimento"></div>
               <div class="lead-toolbar" aria-label="Ferramentas dos contatos">
                 <label class="lead-search">
                   <span>Buscar contato</span>
-                  <input id="lead-search" type="search" placeholder="Nome, telefone ou etiqueta" autocomplete="off" />
+                  <input id="lead-search" type="search" placeholder="Nome, telefone, campanha ou etiqueta" autocomplete="off" />
                 </label>
                 <label>
                   <span>Exibir</span>
@@ -314,6 +315,7 @@
                     <option value="formation">Cursos</option>
                     <option value="rental">Locação de sala</option>
                     <option value="close_friends">Close Friends</option>
+                    <option value="ads">Vindos de anúncio (Google Ads)</option>
                   </select>
                 </label>
                 <label><span>Etapa</span><select id="lead-stage-filter"><option value="all">Todas as etapas</option><option value="novo">Novos</option><option value="em_contato">Em contato</option><option value="agendado">Agendados</option><option value="concluido">Concluídos</option><option value="perdido">Perdidos</option><option value="followup">Retorno vencido</option></select></label>
@@ -332,7 +334,7 @@
             </section>
 
             <section class="panel" data-panel="pipeline">
-              <div class="panel__heading"><div><p class="eyebrow">Atendimento</p><h2>Pipeline</h2></div><button type="button" class="small-action" data-new-lead>+ Novo lead</button></div>
+              <div class="panel__heading"><div><p class="eyebrow">Atendimento</p><h2>Funil de atendimento</h2></div><button type="button" class="small-action" data-new-lead>+ Novo contato</button></div>
               <p class="helper">Arraste os cartões entre as etapas ou abra um lead para registrar o próximo passo.</p>
               <div class="ops-toolbar"><input id="pipeline-search" type="search" placeholder="Buscar nome, telefone ou interesse" aria-label="Buscar no pipeline" /><select id="pipeline-unit" aria-label="Filtrar unidade"><option value="all">Todas as unidades</option><option value="Franca">Franca</option><option value="Ribeirão Preto">Ribeirão Preto</option></select></div>
               <div class="pipeline-board" id="pipeline-board"></div>
@@ -374,6 +376,34 @@
               <div id="reports-content"></div>
             </section>
 
+            <section class="panel" data-panel="avisos">
+              <div class="panel__heading"><div><p class="eyebrow">Atendimento</p><h2>Avisos de lead novo</h2></div><button type="button" class="small-action" id="avisos-refresh">Atualizar</button></div>
+              <p class="helper">Quando um lead novo chega pelo site ou pelo cartão, a equipe recebe uma mensagem no WhatsApp. Assim o primeiro contato sai em minutos.</p>
+              <div class="avisos-grid">
+                <div class="ops-surface" id="avisos-status" aria-live="polite"><p class="ops-muted">Carregando…</p></div>
+                <div class="ops-surface" id="avisos-form">
+                  <h3>Quem recebe</h3>
+                  <label class="avisos-field">Número da equipe ou id do grupo<input id="avisos-destino" name="destino" inputmode="tel" autocomplete="off" placeholder="(16) 99999-0000" /></label>
+                  <p class="ops-muted">Use o número com DDD. Para um grupo, cole o id que termina em @g.us.</p>
+                  <label class="avisos-toggle"><input type="checkbox" id="avisos-ativo" /> Avisar a equipe quando chegar um lead novo</label>
+                  <div class="avisos-actions"><button class="button" type="button" id="avisos-salvar">Salvar</button><button class="button button--ghost" type="button" id="avisos-testar">Enviar mensagem de teste</button></div>
+                  <p class="ops-feedback" id="avisos-feedback" role="status"></p>
+                </div>
+              </div>
+              <div class="ops-surface">
+                <h3>Como a mensagem chega</h3>
+                <pre class="avisos-exemplo">🔔 Novo lead: Maria S.
+Interesse: Lentes em resina
+Unidade: Franca
+Origem: Google Ads · pmax-lentes
+
+Abrir ficha:
+https://institutovert.app/admin?section=contatos</pre>
+                <p class="ops-muted">A mensagem leva só o primeiro nome e a inicial do sobrenome, sem telefone. A mesma pessoa enviando de novo em 10 minutos gera um aviso só.</p>
+              </div>
+              <div class="ops-surface"><h3>Últimos envios</h3><div class="ops-list" id="avisos-envios"></div></div>
+            </section>
+
             <section class="panel" data-panel="equipe">
               <div class="panel__heading"><div><p class="eyebrow">Permissões</p><h2>Equipe e acesso</h2></div></div>
               <div class="ops-list" id="team-list"></div>
@@ -381,7 +411,7 @@
 
             <section class="panel" data-panel="site">
               <div class="panel__heading"><div><p class="eyebrow">Conteúdo público</p><h2>Editar site</h2></div><a class="small-action" href="/" target="_blank" rel="noopener">Ver site ↗</a></div>
-              <p class="helper">Só o que é exclusivo do site: horários das unidades, perguntas frequentes, banner de campanha, e-mail e rodapé legal. Use o botão Salvar dentro do editor; as alterações aparecem no site após salvar.</p>
+              <p class="helper">Prepare as alterações, confira a prévia e salve o rascunho. O site só muda ao selecionar Publicar no site.</p>
               <iframe class="site-editor-frame" id="site-editor-frame" title="Editor do site" data-src="/config/?embed=1"></iframe>
             </section>
 
@@ -459,3 +489,4 @@
     <script type="module" src="/admin/admin.js"></script>
   </body>
 </html>
+

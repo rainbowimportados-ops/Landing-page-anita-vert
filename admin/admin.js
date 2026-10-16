@@ -1,5 +1,10 @@
-import { ADMIN_EMAIL, ADMIN_REDIRECT_URL, loadCardContent, supabase } from '../lib/supabase.js';
+import { ADMIN_REDIRECT_URL, loadCardContent, supabase } from '../lib/supabase.js';
+import { mountWorkspace, initWorkspace, workspaceSections } from './workspace.js';
+mountWorkspace();
+
 import { initOperations } from './operations.js';
+import { initAvisos } from './avisos.js';
+import { CABECALHO_CSV_CAMPANHA, COLUNAS_CAMPANHA, linhaCsvCampanha, resumoCampanha, textoBuscaCampanha, veioDeAnuncio } from './origem-campanha.js';
 
 const navIconPaths = {
   'visao-geral':'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
@@ -21,6 +26,7 @@ const navIconPaths = {
   campanhas:'<path d="m12 2 2 7 7 3-7 2-2 8-2-8-7-2 7-3z"/>',
   depoimentos:'<path d="M4 5h16v12H8l-4 4zM8 10h8m-8 3h5"/>',
   resultados:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="1"/><path d="m3 17 5-5 4 4 3-3 6 5"/>',
+  avisos:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 0 0 4 0"/>',
   equipe:'<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2m1-13 5 2v4a5 5 0 0 1-5 4"/>',
 };
 document.querySelectorAll('.nav-link[data-section]').forEach((button) => {
@@ -66,6 +72,8 @@ let visitorJourneys = [];
 let selectedLeadIds = new Set();
 let leadDialogMode = 'edit';
 let operations = null;
+let workspace = null;
+let avisos = null;
 
 const blankItems = {
   units: () => ({ id: crypto.randomUUID(), name: 'Nova unidade', cep: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '', address: '', phone: '', contactUrl: '', contactButtonLabel: '', whatsappMessage: '', collectLead: true, mapsUrl: '', mapsQuery: '', website: '', active: true }),
@@ -180,7 +188,7 @@ loginForm.addEventListener('submit', async (event) => {
   button.disabled = true;
   loginFeedback.textContent = 'Validando acesso…';
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: ADMIN_EMAIL,
+    email: loginForm.querySelector('#email').value.trim(),
     password: loginForm.querySelector('#password').value,
   });
   if (error) {
@@ -196,7 +204,7 @@ firstAccessButton.addEventListener('click', async () => {
   firstAccessButton.disabled = true;
   loginFeedback.textContent = 'Enviando validação por e-mail…';
   const { error } = await supabase.auth.signInWithOtp({
-    email: ADMIN_EMAIL,
+    email: loginForm.querySelector('#email').value.trim(),
     options: { shouldCreateUser: false, emailRedirectTo: ADMIN_REDIRECT_URL },
   });
   loginFeedback.textContent = error
@@ -248,6 +256,7 @@ document.querySelector('#logout').addEventListener('click', async () => {
 });
 
 const sectionDetails = {
+  ...Object.fromEntries(Object.entries(workspaceSections).map(([key,[title,context]])=>[key,{title,context}])),
   'visao-geral': { title: 'Visão geral', context: 'Desempenho do cartão' },
   acessos: { title: 'Instagram e acessos', context: 'Jornada dos visitantes' },
   empresa: { title: 'Dados da empresa', context: 'Configuração do cartão' },
@@ -262,6 +271,7 @@ const sectionDetails = {
   'campanhas-crm': { title: 'Campanhas', context: 'Links de captação' },
   origens: { title: 'Origens', context: 'Aquisição de leads' },
   relatorios: { title: 'Relatórios', context: 'Resultados de captação' },
+  avisos: { title: 'Avisos', context: 'Aviso de lead novo' },
   equipe: { title: 'Equipe e acesso', context: 'Permissões' },
   site: { title: 'Editar site', context: 'Conteúdo e identidade' },
   casos: { title: 'Antes e depois', context: 'Resultados do site' },
@@ -285,10 +295,12 @@ function activatePanel(section, shouldScroll = false) {
   // Editores embutidos (/config) só carregam quando a área é aberta.
   const frame = panel.querySelector('iframe.site-editor-frame[data-src]');
   if (frame && !frame.src) frame.src = frame.dataset.src;
-  saveButton.hidden = ['site', 'casos', 'contatos', 'pipeline', 'avaliacoes', 'pacientes', 'agenda', 'campanhas-crm', 'origens', 'relatorios', 'equipe', 'acessos', 'visao-geral'].includes(section);
+  saveButton.hidden = Boolean(workspaceSections[section]) || ['site', 'casos', 'contatos', 'pipeline', 'avaliacoes', 'pacientes', 'agenda', 'campanhas-crm', 'origens', 'relatorios', 'avisos', 'equipe', 'acessos', 'visao-geral'].includes(section);
   saveStatus.hidden = saveButton.hidden;
   document.querySelector('.preview-pane').hidden = saveButton.hidden;
   operations?.activate(section);
+  avisos?.activate(section);
+  void workspace?.activate(section);
   if (section === 'links' && content) renderUnitContacts();
   const details = sectionDetails[section];
   const title = document.querySelector('#workspace-title');
@@ -399,6 +411,7 @@ function renderList(type) {
       field('Endereço exibido no cartão', 'address', item.address, { wide: true }), field('WhatsApp', 'phone', item.phone),
       field('Mensagem pré-preenchida do WhatsApp', 'whatsappMessage', item.whatsappMessage || '', { wide: true, placeholder: 'Olá! Meu nome é {nome}…' }),
       field('Busca do mapa', 'mapsQuery', item.mapsQuery), field('Link do Google', 'mapsUrl', item.mapsUrl, { type: 'url' }),
+      field('Link de avaliação no Google', 'reviewUrl', item.reviewUrl || '', { type: 'url', wide: true, placeholder: 'https://g.page/r/…/review' }),
       field('Site da unidade', 'website', item.website, { type: 'url' }),
       `<div class="field wide">${leadToggle(item.collectLead)}</div>`,
     ].join('');
@@ -685,6 +698,7 @@ async function loadLeads() {
   }
   const data = leadResult.data || [];
   contactLeads = data;
+  const ownerFilter=document.querySelector('#vert-contact-owner');if(ownerFilter){const current=ownerFilter.value;ownerFilter.innerHTML='<option value="">Todos os responsáveis</option><option value="__unassigned">Não atribuídos</option>'+[...new Set(data.map(l=>l.assigned_to).filter(Boolean))].sort().map(n=>'<option value="'+escapeHtml(n)+'">'+escapeHtml(n)+'</option>').join('');ownerFilter.value=current;}
   formationLeads = data.filter((lead) => lead.lead_type === 'formation');
   visitorJourneys = aggregateVisitorJourneys(clickResult.data || [], data);
   selectedLeadIds = new Set([...selectedLeadIds].filter((id) => contactLeads.some((lead) => lead.id === id)));
@@ -692,6 +706,7 @@ async function loadLeads() {
   renderContactList();
   renderCrmSummary();
   operations?.setLeads(data);
+  workspace?.onLeadsChanged();
   if (formationList) formationList.innerHTML = formationLeads.length
     ? formationLeads.map(renderFormationLeadCard).join('')
     : '<div class="empty-state"><strong>Nenhum interessado ainda</strong><p>Os leads dos cursos aparecerão aqui com suas respostas.</p></div>';
@@ -702,7 +717,7 @@ async function loadAllSiteLeads() {
   const pageSize = 500;
   for (let offset = 0; ; offset += pageSize) {
     const result = await supabase.from('digital_card_leads')
-      .select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at,visitor_id,instagram_handle,source_origin,age_range,gender,answers,pipeline_status,internal_notes,next_followup_at,appointment_at,assigned_to')
+      .select('id,name,phone,profession,button,unit,destination,created_at,lead_type,is_dentist,has_previous_course,course_title,marked,tags,updated_at,visitor_id,instagram_handle,source_origin,age_range,gender,answers,pipeline_status,internal_notes,next_followup_at,appointment_at,assigned_to,' + COLUNAS_CAMPANHA)
       .order('created_at', { ascending: false }).order('id', { ascending: false }).range(offset, offset + pageSize - 1);
     if (result.error) return { data: null, error: result.error };
     rows.push(...(result.data || []));
@@ -801,16 +816,20 @@ function filteredContactLeads() {
   const search = document.querySelector('#lead-search').value.trim().toLocaleLowerCase('pt-BR');
   const filter = document.querySelector('#lead-filter').value;
   const stage = document.querySelector('#lead-stage-filter').value;
+  const selectedUnit=document.querySelector('#vert-contact-unit')?.value||'';
+  const selectedOwner=document.querySelector('#vert-contact-owner')?.value||'';
   return contactLeads.filter((lead) => {
     const matchesFilter = filter === 'all' || (filter === 'marked' ? lead.marked
       : filter === 'unmarked' ? !lead.marked
+      : filter === 'ads' ? veioDeAnuncio(lead)
+      : filter === 'new-patient' ? ['appointment', 'contact'].includes(lead.lead_type)
       : filter === 'appointment' ? ['appointment', 'patient', 'contact'].includes(lead.lead_type)
       : lead.lead_type === filter);
-    const searchable = [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.button, lead.unit, lead.source_origin, ...Object.values(lead.answers || {}), ...(lead.tags || [])].join(' ').toLocaleLowerCase('pt-BR');
+    const searchable = [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.button, lead.unit, lead.source_origin, textoBuscaCampanha(lead), ...Object.values(lead.answers || {}), ...(lead.tags || [])].join(' ').toLocaleLowerCase('pt-BR');
     const matchesStage = stage === 'all' || (stage === 'followup'
       ? lead.next_followup_at && new Date(lead.next_followup_at) <= new Date() && !['concluido', 'perdido'].includes(lead.pipeline_status)
       : (lead.pipeline_status || 'novo') === stage);
-    return matchesFilter && matchesStage && (!search || searchable.includes(search));
+    return matchesFilter && matchesStage && (!selectedUnit||lead.unit===selectedUnit) && (!selectedOwner||(lead.assigned_to||'')===selectedOwner||(selectedOwner==='__unassigned'&&!lead.assigned_to)) && (!search || searchable.includes(search));
   });
 }
 
@@ -830,7 +849,7 @@ function renderContactList() {
       ? '<div class="empty-state"><strong>Nenhum contato encontrado</strong><p>Ajuste a busca ou o filtro.</p></div>'
       : '<div class="empty-state"><strong>Nenhum contato recebido ainda</strong><p>Os novos contatos aparecerão aqui.</p></div>';
   } else {
-    list.innerHTML = `<div class="lead-list-heading" aria-hidden="true"><span></span><span>Contato</span><span>Origem e etapa</span><span>Recebido em</span><span>Ações</span></div>${leads.map(renderLeadRow).join('')}`;
+    list.innerHTML = `<div class="lead-list-heading" aria-hidden="true"><span></span><span>Nome</span><span>Telefone</span><span>Interesse</span><span>Unidade</span><span>Etapa</span><span>Responsável</span><span>Ações</span></div>${leads.map(renderLeadRow).join('')}`;
   }
   updateLeadSelectionBar();
 }
@@ -844,25 +863,23 @@ function renderLeadRow(lead) {
   const stage = lead.pipeline_status || 'novo';
   const followup = lead.next_followup_at ? new Intl.DateTimeFormat('pt-BR', { dateStyle:'short', timeStyle:'short' }).format(new Date(lead.next_followup_at)) : '';
   const due = followup && new Date(lead.next_followup_at) <= new Date() && !['concluido', 'perdido'].includes(stage);
-  return `<article class="lead-row${lead.marked ? ' is-marked' : ''}" data-lead-id="${escapeHtml(lead.id)}">
-    <label class="lead-row__select"><input class="lead-select" type="checkbox" ${selectedLeadIds.has(lead.id) ? 'checked' : ''} aria-label="Selecionar ${escapeHtml(lead.name)}" /></label>
-    <div class="lead-row__contact" data-label="Contato">
-      <strong>${escapeHtml(lead.name)}</strong>
-      <span>${escapeHtml(lead.profession || 'Profissão não informada')}</span>
-      <a href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.phone)}</a>
-      ${lead.instagram_handle ? `<a href="https://www.instagram.com/${encodeURIComponent(String(lead.instagram_handle).replace(/^@/, ''))}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.instagram_handle)}</a>` : ''}
-      ${tags ? `<div class="lead-tags">${tags}</div>` : ''}
-    </div>
-    <div class="lead-row__source" data-label="Origem e etapa"><span class="crm-stage crm-stage--${stage}">${escapeHtml(stageLabels[stage] || stage)}</span><span>${escapeHtml(lead.lead_type === 'formation' ? 'Curso' : lead.lead_type === 'rental' ? 'Locação' : lead.lead_type === 'close_friends' ? 'Close Friends' : 'Paciente')} · ${escapeHtml(lead.button)}</span><small>${escapeHtml(lead.unit || 'Sem unidade')} · ${escapeHtml(lead.source_origin || 'Origem não identificada')}</small>${followup ? `<small class="crm-followup${due ? ' is-due' : ''}">Retorno: ${escapeHtml(followup)}</small>` : ''}${lead.internal_notes ? `<small class="lead-answer">${escapeHtml(lead.internal_notes)}</small>` : ''}${answers ? `<small class="lead-answer">${escapeHtml(answers)}</small>` : ''}</div>
-    <time class="lead-row__date" data-label="Recebido em" datetime="${escapeHtml(lead.created_at)}">${escapeHtml(date)}${journey ? `<br><strong>${journey.clicks} ${journey.clicks === 1 ? 'clique' : 'cliques'}</strong>` : ''}</time>
-    <div class="lead-row__actions" data-label="Ações">
-      <button type="button" data-lead-action="mark" aria-label="${lead.marked ? 'Desmarcar' : 'Marcar'} ${escapeHtml(lead.name)}" title="${lead.marked ? 'Desmarcar' : 'Marcar'}">${lead.marked ? '★' : '☆'}</button>
-      <button type="button" data-lead-action="tag" title="Etiquetar">Etiqueta</button>
-      <button type="button" data-lead-action="edit" title="Editar">Editar</button>
-      <button type="button" data-open-lead="${escapeHtml(lead.id)}" title="Abrir ficha">Ficha</button>
-      <button type="button" class="is-danger" data-lead-action="delete" title="Excluir">Excluir</button>
-    </div>
+  const initials=String(lead.name||'?').split(/\s+/).filter(Boolean).slice(0,2).map(n=>n[0]).join('');
+  return `<article class="lead-row vert-contact-row${lead.marked?' is-marked':''}" data-lead-id="${escapeHtml(lead.id)}">
+    <label class="lead-row__select"><input class="lead-select" type="checkbox" ${selectedLeadIds.has(lead.id)?'checked':''} aria-label="Selecionar ${escapeHtml(lead.name)}"></label>
+    <button type="button" class="vert-contact-name" data-open-lead="${escapeHtml(lead.id)}"><span class="ops-avatar">${escapeHtml(initials)}</span><strong>${escapeHtml(lead.name)}</strong></button>
+    <a class="vert-contact-phone" href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">${escapeHtml(lead.phone)}</a>
+    <span class="vert-contact-interest" title="${escapeHtml(lead.course_title||lead.answers?.interesse||lead.button)}">${escapeHtml(lead.course_title||lead.answers?.interesse||lead.button)}</span>
+    <span class="vert-contact-unit">${escapeHtml(lead.unit||'A definir')}</span>
+    <span class="crm-stage crm-stage--${escapeHtml(stage)}">${escapeHtml(stageLabels[stage]||stage)}</span>
+    <span class="vert-contact-owner">${escapeHtml(lead.assigned_to||'Não atribuído')}</span>
+    <details class="vert-row-menu"><summary aria-label="Ações de ${escapeHtml(lead.name)}">•••</summary><div>
+    <button type="button" data-open-lead="${escapeHtml(lead.id)}">Abrir ficha</button>
+    <button type="button" data-lead-action="edit">Editar contato</button>
+    <button type="button" data-lead-action="tag">Etiquetas</button>
+    <button type="button" data-lead-action="mark">${lead.marked?'Desmarcar':'Marcar contato'}</button>
+    <button type="button" class="is-danger" data-lead-action="delete">Excluir contato</button></div></details>
   </article>`;
+
 }
 
 function formatLeadAnswers(answers) {
@@ -885,6 +902,7 @@ document.querySelector('#refresh-leads').addEventListener('click', () => void lo
 document.querySelector('#refresh-accesses').addEventListener('click', () => { void loadLeads(); void loadMetrics(); });
 document.querySelector('#refresh-formation-leads').addEventListener('click', () => void loadLeads());
 document.querySelector('#lead-search').addEventListener('input', renderContactList);
+document.addEventListener('change',e=>{if(['vert-contact-unit','vert-contact-owner'].includes(e.target.id))renderContactList();});
 document.querySelector('#lead-filter').addEventListener('change', renderContactList);
 document.querySelector('#lead-stage-filter').addEventListener('change', renderContactList);
 document.querySelector('#crm-summary').addEventListener('click', (event) => {
@@ -1046,8 +1064,8 @@ document.querySelector('#export-leads').addEventListener('click', () => {
     window.alert('Não há contatos para exportar.');
     return;
   }
-  const header = ['Nome', 'Telefone', 'Instagram', 'Profissão', 'Faixa etária', 'Sexo', 'Tipo', 'Origem', 'Unidade', 'Respostas', 'Origem do acesso', 'Recebido em', 'Etapa', 'Próximo retorno', 'Notas internas', 'Marcado', 'Etiquetas'];
-  const csvRows = rows.map((lead) => [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.age_range, lead.gender, lead.lead_type, lead.button, lead.unit, formatLeadAnswers(lead.answers), lead.source_origin, lead.created_at, stageLabels[lead.pipeline_status || 'novo'], lead.next_followup_at, lead.internal_notes, lead.marked ? 'Sim' : 'Não', (lead.tags || []).join('; ')]);
+  const header = ['Nome', 'Telefone', 'Instagram', 'Profissão', 'Faixa etária', 'Sexo', 'Tipo', 'Origem', 'Unidade', 'Respostas', 'Origem do acesso', 'Recebido em', 'Etapa', 'Próximo retorno', 'Notas internas', 'Marcado', 'Etiquetas', ...CABECALHO_CSV_CAMPANHA];
+  const csvRows = rows.map((lead) => [lead.name, lead.phone, lead.instagram_handle, lead.profession, lead.age_range, lead.gender, lead.lead_type, lead.button, lead.unit, formatLeadAnswers(lead.answers), lead.source_origin, lead.created_at, stageLabels[lead.pipeline_status || 'novo'], lead.next_followup_at, lead.internal_notes, lead.marked ? 'Sim' : 'Não', (lead.tags || []).join('; '), ...linhaCsvCampanha(lead)]);
   const csv = '\uFEFF' + [header, ...csvRows].map((row) => row.map(csvCell).join(',')).join('\r\n');
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const link = document.createElement('a');
@@ -1100,7 +1118,8 @@ async function openAdmin(nextSession, passwordJustConfigured = false) {
   if (loadingAdmin) return;
   loadingAdmin = true;
   session = nextSession;
-  if (session.user.email?.toLowerCase() !== ADMIN_EMAIL) {
+  const access = await supabase.from('digital_card_admins').select('user_id').eq('user_id', session.user.id).maybeSingle();
+  if (access.error || !access.data) {
     await supabase.auth.signOut();
     loginFeedback.textContent = 'Este e-mail não possui autorização.';
     showLogin();
@@ -1143,4 +1162,7 @@ supabase.auth.onAuthStateChange((_event, nextSession) => {
 });
 
 operations = initOperations({ supabase, refresh: loadLeads, activatePanel, getSession: () => session });
+workspace = initWorkspace({supabase,getLeads:()=>contactLeads,getSession:()=>session,activatePanel,refresh:loadLeads});
+avisos = initAvisos({ supabase });
 start();
+

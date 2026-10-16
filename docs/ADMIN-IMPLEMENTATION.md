@@ -1,0 +1,90 @@
+# Administração do Instituto Vert — implementação e aceite
+
+Documento baseado na leitura de `admin/workspace.js`, `formulario/form.js`, `src/painel/Editor.tsx` e `supabase/migrations/20261014210000_admin_workspace.sql`, em 14/10/2026. Os critérios abaixo são roteiros de aceite, não resultados de execução. A existência de código e migração não comprova que o banco remoto foi atualizado ou que os fluxos foram homologados com sessão real.
+
+## Mapa de telas, dados e ações
+
+| Tela | Dados e dependências | Ações implementadas | Critério de aceite a executar |
+| --- | --- | --- | --- |
+| Navegação | Seções existentes do painel e novas seções de workspace | Agrupamento por Início, CRM, Captação, Site e conteúdo, Análises e Administração; seletor móvel | Abrir cada destino no desktop e no seletor móvel; preservar acesso às áreas existentes. |
+| Meu dia | Leads carregados pelo painel e `site_lead_tasks` | Ver tarefas sem prazo ou até o fim do dia, avaliações do dia e retornos vencidos; abrir contato; criar, editar e concluir tarefas | Preparar dados de ontem/hoje/amanhã e verificar contagens e persistência ao recarregar. O dia usa America/Sao_Paulo. |
+| Tarefas | `site_lead_tasks`, vínculo com lead e unidade do lead | Criar/editar título, contato e prazo; concluir/reabrir; filtrar por texto, status e unidade | Salvar tarefa vinculada, recarregar, concluir/reabrir e conferir cada filtro. Busca é aplicada no evento de alteração do campo. |
+| Formulários | `site_forms` | Criar/editar nome, slug, apresentação, interesse, unidade e campos opcionais; publicar/despublicar; copiar e abrir link | Rascunho não aparece publicamente; publicação habilita o endereço; despublicação impede nova submissão. |
+| Formulário público | RPCs `site_public_form`, `site_submit_form`, dependência preexistente `site_capturar_lead` | Nome, telefone e consentimento obrigatórios; cidade/profissão/Instagram/mensagem opcionais; profissão obrigatória para locação; envio ao CRM e feedback de erro/sucesso | Enviar dados de teste consentidos; conferir lead, interesse, unidade e origem no CRM; testar telefone inválido, falha de rede e formulário despublicado. Validar também rejeição diretamente na RPC, sem depender do HTML. |
+| Links e QR codes | `site_tracking_links`; gerador QR local | Criar URL para site ou cartão com UTMs; copiar/abrir URL; exibir QR e baixar SVG | Ler QR em dispositivo real, conferir destino e parâmetros; submeter contato pelo destino e conferir atribuição disponível. |
+| Biblioteca de mídia | Bucket público `digital-card-media` | Navegar pastas, listar 60 itens por página e pesquisar por pasta, enviar JPEG/PNG/WebP/MP4 até 20 MB, abrir e copiar URL | Enviar arquivo permitido, verificar URL pública e rejeição de formato/tamanho inválidos; conferir políticas e limites do bucket no servidor. |
+| Conteúdo | Destinos existentes do painel | Abrir site, cartão, cursos, depoimentos, casos, unidades, campanhas e mídia | Cada cartão deve encaminhar à área correspondente sem perder a navegação. |
+| Integrações | Links para telas existentes; cartões informativos | Encaminhar a CRM, avisos, Instagram/acessos, UTMs, relatórios e agenda | Confirmar que a configuração/estado efetivo é consultado na tela de destino; não interpretar os cartões como teste de conectividade. |
+| Privacidade | `site_privacy_requests`, vínculo opcional ao lead | Registrar acesso/correção/exclusão/revogação; atualizar status e notas | Registrar e atualizar solicitação; conferir persistência e auditoria; marcar concluída não deve excluir dados nem executar a solicitação automaticamente. |
+| Equipe | `digital_card_admins`, RPCs `site_admin_members` e `site_admin_access`, contas preexistentes em Auth | Listar administradores; diretoria concede/revoga acesso a conta já existente | Conta inexistente retorna erro; administrador comum não altera acessos; diretoria não pode remover a própria conta protegida; revogado perde acesso conforme políticas aplicáveis. |
+| Histórico | `site_admin_audit`, `site_content_versions`, `site_content_drafts` | Ver últimas 200 alterações e 50 versões; preparar versão da landing como rascunho | Publicar conteúdo de teste, localizar versão e auditoria; restaurar após confirmação; verificar que o publicado permanece igual até nova publicação. |
+| Editor do site | `landing_content`, `site_content_drafts`, RPC `site_publish_draft`; iframe da landing | Editar contato, horários, respostas do FAQ, banner e rodapé; prévia desktop/celular; salvar rascunho e publicar | Salvar e reabrir rascunho sem alterar site público; conferir prévia; publicar; testar conflito entre dois editores e preservação de resultados/antes e depois. |
+
+## Comportamento de dados e publicação
+
+A migração adiciona tabelas e políticas administrativas sem redefinir as políticas preexistentes do CRM. As novas tabelas operacionais usam RLS baseada na presença do usuário em `digital_card_admins`; histórico e versões permitem leitura administrativa. As RPCs públicas expõem a definição de um formulário publicado e encaminham sua submissão ao capturador existente; não expõem a lista de submissões.
+
+O editor recupera o rascunho antes do publicado. A gravação compara o timestamp do rascunho e a publicação bloqueia registros e verifica a versão-base publicada. A publicação da landing preserva o campo `resultados`, administrado no fluxo próprio de casos. O histórico começa na instalação dos gatilhos; não recupera versões anteriores à migração. Os gatilhos cobrem formulários, links, solicitações, rascunhos, conteúdo da landing/cartão, campanhas e tarefas, além dos eventos de concessão/revogação registrados pela RPC. Não representam auditoria integral de toda atividade do sistema.
+
+## Limitações explícitas
+
+- Não há alegação de equivalência exata aos mockups. O aceite visual exige inspeção autenticada, tamanhos de tela reais e comparação com referências aprovadas.
+- Meta Ads, Google Ads e calendário externo não estão conectados por este módulo. UTMs não fornecem investimento, ROAS ou sincronização de anúncios. Os cartões de integrações descrevem capacidades/configuração, não monitoramento em tempo real.
+- Não há RBAC por unidade ou papéis granulares. Administradores autorizados têm acesso completo ao site e CRM. O filtro de unidade é apresentação, não barreira de autorização.
+- Não há convite por e-mail nem criação de conta pelo painel. “Autorizar conta existente” depende de conta previamente cadastrada no provedor; somente a diretoria pode conceder/revogar.
+- O editor permite reordenar 12 blocos por setas e controlar sua visibilidade. Topo, contato, rodapé e disponibilidade das unidades são preservados. O conteúdo de blocos institucionais permanece no desenho existente; topo, banner, FAQ, horários, contato e rodapé são editáveis. Casos e depoimentos têm áreas próprias. A prévia dedicada bloqueia links externos, submissões e métricas.
+- Privacidade é registro e acompanhamento: concluir uma solicitação não executa exclusão, exportação, correção ou revogação nos sistemas envolvidos.
+- A biblioteca usa arquivos públicos, oferece busca e paginação de 60 itens por pasta; não oferece exclusão nem gestão de direitos de uso. Casos de pacientes continuam na área própria.
+- Links rastreáveis têm criação, edição e consulta, sem exclusão na interface atual. A edição não altera URLs já compartilhadas. Os formulários têm campos opcionais de catálogo fixo; editar um formulário publicado modifica imediatamente sua definição pública.
+- O envio de formulário preserva `utm_source`, fixa `utm_medium=form` e usa o slug como campanha; não preserva todos os parâmetros recebidos. Proteções efetivas de captação e limites dependem do capturador existente e devem ser testados no servidor.
+- Restauração disponível na interface apenas para landing; versões do cartão são consultáveis. Restaurar pode substituir rascunho existente após confirmação. Histórico é limitado na tela e não contém comparação de campos.
+- “Meu dia” reúne dados operacionais disponíveis, sem filtro por responsável; não é uma agenda pessoal com segregação de acesso. As datas de Meu dia usam o fuso America/Sao_Paulo.
+
+## Próximas entregas e critérios de conclusão
+
+1. **Homologação e implantação:** aplicar a migração em ambiente de teste com dependências existentes; testar RLS como anônimo, não administrador, administrador e diretoria; executar cada critério da tabela com dados de teste. Registrar ambiente, commit, resultados e screenshots desktop/móvel antes da aprovação visual.
+2. **Permissões e convites:** definir matriz de papéis/unidades; implementar autorização no banco e nas RPCs, além da interface; adicionar convite por serviço de backend. Concluir quando testes negativos provarem que um usuário não lê nem altera dados fora de seu escopo e o convite tenha expiração/revogação.
+3. **Integrações externas:** priorizar provedor e métricas com a equipe; implementar OAuth no servidor, armazenamento protegido de credenciais, sincronização idempotente, estado de falha e última atualização. Aceitar somente após reconciliar métricas com a conta de origem. Implementar agenda externa como entrega separada.
+4. **Privacidade operacional:** definir procedimento de verificação de identidade, responsáveis, retenção e sistemas afetados; adicionar execução controlada de exportação/correção/revogação/exclusão com trilha de execução. Concluir somente quando houver prova da operação em cada destino, sem confundir mudança de status com execução.
+5. **Editor e histórico:** validar necessidade de blocos reordenáveis antes de expandir o esquema; adicionar prévia isolada de submissões, comparação de versões e restauração do cartão, com testes de concorrência. Se houver construtor visual, exigir equivalência entre prévia e publicação e migração dos conteúdos existentes.
+6. **Escala e atribuição:** paginar mídia/histórico, acrescentar busca e gestão de links, padronizar fuso operacional e definir preservação de UTMs. Concluir com conjuntos acima dos limites atuais, QR lido em dispositivo e atribuição conferida ponta a ponta.
+
+## Evidência disponível
+
+Esta documentação registra comportamento identificado em código e SQL. Não certifica aplicação da migração remota, entrega de notificações, políticas de armazenamento, execução dos critérios de aceite, acessibilidade completa ou fidelidade visual. Resultados de build, testes e implantação devem ser anexados pelo responsável pela entrega com o commit correspondente; resultados de versões anteriores não validam automaticamente este workspace.
+
+### Verificação registrada nesta entrega
+
+- Código funcional enviado no commit `68befd0c7c805b5600e05d79cf4b2711b916931b`, PR #40 em rascunho.
+- Migrations `site_admin_workspace` e `site_admin_media_list` aplicadas no projeto Vert em 14/10/2026.
+- Testes SQL transacionais passaram para leitura/escrita sem identidade administrativa, rejeição da RPC de membros e isolamento entre formulário publicado e rascunho. Todos os registros de teste foram revertidos; nenhum lead foi criado nem aviso enviado.
+- Os seis testes do modelo de dashboard passaram. A implantação Vercel `dpl_Df5D5M4DxHAw3oaKR8UMHdpRmyeD` concluiu o build e chegou a READY para esse commit.
+- A página de login da nova prévia carregou; as 29 entradas de navegação foram montadas no DOM. A conferência visual e de fluxos internos permanece bloqueada pela ausência de sessão administrativa no navegador de teste. Não foi alterada a autenticação para contornar esse bloqueio.
+- O upload do editor sinaliza atividade ao formulário e bloqueia publicação até concluir. Remover/trocar imagem também marca edição pendente.
+- A versão ainda não foi mesclada em `main`; a interface pública em produção não foi substituída por este PR. As adições de banco já estão presentes.
+
+### Continuação — validação de 14/10/2026
+
+- Commit `b4360ec4db27115e517a6cd49df5666d5a101faf`: biblioteca com busca por pasta e paginação de 60 itens, edição de links rastreáveis, datas de Meu dia em America/Sao_Paulo, bloqueio de reenvio e fechamento durante salvamento, melhorias de leitura/foco/campos móveis.
+- Nove testes Node passaram: seis do dashboard e três do workspace (paginação e reset de busca; recuperação de erro; edição de link e escape de HTML). Estes testes usam dependências simuladas e não equivalem à homologação autenticada no navegador.
+- Vercel `dpl_7YPvr5Nhw1sZkx3rTCnVZEXmhTPW`: READY para esse commit.
+- Migrações existentes confirmadas no projeto `xiskevunqbvmoclygppc`; as seis novas tabelas administrativas têm RLS ativa.
+- Teste SQL transacional confirmou definição pública publicada, isolamento de rascunho, bloqueio de leitura anônima direta e leitura/escrita sem autorização administrativa. ROLLBACK executado, sem leads nem notificações.
+- O build local não executou por ausência de TypeScript instalado; a compilação válida é a do deployment Vercel acima.
+- A prévia autenticada permanece aguardando login na aba Chrome. Não há aceite visual desktop/móvel, nem validação ponta a ponta dos fluxos autenticados. Nenhuma mesclagem ou publicação em produção foi feita nesta continuação.
+- As limitações de papéis/unidades, convites e integrações externas continuam conforme descritas acima. O editor por blocos foi implementado na revisão abaixo.
+
+
+### Revisão visual e funcional — 14/10/2026
+
+- Referências aprovadas aplicadas ao dashboard, tabelas de contatos, navegação, ficha de contato em três colunas, agenda semanal, editor com lista de blocos e formulários com prévia.
+- A sessão autenticada ficou disponível: o bloqueio de login registrado anteriormente foi superado. Foram abertas as telas de tarefas, Meu dia, formulários, links, biblioteca, equipe, privacidade e histórico.
+- Editor: título/texto do topo, 12 blocos reordenáveis e visibilidade, além dos campos existentes; normalização mantém conteúdo antigo e ignora IDs desconhecidos/duplicados. Unidades permanece visível por ser destino de chamadas fixas. Links de navegação de blocos ocultos são removidos.
+- Prévia em aba separada sincronizada validada: título alterado em tempo real, seção Tratamentos removida com seus links, seção Sobre movida antes de Resultados. Todas as mudanças de teste foram revertidas antes de salvar. Rascunho salvo e recuperado ao recarregar, sem publicar conteúdo.
+- O iframe da prévia ficou em branco no navegador automatizado, cuja camada de controle reportou resposta de documento pausada; a causa não foi confirmada como falha da aplicação. Há estado de carregamento e acesso à prévia em aba separada, que foi testada. Não se certifica o iframe embutido.
+- Ficha: dados reais, histórico recente e notas lado a lado; abas e ações existentes preservadas. Conferida em desktop e em 390 × 844, sem overflow horizontal.
+- Agenda: alternância semana/mês e navegação para próxima semana e hoje conferidas. Semana usa horário de Brasília nos agendamentos; não sincroniza calendário externo.
+- Formulário: nome e campo Cidade refletiram na prévia, sem salvar formulário de teste ou enviar contatos.
+- Onze testes Node passaram (dashboard, workspace e normalização de blocos). Compilação TypeScript/Vite validada pelo deployment READY `dpl_5n7F7aZUw7SDfz7EsP5V8Ppyfy9w`, commit `e2867d6af28b49da6d1172986817358c373b15a8`.
+- Detector visual executado nos arquivos de editor/CRM: avisos de fontes existentes e bordas laterais de timeline/agenda mantidos por corresponderem à referência. Não são erros funcionais.
+- Não foram criados leads, enviados avisos nem alterados agendamentos/notas de contatos para testes. A validação não cobre integrações externas, convites, RBAC ou execução automática de privacidade.
