@@ -849,7 +849,7 @@ async function renderPublishedCase() {
 window.addEventListener('message', (event) => { if (event.origin === window.location.origin && event.data?.type === 'vert-card-preview') renderContent(event.data.content); });
 bindTracking(); initializeScrollMotion(); initializePrivacy(); void renderPublishedCase(); loadCardContent().then(({ content }) => renderContent(content)).catch(() => {
   renderContent({ company: { phone: '5516999657667' }, units: [
-    { id: 'franca', name: 'Unidade Franca', city: 'Franca', mapsUrl: 'https://share.google/h4z7z9tEyG4lLo7gp' },
-    { id: 'ribeirao-preto', name: 'Unidade Ribeirão Preto', city: 'Ribeirão Preto', mapsUrl: 'https://share.google/FDO4JcaSOvqew78Sh' },
+    { id: 'franca', name: 'Unidade Franca', city: 'Franca', address: 'Rua Capitão Urias Batista de Avelar, 3736 — Vila Chico Júlio, Franca/SP, CEP 14405-217', mapsUrl: 'https://share.google/h4z7z9tEyG4lLo7gp' },
+    { id: 'ribeirao-preto', name: 'Unidade Ribeirão Preto', city: 'Ribeirão Preto', address: 'Av. Presidente Vargas, 2001, Sala 98 — Jardim Santa Ângela, Ribeirão Preto/SP, CEP 14020-525', mapsUrl: 'https://share.google/FDO4JcaSOvqew78Sh' },
   ] });
 });
