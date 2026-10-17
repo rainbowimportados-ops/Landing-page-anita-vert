@@ -249,3 +249,14 @@
 .card-extras .published-case__note { margin: 12px 0 0; color: #bfa58c; font-size: .7rem; line-height: 1.5; }
 .card-extras .published-case__link { display: flex; min-height: 50px; align-items: center; justify-content: space-between; margin-top: 12px; padding: 0 16px; border: 1px solid rgba(255,255,255,.16); border-radius: 12px; color: #f6e9dc; font-size: .72rem; font-weight: 600; letter-spacing: .04em; text-decoration: none; }
 .card-extras .published-case__link:hover { background: rgba(255,255,255,.06); }
+
+/* Optional next actions from a printed card or NFC; no registration required. */
+.contact-start { margin: 24px 0; padding: 28px 24px; border: 1px solid rgba(234,218,198,.24); border-radius: 20px; scroll-margin-top: 24px; }
+.contact-start h2 { margin: 10px 0; font-family: var(--serif); font-size: clamp(1.6rem, 5vw, 2.1rem); font-weight: 400; }
+.contact-start > p { line-height: 1.6; }
+.contact-start .contact-button { margin-top: 20px; text-decoration: none; justify-content: space-between; }
+.contact-start .contact-button small { display: block; margin-top: 5px; font-size: .7rem; font-weight: 400; }
+.contact-start__hint { font-size: .72rem; opacity: .85; margin-top: 10px; }
+.contact-start__social { display: grid; gap: 8px; margin-top: 22px; }
+.contact-start__social a { display: flex; align-items: center; min-height: 48px; padding: 10px 14px; border: 1px solid rgba(234,218,198,.3); border-radius: 12px; text-decoration: none; font-size: .8rem; }
+.contact-start a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }

@@ -1,3 +1,4 @@
+import { updateContactCard } from './lib/contact-card.js';
 import { ativarGoogle, enviarEventoGoogle, revogarGoogle } from './src/lib/google.ts';
 import { origemDaVisita } from './src/lib/origem.ts';
 import { loadCardContent, supabase, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from './lib/supabase.js';
@@ -395,6 +396,11 @@ function renderContent(content) {
   if (floatingLabel) floatingLabel.textContent = company.contactButtonLabel || 'Falar no WhatsApp';
   if (activeUnitId) showUnit(activeUnits().find((unit) => unit.id === activeUnitId), false);
   else if (location.hash.startsWith('#unidade-')) showUnit(activeUnits().find((unit) => unit.id === decodeURIComponent(location.hash.slice(9))), false);
+  updateContactCard(company, units);
+  document.querySelectorAll('[data-contact-social]').forEach(link => {
+    const value = validHttpUrl(company[link.dataset.contactSocial]);
+    if (value) link.href = value;
+  });
   bindTracking();
 }
 
