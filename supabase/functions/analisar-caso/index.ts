@@ -9,7 +9,7 @@ import { encodeBase64 } from 'jsr:@std/encoding/base64'
  * ângulo. O resultado é gravado em site_caso_fotos e o administrador revisa no
  * painel antes de publicar — a IA sugere, quem decide é a pessoa.
  *
- * Só administradores (digital_card_admins) podem chamar. As fotos ficam no
+ * Só quem pode editar "Antes e depois" (site_minhas_permissoes) chama. As fotos ficam no
  * bucket privado casos-pacientes e são lidas aqui com a chave de serviço.
  *
  * Secrets: OPENAI_FOTOS_API_KEY (chave só para as fotos); se não existir, usa a
@@ -125,15 +125,20 @@ Deno.serve(async (req) => {
   }
   const db = { apikey: servico, Authorization: `Bearer ${servico}`, 'Content-Type': 'application/json' }
 
-  // 1. Quem chama precisa ser administrador.
+  // 1. Quem chama precisa estar logado e poder editar "Antes e depois".
   const token = req.headers.get('Authorization')?.replace(/^Bearer\s+/i, '')
   if (!token) return responder(401, { ok: false, erro: 'Faça login no painel.' })
   const usuario = await fetch(`${url}/auth/v1/user`, { headers: { apikey: servico, Authorization: `Bearer ${token}` } })
   if (!usuario.ok) return responder(401, { ok: false, erro: 'Sessão expirada. Entre de novo no painel.' })
-  const { id: userId } = (await usuario.json()) as { id: string }
-  const admin = await fetch(`${url}/rest/v1/digital_card_admins?user_id=eq.${userId}&select=user_id`, { headers: db })
-  if (!admin.ok || ((await admin.json()) as unknown[]).length === 0) {
-    return responder(403, { ok: false, erro: 'Sua conta não é administradora.' })
+  // Permissão de editar "Antes e depois", calculada pelo banco com a sessão da pessoa.
+  const permissoes = await fetch(`${url}/rest/v1/rpc/site_minhas_permissoes`, {
+    method: 'POST',
+    headers: { apikey: servico, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: '{}',
+  })
+  const minhas = permissoes.ok ? ((await permissoes.json()) as { areas?: Record<string, string> }) : null
+  if (minhas?.areas?.casos !== 'editar') {
+    return responder(403, { ok: false, erro: 'Sua conta não tem permissão para editar Antes e depois.' })
   }
 
   // 2. Caso e fotos

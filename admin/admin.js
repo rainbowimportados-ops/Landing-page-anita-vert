@@ -1,5 +1,6 @@
 import { ADMIN_REDIRECT_URL, loadCardContent, supabase } from '../lib/supabase.js';
 import { mountWorkspace, initWorkspace, workspaceSections } from './workspace.js';
+import { aplicarPermissoes, carregarPermissoes, nivelDaSecao, podeVer, primeiraSecaoPermitida } from './permissoes.js';
 mountWorkspace();
 
 import { initOperations } from './operations.js';
@@ -285,6 +286,12 @@ function activatePanel(section, shouldScroll = false) {
   // Link antigo para uma área que saiu do painel: abre a visão geral.
   if ((!button || !panel) && section !== 'visao-geral') return activatePanel('visao-geral', shouldScroll);
   if (!button || !panel) return;
+  // Área fora das permissões da pessoa: abre a primeira que ela pode ver.
+  if (!podeVer(section)) {
+    const permitida = primeiraSecaoPermitida();
+    if (permitida && permitida !== section) return activatePanel(permitida, shouldScroll);
+    if (!permitida) return;
+  }
   document.querySelectorAll('.nav-link, .panel').forEach((element) => element.classList.remove('is-active'));
   button.classList.add('is-active');
   panel.classList.add('is-active');
@@ -295,7 +302,7 @@ function activatePanel(section, shouldScroll = false) {
   // Editores embutidos (/config) só carregam quando a área é aberta.
   const frame = panel.querySelector('iframe.site-editor-frame[data-src]');
   if (frame && !frame.src) frame.src = frame.dataset.src;
-  saveButton.hidden = Boolean(workspaceSections[section]) || ['site', 'casos', 'contatos', 'pipeline', 'avaliacoes', 'pacientes', 'agenda', 'campanhas-crm', 'origens', 'relatorios', 'avisos', 'equipe', 'acessos', 'visao-geral'].includes(section);
+  saveButton.hidden = nivelDaSecao(section) !== 'editar' || Boolean(workspaceSections[section]) || ['site', 'casos', 'contatos', 'pipeline', 'avaliacoes', 'pacientes', 'agenda', 'campanhas-crm', 'origens', 'relatorios', 'avisos', 'equipe', 'acessos', 'visao-geral'].includes(section);
   saveStatus.hidden = saveButton.hidden;
   document.querySelector('.preview-pane').hidden = saveButton.hidden;
   operations?.activate(section);
@@ -1132,6 +1139,11 @@ async function openAdmin(nextSession, passwordJustConfigured = false) {
     return;
   }
   showAdmin();
+  await carregarPermissoes(supabase);
+  aplicarPermissoes();
+  if (!primeiraSecaoPermitida()) {
+    setStatus('Seu acesso ainda não foi configurado. Peça à diretoria para definir o que você pode ver.', 'error');
+  }
   activatePanel(new URLSearchParams(window.location.search).get('section') || adminApp.dataset.activeSection || 'visao-geral');
   void loadMetrics();
   void loadLeads();
@@ -1143,6 +1155,7 @@ async function openAdmin(nextSession, passwordJustConfigured = false) {
     content.formationSettings ||= {};
     content.formations = (content.formations || []).filter((item) => !isCloseFriendsFormation(item));
     renderAll();
+    aplicarPermissoes(); // as listas do cartão foram redesenhadas
     setDirty(false);
   } catch (error) {
     setStatus(`Erro ao carregar: ${error.message}`, 'error');

@@ -54,3 +54,22 @@
 @media(max-width:1100px){.app .lead-toolbar{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:640px){.app .lead-toolbar{grid-template-columns:1fr 1fr}.app .lead-toolbar .lead-search{grid-column:1/-1}.vert-filter-tabs button{padding:12px;min-height:42px}}
 
 .vert-qr-guide:has(svg){display:grid;grid-template-columns:1fr 220px;gap:20px;align-items:center}.vert-qr-guide .ws-qr svg{width:200px}.vert-qr-guide p{overflow-wrap:anywhere}@media(max-width:640px){.vert-qr-guide:has(svg){grid-template-columns:1fr}}
+
+/* Permissões por área (Equipe e acesso → Permissões). */
+.ws-perm-grade { display: grid; border: 1px solid var(--line, #e6dfd8); border-radius: 10px; overflow: hidden; background: #fff; }
+.ws-perm-cab, .ws-perm-linha { display: grid; grid-template-columns: minmax(0, 1fr) repeat(3, 84px); align-items: center; }
+.ws-perm-cab { padding: 8px 12px; background: #f7f5f2; color: #6d5b50; font-size: .62rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.ws-perm-cab span:not(:first-child) { text-align: center; }
+.ws-perm-linha { padding: 10px 12px; border-top: 1px solid var(--line, #e6dfd8); }
+.ws-perm-linha strong { display: block; color: var(--ink, #251c17); font-size: .76rem; }
+.ws-perm-linha small { display: block; margin-top: 2px; color: #8c796d; font-size: .64rem; line-height: 1.35; }
+.ws-perm-op { display: grid; place-items: center; min-height: 40px; cursor: pointer; }
+.ws-dialog .ws-perm-op input[type=radio] { appearance: auto; width: 18px; height: 18px; min-width: 0; min-height: 0; margin: 0; padding: 0; border: 0; border-radius: 50%; box-shadow: none; accent-color: #4b3023; cursor: pointer; }
+@media (max-width: 640px) {
+  .ws-perm-cab, .ws-perm-linha { grid-template-columns: minmax(0, 1fr) repeat(3, 56px); }
+  .ws-perm-cab { font-size: .56rem; }
+}
+
+/* Área só de leitura para quem tem permissão "só ver". */
+.aviso-somente-leitura { margin: 12px 0 0; padding: 10px 14px; border: 1px solid #e3d3bd; border-radius: 9px; background: #fbf6ee; color: #6b4e33; font-size: .72rem; font-weight: 500; }
+[data-somente-leitura] [data-new-lead], [data-somente-leitura] .lead-selection-bar, [data-somente-leitura] #new-campaign { display: none !important; }

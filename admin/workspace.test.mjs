@@ -5,7 +5,8 @@ const source=(await readFile(new URL('./workspace.js',import.meta.url),'utf8'))
  .replace("import './workspace.css';",'')
  .replace("import qrcode from './vendor/qrcode.js';",'const qrcode=()=>{};')
  .replace("'./continuity-model.js'",JSON.stringify(new URL('./continuity-model.js',import.meta.url).href))
- .replace("'./dashboard-model.js'",JSON.stringify(new URL('./dashboard-model.js',import.meta.url).href));
+ .replace("'./dashboard-model.js'",JSON.stringify(new URL('./dashboard-model.js',import.meta.url).href))
+ .replace("'./permissoes.js'",JSON.stringify(new URL('./permissoes.js',import.meta.url).href));
 const {initWorkspace}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 function setup({files=[],links=[],error=null}={}){
  const elements=new Map(),events={},calls=[];

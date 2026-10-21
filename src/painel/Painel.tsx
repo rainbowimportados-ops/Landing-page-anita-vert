@@ -41,6 +41,9 @@ export default function Painel() {
   const [sessao, setSessao] = useState<Session | null>(null)
   const [verificando, setVerificando] = useState(true)
   const [aba, setAba] = useState<Aba>(abaDaUrl)
+  // Permissões da pessoa (definidas pela diretoria em Equipe e acesso). Quem
+  // decide de verdade é o banco; aqui só avisamos e escondemos.
+  const [areas, setAreas] = useState<Record<string, string> | null>(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -52,6 +55,13 @@ export default function Painel() {
     })
     return () => data.subscription.unsubscribe()
   }, [])
+
+  useEffect(() => {
+    if (!sessao) return
+    supabase.rpc('site_minhas_permissoes').then(({ data }) => {
+      setAreas((data as { areas?: Record<string, string> } | null)?.areas ?? null)
+    })
+  }, [sessao])
 
   function mudar(nova: Aba) {
     setAba(nova)
@@ -71,11 +81,27 @@ export default function Painel() {
   const sair = () => {
     void supabase.auth.signOut()
   }
+  const nivel = areas?.[aba === 'casos' ? 'casos' : 'site'] ?? 'editar'
+  if (nivel === 'nenhum') {
+    return (
+      <p className="container-vert py-20 text-sm text-conteudo-suave">
+        Sua conta não tem acesso a esta área. Peça à diretoria para liberar em Equipe e acesso.
+      </p>
+    )
+  }
+  const aviso =
+    nivel === 'ver' ? (
+      <p role="note" className="mx-4 mt-4 rounded-card border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 sm:mx-6">
+        Você tem acesso só para ver esta área. Alterações não são salvas.
+      </p>
+    ) : null
+
   // No /admin o menu lateral já escolhe a área: aqui entra só o conteúdo.
   if (integrado) {
-    if (aba === 'conteudo') return <Editor email={email} aoSair={sair} />
+    if (aba === 'conteudo') return <>{aviso}<Editor email={email} aoSair={sair} /></>
     return (
       <main className="min-h-full bg-fundo px-4 py-5 sm:px-6">
+        {aviso}
         <Casos integrado />
       </main>
     )
