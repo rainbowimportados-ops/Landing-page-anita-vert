@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /gestao
+Disallow: /config
+
+Sitemap: https://institutovert.app/sitemap.xml
