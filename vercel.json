@@ -24,6 +24,16 @@
       "permanent": false
     },
     {
+      "source": "/vert",
+      "destination": "/?utm_source=instagram&utm_medium=bio&utm_campaign=institutovert",
+      "permanent": false
+    },
+    {
+      "source": "/anita",
+      "destination": "/?utm_source=instagram&utm_medium=bio&utm_campaign=draanita",
+      "permanent": false
+    },
+    {
       "source": "/:path*",
       "has": [
         {
