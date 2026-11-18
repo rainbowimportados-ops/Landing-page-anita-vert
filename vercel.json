@@ -34,6 +34,11 @@
       "permanent": false
     },
     {
+      "source": "/draanita",
+      "destination": "/?utm_source=instagram&utm_medium=bio&utm_campaign=draanita",
+      "permanent": false
+    },
+    {
       "source": "/:path*",
       "has": [
         {
