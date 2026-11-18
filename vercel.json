@@ -25,17 +25,27 @@
     },
     {
       "source": "/vert",
-      "destination": "/cartao?utm_source=instagram&utm_medium=bio&utm_campaign=institutovert",
+      "destination": "/?utm_source=instagram&utm_medium=bio_site&utm_campaign=institutovert",
       "permanent": false
     },
     {
-      "source": "/anita",
-      "destination": "/cartao?utm_source=instagram&utm_medium=bio&utm_campaign=draanita",
+      "source": "/vert-cartao",
+      "destination": "/cartao?utm_source=instagram&utm_medium=bio_cartao&utm_campaign=institutovert",
       "permanent": false
     },
     {
       "source": "/draanita",
-      "destination": "/cartao?utm_source=instagram&utm_medium=bio&utm_campaign=draanita",
+      "destination": "/?utm_source=instagram&utm_medium=bio_site&utm_campaign=draanita",
+      "permanent": false
+    },
+    {
+      "source": "/draanita-cartao",
+      "destination": "/cartao?utm_source=instagram&utm_medium=bio_cartao&utm_campaign=draanita",
+      "permanent": false
+    },
+    {
+      "source": "/anita",
+      "destination": "/?utm_source=instagram&utm_medium=bio_site&utm_campaign=draanita",
       "permanent": false
     },
     {
