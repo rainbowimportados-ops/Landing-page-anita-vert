@@ -49,6 +49,92 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Montserrat:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://institutovert.app/#org",
+            "name": "Instituto Vert",
+            "url": "https://institutovert.app/",
+            "logo": "https://institutovert.app/icones/vert-apple-touch.png",
+            "sameAs": [
+              "https://www.instagram.com/institutovert.br/",
+              "https://www.instagram.com/dra.anitaalmeida/"
+            ]
+          },
+          {
+            "@type": "Dentist",
+            "@id": "https://institutovert.app/#franca",
+            "name": "Instituto Vert - Franca",
+            "parentOrganization": {
+              "@id": "https://institutovert.app/#org"
+            },
+            "url": "https://institutovert.app/",
+            "telephone": "+55-16-99965-7667",
+            "priceRange": "$$$",
+            "paymentAccepted": "Cartão de crédito, cartão de débito",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Rua Capitão Urias Batista de Avelar, 3736 - Vila Chico Júlio",
+              "addressLocality": "Franca",
+              "addressRegion": "SP",
+              "postalCode": "14405-217",
+              "addressCountry": "BR"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": -20.5188393,
+              "longitude": -47.406431
+            },
+            "medicalSpecialty": "Dentistry",
+            "availableService": [
+              {
+                "@type": "MedicalProcedure",
+                "name": "Lentes em resina"
+              },
+              {
+                "@type": "MedicalProcedure",
+                "name": "Ortodontia e alinhadores"
+              },
+              {
+                "@type": "MedicalProcedure",
+                "name": "Clareamento dental"
+              },
+              {
+                "@type": "MedicalProcedure",
+                "name": "Gengivoplastia"
+              },
+              {
+                "@type": "MedicalProcedure",
+                "name": "Implantes dentários"
+              }
+            ]
+          },
+          {
+            "@type": "Dentist",
+            "@id": "https://institutovert.app/#ribeirao",
+            "name": "Instituto Vert - Ribeirão Preto",
+            "parentOrganization": {
+              "@id": "https://institutovert.app/#org"
+            },
+            "url": "https://institutovert.app/",
+            "telephone": "+55-16-99965-7667",
+            "priceRange": "$$$",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Av. Presidente Vargas, 2001 - sala 98 - Subsetor Sul",
+              "addressLocality": "Ribeirão Preto",
+              "addressRegion": "SP",
+              "postalCode": "14020-525",
+              "addressCountry": "BR"
+            },
+            "medicalSpecialty": "Dentistry"
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
