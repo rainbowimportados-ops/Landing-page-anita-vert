@@ -40,6 +40,30 @@ function gtag(...args: unknown[]): void {
   window.gtag?.(...args)
 }
 
+// Microsoft Clarity: mapa de calor e gravação de sessão, com mascaramento total
+// configurado no projeto (nenhum texto da página nem o que é digitado é enviado).
+// Segue a mesma regra do Google: só é carregado depois do aceite no aviso.
+const CLARITY_ID = 'zfnvueoa15'
+
+type FilaClarity = ((...args: unknown[]) => void) & { q?: unknown[] }
+
+function carregarClarity(): void {
+  if (document.getElementById('clarity-tag')) return
+  const w = window as unknown as { clarity?: FilaClarity }
+  if (!w.clarity) {
+    const fila: FilaClarity = (...args: unknown[]) => {
+      ;(fila.q = fila.q || []).push(args)
+    }
+    w.clarity = fila
+  }
+  const script = document.createElement('script')
+  script.id = 'clarity-tag'
+  script.async = true
+  script.src = `https://www.clarity.ms/tag/${CLARITY_ID}`
+  document.head.appendChild(script)
+  w.clarity('consent')
+}
+
 export function googleConfigurado(): boolean {
   return Boolean(GA4_ID || ADS_ID)
 }
@@ -56,6 +80,7 @@ export function ativarGoogle(): void {
   })
   if (ativa) return
   ativa = true
+  carregarClarity()
 
   const principal = GA4_ID || ADS_ID
   if (!principal) return
