@@ -382,7 +382,18 @@ body:has(#admin-app) {
   #admin-app .vert-contact-row {
     margin-bottom: 0 !important; border: 0 !important; border-bottom: .5px solid var(--ap-separator) !important; border-radius: 0 !important;
   }
-  #admin-app #leads-list { overflow: hidden; background: var(--ap-surface) !important; }
+  /* Sem overflow: hidden: o menu "…" de cada contato precisa sair dos limites da lista. */
+  #admin-app #leads-list { overflow: visible !important; background: var(--ap-surface) !important; }
+  #admin-app .vert-contact-row:first-child { border-radius: var(--ap-radius) var(--ap-radius) 0 0 !important; }
+  #admin-app .vert-contact-row:last-child { border-radius: 0 0 var(--ap-radius) var(--ap-radius) !important; }
+  /* Ações do contato como folha de ações do iOS, presa acima da barra de abas:
+     sempre inteira na tela, mesmo no último contato da lista. */
+  #admin-app .vert-row-menu[open] > div {
+    position: fixed; top: auto; left: 12px; right: 12px; width: auto; z-index: 50;
+    bottom: calc(74px + env(safe-area-inset-bottom));
+    padding: 6px; border-radius: 16px; background: rgba(250, 250, 252, .94);
+  }
+  #admin-app .vert-row-menu[open] > div button { min-height: 46px; font-size: 16px; text-align: center; }
   #admin-app :where(input:not([type=checkbox], [type=radio]), select, textarea) { font-size: 16px !important; }
   #admin-app .crm-summary { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
   #admin-app .crm-summary button { flex-direction: column; justify-content: center; gap: 2px !important; padding: 8px 4px !important; text-align: center; }
