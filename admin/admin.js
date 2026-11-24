@@ -6,6 +6,9 @@ mountWorkspace();
 import { initOperations } from './operations.js';
 import { initAvisos } from './avisos.js';
 import { CABECALHO_CSV_CAMPANHA, COLUNAS_CAMPANHA, linhaCsvCampanha, resumoCampanha, textoBuscaCampanha, veioDeAnuncio } from './origem-campanha.js';
+import { initTabbar } from './tabbar.js';
+// Camada visual no padrão Apple: importada por último para valer sobre as demais folhas.
+import './apple.css';
 
 const navIconPaths = {
   'visao-geral':'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
@@ -1175,6 +1178,7 @@ supabase.auth.onAuthStateChange((_event, nextSession) => {
 });
 
 operations = initOperations({ supabase, refresh: loadLeads, activatePanel, getSession: () => session });
+initTabbar();
 workspace = initWorkspace({supabase,getLeads:()=>contactLeads,getSession:()=>session,activatePanel,refresh:loadLeads});
 avisos = initAvisos({ supabase });
 start();

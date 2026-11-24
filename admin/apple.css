@@ -1,0 +1,454 @@
+/*
+ * Instituto Vert · painel no padrão visual da Apple.
+ *
+ * Última camada do painel: superfícies neutras (cinzas de sistema), tipografia
+ * do sistema (SF Pro no Mac/iPhone), separadores finos, controles segmentados
+ * e folhas translúcidas. O marrom da marca fica só como cor de destaque
+ * (ações principais, seleção e gráficos), como o "accent color" do macOS.
+ * Carregado por admin.js depois de todas as outras folhas.
+ */
+
+:root {
+  --ap-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", Roboto, system-ui, sans-serif;
+  --ap-bg: #f5f5f7;
+  --ap-surface: #fff;
+  --ap-elevated: rgba(255, 255, 255, .78);
+  --ap-label: #1d1d1f;
+  --ap-secondary: #5e5e63;
+  --ap-tertiary: #6e6e73; /* 4,9:1 sobre #f5f5f7: legível em textos pequenos */
+  --ap-separator: rgba(60, 60, 67, .12);
+  --ap-hairline: rgba(0, 0, 0, .08);
+  --ap-fill: rgba(118, 118, 128, .12);
+  --ap-fill-hover: rgba(118, 118, 128, .18);
+  --ap-accent: #8a5a3b;
+  --ap-accent-strong: #6f4529;
+  --ap-accent-tint: rgba(138, 90, 59, .12);
+  --ap-accent-ring: rgba(138, 90, 59, .45);
+  --ap-focus: 0 0 0 2px #fff, 0 0 0 4px var(--ap-accent); /* foco visível: 6:1 sobre branco */
+  --ap-green: #248a3d;
+  --ap-orange: #c93400;
+  --ap-purple: #8944ab;
+  --ap-red: #d70015;
+  --ap-radius: 14px;
+  --ap-shadow: 0 0 0 .5px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04), 0 4px 14px rgba(0, 0, 0, .03);
+  --ap-shadow-pop: 0 0 0 .5px rgba(0, 0, 0, .08), 0 12px 40px rgba(0, 0, 0, .14);
+  --ap-blur: saturate(180%) blur(20px);
+  /* Tokens antigos apontam para os novos, para as folhas anteriores herdarem. */
+  --ink: var(--ap-label); --ink-soft: var(--ap-secondary); --line: var(--ap-separator);
+  --canvas: var(--ap-bg); --surface: var(--ap-surface); --accent: var(--ap-accent);
+  --accent-dark: var(--ap-accent-strong); --accent-soft: var(--ap-accent-tint);
+  --chocolate: var(--ap-label); --border: var(--ap-separator); --ivory: var(--ap-bg);
+}
+
+/* ── Tipografia e base ─────────────────────────────────────────── */
+body:has(#admin-app),
+#admin-app, #admin-app :is(button, input, select, textarea, label, a, p, span, strong, small, h1, h2, h3, h4, td, th, li, dt, dd, time, b),
+.login-screen, .login-screen :is(button, input, label, a, p, h1),
+.ops-dialog, .ops-dialog *, .ws-dialog, .ws-dialog *, .lead-dialog, .lead-dialog * {
+  font-family: var(--ap-font) !important;
+}
+body:has(#admin-app) {
+  background: var(--ap-bg);
+  color: var(--ap-label);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+#admin-app { background: var(--ap-bg); color: var(--ap-label); }
+#admin-app ::selection { background: var(--ap-accent-tint); color: var(--ap-label); }
+#admin-app :focus-visible, .ops-dialog :focus-visible, .ws-dialog :focus-visible { outline: none; box-shadow: var(--ap-focus) !important; }
+#admin-app .eyebrow { color: var(--ap-tertiary); font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+
+/* ── Barra lateral (fonte do macOS: translúcida e clara) ───────── */
+#admin-app .sidebar {
+  width: 248px;
+  padding: 14px 10px 12px;
+  background: rgba(246, 246, 248, .82);
+  -webkit-backdrop-filter: var(--ap-blur);
+  backdrop-filter: var(--ap-blur);
+  border-right: .5px solid var(--ap-hairline);
+  box-shadow: none;
+  color: var(--ap-label);
+}
+#admin-app .sidebar__brand { display: block; padding: 2px 6px 14px; }
+#admin-app .sidebar__brand img {
+  transform: none; mix-blend-mode: normal; opacity: 1; filter: none;
+  height: 58px; width: 100%; border-radius: 12px; object-fit: cover;
+  box-shadow: 0 0 0 .5px rgba(0, 0, 0, .12), 0 2px 8px rgba(0, 0, 0, .08);
+}
+#admin-app .sidebar nav { gap: 1px; padding: 0 2px 12px; scrollbar-width: none; }
+#admin-app .sidebar nav::-webkit-scrollbar { display: none; }
+#admin-app .nav-group-label {
+  margin: 16px 10px 4px; color: var(--ap-tertiary);
+  font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none;
+}
+#admin-app .nav-group-label:first-child { margin-top: 4px; }
+#admin-app .nav-link {
+  min-height: 32px; gap: 9px; padding: 5px 10px; border-radius: 8px;
+  background: transparent; box-shadow: none;
+  color: var(--ap-label); font-size: 13px; font-weight: 500; letter-spacing: -.01em;
+  transition: background-color .15s ease, color .15s ease;
+}
+#admin-app .nav-link > span { width: 18px; height: 18px; flex-basis: 18px; color: var(--ap-accent); }
+#admin-app .nav-link svg { width: 17px; height: 17px; stroke-width: 1.7; }
+#admin-app .nav-link:hover { background: rgba(0, 0, 0, .045); color: var(--ap-label); }
+#admin-app .nav-link.is-active { background: var(--ap-accent-tint); box-shadow: none; color: var(--ap-accent-strong); font-weight: 600; }
+#admin-app .nav-link.is-active > span { color: var(--ap-accent-strong); }
+#admin-app .sidebar .logout {
+  margin: 8px 2px 0; padding: 9px 10px; border: 0; border-top: .5px solid var(--ap-hairline);
+  border-radius: 0; background: transparent; color: var(--ap-secondary); font-size: 13px; text-align: left;
+}
+#admin-app .sidebar .logout:hover { color: var(--ap-red); }
+#admin-app .workspace { margin-left: 248px; background: var(--ap-bg); }
+
+/* ── Barra superior (translúcida, com busca no estilo Spotlight) ─ */
+#admin-app .topbar {
+  min-height: 56px; padding: 10px clamp(18px, 3vw, 40px);
+  background: rgba(245, 245, 247, .76);
+  -webkit-backdrop-filter: var(--ap-blur);
+  backdrop-filter: var(--ap-blur);
+  border-bottom: .5px solid var(--ap-hairline);
+  box-shadow: none;
+}
+#admin-app .vert-global-search label {
+  min-height: 34px; border: 0; border-radius: 10px; background: var(--ap-fill); box-shadow: none;
+}
+#admin-app .vert-global-search svg { stroke: var(--ap-tertiary); }
+#admin-app .vert-global-search input { background: transparent; color: var(--ap-label); font-size: 14px; }
+#admin-app #vert-search-results {
+  border: 0; border-radius: 14px; background: var(--ap-elevated);
+  -webkit-backdrop-filter: var(--ap-blur); backdrop-filter: var(--ap-blur); box-shadow: var(--ap-shadow-pop);
+}
+#admin-app #vert-search-results button { border-radius: 8px; }
+#admin-app #vert-search-results button:hover { background: var(--ap-accent-tint); }
+#admin-app .save-status { color: var(--ap-tertiary); font-size: 12px; }
+
+/* ── Títulos de página (Large Title) ───────────────────────────── */
+#admin-app .editor { padding-top: 28px; }
+#admin-app .panel__heading { margin-bottom: 20px; gap: 16px; }
+#admin-app .panel__heading h2,
+#admin-app .overview-heading h2 {
+  color: var(--ap-label); font-size: clamp(26px, 2.4vw, 32px); font-weight: 700; letter-spacing: -.025em; line-height: 1.1;
+}
+#admin-app .panel__heading p, #admin-app .helper, #admin-app .ops-muted, #admin-app .dash-context {
+  color: var(--ap-secondary);
+}
+#admin-app h3 { letter-spacing: -.015em; }
+
+/* ── Botões ────────────────────────────────────────────────────── */
+#admin-app .button, #admin-app .panel .button,
+#admin-app .small-action, #admin-app .panel .small-action, #admin-app .lead-toolbar__button,
+.ops-dialog .button, .ws-dialog .button {
+  min-height: 34px; padding: 7px 14px; border: 0; border-radius: 10px;
+  background: var(--ap-accent); box-shadow: none; color: #fff;
+  font-size: 13px; font-weight: 600; letter-spacing: -.01em;
+  transition: background-color .15s ease, transform .1s ease, opacity .15s ease;
+}
+#admin-app .button:hover, .ops-dialog .button:hover, .ws-dialog .button:hover { background: var(--ap-accent-strong); color: #fff; }
+#admin-app :is(.button, .small-action):active { transform: scale(.98); }
+#admin-app .button--ghost, #admin-app .panel .button--ghost, #admin-app .small-action, #admin-app .panel .small-action, #admin-app .lead-toolbar__button,
+.ops-dialog .button--ghost, .ws-dialog .button--ghost {
+  border: 0; background: var(--ap-fill); color: var(--ap-label);
+}
+#admin-app :is(.button--ghost, .small-action, .lead-toolbar__button):hover,
+.ops-dialog .button--ghost:hover, .ws-dialog .button--ghost:hover { background: var(--ap-fill-hover); color: var(--ap-label); }
+#admin-app .text-action, #admin-app .ws-text-button, #admin-app #ops-dashboard .dash-text-button {
+  color: var(--ap-accent); font-weight: 500; text-decoration: none;
+}
+#admin-app :is(.text-action, .ws-text-button):hover, #admin-app #ops-dashboard .dash-text-button:hover { text-decoration: underline; }
+#admin-app .remove, #admin-app .is-danger { color: var(--ap-red) !important; }
+
+/* ── Campos ───────────────────────────────────────────────────── */
+#admin-app :where(input:not([type=checkbox], [type=radio], [type=range], [type=color], [type=file], [type=search]), select, textarea),
+.ops-dialog :where(input:not([type=checkbox], [type=radio], [type=file]), select, textarea),
+.ws-dialog :where(input:not([type=checkbox], [type=radio], [type=file]), select, textarea) {
+  border: .5px solid rgba(0, 0, 0, .16) !important;
+  border-radius: 10px !important;
+  background-color: var(--ap-surface);
+  color: var(--ap-label);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+#admin-app :is(.lead-toolbar, .ws-toolbar, .dash-toolbar, .dash-contact-filters, .form-grid, .fields, .ops-form-grid, .ops-toolbar, .repeat-card, .panel__heading, .overview-heading) :is(input:not([type=checkbox], [type=radio], [type=file]), select, textarea) {
+  border: .5px solid rgba(0, 0, 0, .16) !important; border-radius: 10px !important;
+}
+#admin-app .vert-global-search input#vert-search { border: 0 !important; outline: 0; background: transparent !important; box-shadow: none !important; }
+#admin-app :where(input:not([type=search]), select, textarea):focus,
+.ops-dialog :where(input, select, textarea):focus, .ws-dialog :where(input, select, textarea):focus {
+  border-color: var(--ap-accent) !important; box-shadow: 0 0 0 4px var(--ap-accent-ring) !important; outline: none;
+}
+#admin-app .vert-global-search label:focus-within { box-shadow: 0 0 0 4px var(--ap-accent-ring); background: var(--ap-surface); }
+#admin-app :is(input, textarea)::placeholder { color: var(--ap-tertiary); }
+#admin-app select, .ops-dialog select, .ws-dialog select {
+  -webkit-appearance: none; appearance: none; padding-right: 32px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14' fill='none' stroke='%236e6e73' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 5l3-3 3 3M2 9l3 3 3-3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 11px center; background-size: 9px 13px;
+}
+#admin-app :is(input[type=checkbox], input[type=radio]), .ops-dialog input[type=checkbox], .ws-dialog input[type=checkbox] { accent-color: var(--ap-accent); }
+#admin-app :is(label, .field, .form-grid label) { color: var(--ap-secondary); letter-spacing: 0; }
+
+/* ── Cartões e superfícies ────────────────────────────────────── */
+#admin-app :is(.dash-section, .ws-card, .ops-surface, .metric-card, .overview-card, .form-grid, .repeat-card,
+  .lead-toolbar, .ws-table-wrap, .ops-contact-panel, .vert-media-detail, .vert-qr-guide, .ws-stats article,
+  .journey-panel, .access-insights, .ws-perm-grade, .brand-note, #leads-list) {
+  border: 0 !important;
+  border-radius: var(--ap-radius) !important;
+  background: var(--ap-surface);
+  box-shadow: var(--ap-shadow) !important;
+}
+#admin-app :is(.empty-state, .ws-empty, .ops-empty) { color: var(--ap-secondary); }
+#admin-app :is(.empty-state, .ws-empty) { border: 1px dashed rgba(0, 0, 0, .14); border-radius: var(--ap-radius); background: transparent; }
+
+/* Visão geral: indicadores como cartões de “widgets”. */
+#admin-app .dash-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 0; border: 0; margin-bottom: 20px;
+}
+#admin-app .dash-metrics article {
+  padding: 16px 18px; border: 0; border-radius: var(--ap-radius); background: var(--ap-surface); box-shadow: var(--ap-shadow); gap: 6px;
+}
+#admin-app .dash-metrics article:first-child { padding-left: 18px; }
+#admin-app .dash-metrics span { color: var(--ap-secondary); font-size: 13px; font-weight: 500; }
+#admin-app .dash-metrics strong { color: var(--ap-label); font-size: 34px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+#admin-app .dash-metrics small { color: var(--ap-tertiary); font-size: 12px; }
+#admin-app .dash-metric-icon { background: var(--ap-accent-tint) !important; color: var(--ap-accent) !important; border: 0 !important; }
+#admin-app .dash-section { padding: 20px; }
+#admin-app .dash-section-head h3 { font-size: 17px; font-weight: 600; color: var(--ap-label); }
+#admin-app :is(.dash-section-head p, .dash-queue-row small, .dash-chart-axis, .dash-queue-row time) { color: var(--ap-secondary); }
+#admin-app .dash-queue-row { border-bottom: .5px solid var(--ap-separator); }
+#admin-app .dash-queue-row:hover { background: rgba(0, 0, 0, .025); }
+#admin-app :is(.dash-avatar, .ops-avatar) {
+  background: linear-gradient(180deg, #a58a77, #7b6253) !important; color: #fff !important; font-weight: 600;
+}
+#admin-app :is(.dash-stage-list, .dash-source-list) i { height: 6px; border-radius: 3px; background: var(--ap-fill); }
+#admin-app :is(.dash-stage-list, .dash-source-list) i::before { border-radius: 3px; background: var(--ap-accent); }
+#admin-app .dash-chart-bars > div { border-bottom: .5px solid var(--ap-separator); }
+#admin-app .dash-chart-bars > div > span { border-radius: 4px 4px 1px 1px; background: var(--ap-accent); opacity: .85; }
+#admin-app .dash-chart-bars > div:hover > span { opacity: 1; background: var(--ap-accent-strong); }
+
+/* ── Controles segmentados ────────────────────────────────────── */
+#admin-app :is(.dash-tabs, .vert-filter-tabs, .ops-tabs), .ops-dialog .ops-tabs, .ops-dialog#ops-lead-detail .ops-tabs {
+  display: inline-flex; flex-wrap: wrap; gap: 2px; width: auto; max-width: 100%;
+  margin: 4px 0 16px; padding: 2px !important; border: 0 !important; border-radius: 10px;
+  background: var(--ap-fill);
+}
+#admin-app :is(.dash-tabs, .vert-filter-tabs, .ops-tabs) button,
+.ops-dialog .ops-tabs button, .ops-dialog#ops-lead-detail .ops-tabs button {
+  min-height: 30px; padding: 5px 14px !important; border: 0 !important; border-radius: 8px !important;
+  background: transparent; color: var(--ap-label) !important; font-size: 13px !important; font-weight: 500;
+}
+#admin-app :is(.dash-tabs, .vert-filter-tabs) button[aria-pressed="true"],
+#admin-app .ops-tabs button.is-active, .ops-dialog .ops-tabs button.is-active,
+.ops-dialog#ops-lead-detail .ops-tabs button.is-active {
+  background: var(--ap-surface) !important; font-weight: 600;
+  box-shadow: 0 0 0 .5px rgba(0, 0, 0, .04), 0 3px 8px rgba(0, 0, 0, .12), 0 3px 1px rgba(0, 0, 0, .04);
+}
+#admin-app .dash-tabs button:hover:not([aria-pressed="true"]) { background: rgba(0, 0, 0, .04); }
+#admin-app .dash-tabs b { min-width: 20px; padding: 1px 6px; border-radius: 10px; background: var(--ap-fill) !important; color: var(--ap-secondary) !important; font-size: 11px; }
+
+/* ── Etapas e etiquetas (cores de sistema) ────────────────────── */
+#admin-app :is(.crm-stage, .ws-pill, .ops-pill) {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 22px; padding: 2px 9px;
+  border: 0; border-radius: 999px; background: var(--ap-fill); color: var(--ap-secondary);
+  font-size: 12px !important; font-weight: 600; letter-spacing: 0; text-transform: none; white-space: nowrap;
+}
+#admin-app .crm-stage--novo { background: rgba(10, 132, 255, .12) !important; color: #0060c7 !important; }
+#admin-app .crm-stage--em_contato { background: rgba(255, 149, 0, .15) !important; color: var(--ap-orange) !important; }
+#admin-app .crm-stage--agendado { background: rgba(175, 82, 222, .13) !important; color: var(--ap-purple) !important; }
+#admin-app .crm-stage--concluido { background: rgba(52, 199, 89, .15) !important; color: var(--ap-green) !important; }
+#admin-app .crm-stage--perdido { background: rgba(142, 142, 147, .16) !important; color: var(--ap-secondary) !important; }
+
+/* ── Listas e tabelas ─────────────────────────────────────────── */
+#admin-app :is(.lead-list-heading, .ws-table th) {
+  background: transparent !important; color: var(--ap-tertiary) !important;
+  font-size: 12px !important; font-weight: 500 !important; letter-spacing: 0 !important; text-transform: none !important;
+  border-bottom: .5px solid var(--ap-separator) !important;
+}
+#admin-app :is(.vert-contact-row, .ws-table td, .ws-row, .ops-list-row) { border-bottom: .5px solid var(--ap-separator) !important; }
+#admin-app .vert-contact-row { font-size: 13px !important; transition: background-color .12s ease; }
+#admin-app :is(.vert-contact-row, .ws-table tbody tr):hover { background: rgba(0, 0, 0, .022) !important; }
+#admin-app .vert-contact-row:last-child { border-bottom: 0 !important; }
+#admin-app .vert-contact-row > :is(span, a) { color: var(--ap-secondary) !important; }
+#admin-app .vert-contact-name strong { color: var(--ap-label); font-size: 13px; }
+#admin-app .vert-contact-row a { text-decoration: none !important; font-variant-numeric: tabular-nums; }
+#admin-app .vert-row-menu summary {
+  width: 30px; height: 30px; line-height: 28px; margin-left: auto; border: 0; border-radius: 50%;
+  background: transparent; color: var(--ap-secondary);
+}
+#admin-app .vert-row-menu summary:hover, #admin-app .vert-row-menu[open] summary { background: var(--ap-fill); }
+#admin-app .vert-row-menu > div {
+  border: 0; border-radius: 12px; background: var(--ap-elevated); padding: 5px;
+  -webkit-backdrop-filter: var(--ap-blur); backdrop-filter: var(--ap-blur); box-shadow: var(--ap-shadow-pop);
+}
+#admin-app .vert-row-menu button { border-radius: 7px; font-size: 13px; color: var(--ap-label); }
+#admin-app .vert-row-menu button:hover { background: var(--ap-accent); color: #fff; }
+#admin-app .crm-summary button {
+  border: 0 !important; border-radius: 12px !important; background: var(--ap-surface) !important; box-shadow: var(--ap-shadow) !important; color: var(--ap-label);
+}
+#admin-app .crm-summary button strong { font-size: 17px; font-variant-numeric: tabular-nums; }
+#admin-app .crm-summary button span { color: var(--ap-secondary); font-size: 12px; }
+#admin-app .lead-toolbar { padding: 14px 16px; }
+
+/* ── Funil (colunas no estilo de listas agrupadas) ────────────── */
+#admin-app .pipeline-column { border: 0 !important; border-radius: 16px !important; background: rgba(118, 118, 128, .08) !important; box-shadow: none !important; }
+#admin-app .pipeline-column__head { color: var(--ap-label); font-size: 13px; font-weight: 600; }
+#admin-app .pipeline-card {
+  border: 0 !important; border-radius: 12px !important; background: var(--ap-surface) !important; box-shadow: var(--ap-shadow) !important;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+#admin-app .pipeline-card:hover { transform: translateY(-1px); box-shadow: var(--ap-shadow-pop) !important; }
+#admin-app .pipeline-card strong { color: var(--ap-label); }
+#admin-app .pipeline-card :is(small, span:not(.ops-avatar)) { color: var(--ap-secondary); }
+
+/* ── Agenda ───────────────────────────────────────────────────── */
+#admin-app :is(.vert-week, .vert-time-week) { border: 0; border-radius: var(--ap-radius); box-shadow: var(--ap-shadow); }
+#admin-app :is(.vert-week-day, .vert-time-day, .vert-hour-slot) { border-color: var(--ap-separator); }
+#admin-app :is(.vert-week-day.is-today header, .vert-time-week > header.is-today) { background: var(--ap-accent-tint); color: var(--ap-accent-strong); }
+#admin-app :is(.vert-week-day button, .vert-time-event) {
+  border: 0; border-left: 3px solid var(--ap-accent); border-radius: 6px; background: var(--ap-accent-tint); color: var(--ap-label);
+}
+
+/* ── Folhas e diálogos ─────────────────────────────────────────── */
+.ops-dialog, .ws-dialog, .lead-dialog {
+  border: 0 !important; border-radius: 20px !important;
+  background: var(--ap-surface) !important; color: var(--ap-label) !important;
+  box-shadow: 0 0 0 .5px rgba(0, 0, 0, .1), 0 24px 80px rgba(0, 0, 0, .22) !important;
+}
+:is(.ops-dialog, .ws-dialog, .lead-dialog)::backdrop {
+  background: rgba(0, 0, 0, .22) !important;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.ops-dialog#ops-lead-detail { background: var(--ap-bg) !important; }
+.ops-dialog#ops-lead-detail .ops-detail-header h2 { font-size: 26px !important; font-weight: 700; letter-spacing: -.025em; }
+.ops-contact-panel h3 { font-size: 15px !important; font-weight: 600; }
+:is(.ops-close, .ws-dialog header button, .lead-dialog__close) {
+  border: 0 !important; border-radius: 50% !important; background: var(--ap-fill) !important; color: var(--ap-secondary) !important;
+}
+.ws-dialog footer, .ops-dialog-footer { border-top: .5px solid var(--ap-separator) !important; }
+.ws-notice {
+  border-radius: 14px !important; background: rgba(29, 29, 31, .88) !important;
+  -webkit-backdrop-filter: var(--ap-blur); backdrop-filter: var(--ap-blur); box-shadow: var(--ap-shadow-pop) !important;
+}
+
+/* ── Login ────────────────────────────────────────────────────── */
+.login-screen { background: radial-gradient(120% 80% at 50% 0%, #fff 0, var(--ap-bg) 60%) !important; }
+.login-card {
+  border: 0 !important; border-radius: 22px !important; background: rgba(255, 255, 255, .86) !important;
+  -webkit-backdrop-filter: var(--ap-blur); backdrop-filter: var(--ap-blur);
+  box-shadow: 0 0 0 .5px rgba(0, 0, 0, .06), 0 20px 60px rgba(0, 0, 0, .1) !important;
+}
+.login-card img { width: 88px !important; height: 88px !important; border-radius: 22px !important; box-shadow: 0 4px 14px rgba(0, 0, 0, .16); }
+.login-card .eyebrow { color: var(--ap-tertiary) !important; font-size: 12px !important; letter-spacing: 0 !important; text-transform: none !important; }
+.login-card h1 { color: var(--ap-label); font-size: 28px !important; font-weight: 700 !important; letter-spacing: -.025em; line-height: 1.15 !important; }
+.login-card > p:not(.eyebrow):not(.feedback) { color: var(--ap-secondary) !important; }
+.login-card label { color: var(--ap-secondary) !important; font-size: 13px !important; font-weight: 500 !important; letter-spacing: 0 !important; }
+.login-card input {
+  min-height: 44px; border: .5px solid rgba(0, 0, 0, .16) !important; border-radius: 12px !important; background: #fff !important; font-size: 16px !important;
+}
+.login-card input:focus { border-color: var(--ap-accent) !important; box-shadow: 0 0 0 4px var(--ap-accent-ring) !important; outline: none; }
+.login-card input[readonly] { background: var(--ap-fill) !important; color: var(--ap-secondary) !important; }
+.login-card button { min-height: 46px; border-radius: 12px !important; background: var(--ap-accent) !important; font-size: 15px !important; font-weight: 600 !important; }
+.login-card button:hover { background: var(--ap-accent-strong) !important; }
+.login-card .login-secondary { background: var(--ap-fill) !important; color: var(--ap-label) !important; border: 0 !important; }
+.login-card .back-link { color: var(--ap-accent) !important; text-decoration: none; font-size: 13px !important; }
+
+/* ── Barra de abas do celular (criada em tabbar.js) ───────────── */
+.ap-tabbar { display: none; }
+
+@media (max-width: 1050px) and (min-width: 761px) {
+  #admin-app .sidebar { width: 220px; }
+  #admin-app .workspace { margin-left: 220px; }
+  #admin-app .dash-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  /* Topo compacto e translúcido: marca à esquerda, seletor de área à direita. */
+  #admin-app .sidebar {
+    position: sticky; top: 0; z-index: 30; width: 100%; min-height: 0;
+    flex-direction: row; align-items: center; gap: 10px;
+    padding: calc(8px + env(safe-area-inset-top)) 14px 8px;
+    background: rgba(245, 245, 247, .8); border-right: 0; border-bottom: .5px solid var(--ap-hairline);
+  }
+  #admin-app .sidebar__brand { width: 96px; height: 36px; flex: 0 0 96px; padding: 0; }
+  #admin-app .sidebar__brand picture, #admin-app .sidebar__brand img { width: 96px; height: 36px; border-radius: 9px; }
+  #admin-app .mobile-section-picker select {
+    min-height: 36px; border: 0 !important; border-radius: 10px !important;
+    background-color: var(--ap-fill) !important; color: var(--ap-label) !important; font-size: 15px !important; font-weight: 600;
+  }
+  #admin-app .workspace { margin-left: 0; padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
+  #admin-app .topbar { position: static; min-height: 0; padding: 10px 14px; background: transparent; border-bottom: 0; }
+  #admin-app .topbar__actions .button { min-height: 34px; padding: 6px 12px; font-size: 13px; }
+  #admin-app .editor { padding: 6px 14px 40px; }
+  #admin-app :is(.panel__heading h2, .overview-heading h2) { font-size: 28px; }
+  #admin-app .dash-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  #admin-app .dash-metrics strong { font-size: 28px; }
+  #admin-app .vert-contact-row {
+    margin-bottom: 0 !important; border: 0 !important; border-bottom: .5px solid var(--ap-separator) !important; border-radius: 0 !important;
+  }
+  /* Sem overflow: hidden: o menu "…" de cada contato precisa sair dos limites da lista. */
+  #admin-app #leads-list { overflow: visible !important; background: var(--ap-surface) !important; }
+  #admin-app .vert-contact-row:first-child { border-radius: var(--ap-radius) var(--ap-radius) 0 0 !important; }
+  #admin-app .vert-contact-row:last-child { border-radius: 0 0 var(--ap-radius) var(--ap-radius) !important; }
+  /* Ações do contato como folha de ações do iOS, presa acima da barra de abas:
+     sempre inteira na tela, mesmo no último contato da lista. */
+  #admin-app .vert-row-menu[open] > div {
+    position: fixed; top: auto; left: 12px; right: 12px; width: auto; z-index: 50;
+    bottom: calc(74px + env(safe-area-inset-bottom));
+    padding: 6px; border-radius: 16px; background: rgba(250, 250, 252, .94);
+  }
+  #admin-app .vert-row-menu[open] > div button { min-height: 46px; font-size: 16px; text-align: center; }
+  #admin-app :where(input:not([type=checkbox], [type=radio]), select, textarea) { font-size: 16px !important; }
+  #admin-app .crm-summary { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  #admin-app .crm-summary button { flex-direction: column; justify-content: center; gap: 2px !important; padding: 8px 4px !important; text-align: center; }
+  #admin-app .crm-summary button span { font-size: 11px; line-height: 1.2; }
+  #admin-app .topbar { gap: 8px; }
+  #admin-app .topbar .vert-global-search { flex: 1; min-width: 0; }
+
+  .ap-tabbar {
+    position: fixed; inset: auto 0 0 0; z-index: 40;
+    display: grid; grid-template-columns: repeat(var(--ap-tabs, 5), minmax(0, 1fr));
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    background: rgba(250, 250, 252, .84);
+    -webkit-backdrop-filter: var(--ap-blur); backdrop-filter: var(--ap-blur);
+    border-top: .5px solid var(--ap-hairline);
+  }
+  .ap-tabbar[hidden] { display: none; }
+  .ap-tabbar button {
+    display: grid; justify-items: center; gap: 2px; min-height: 48px; padding: 4px 2px;
+    border: 0; border-radius: 10px; background: transparent; color: var(--ap-tertiary);
+    font: 500 11px/1.2 var(--ap-font); letter-spacing: 0; cursor: pointer;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  }
+  .ap-tabbar button[aria-current="page"] { color: var(--ap-accent); font-weight: 600; }
+  .ap-tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .ap-tabbar button:focus-visible { outline: none; box-shadow: var(--ap-focus); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #admin-app *, .ap-tabbar * { transition: none !important; }
+  #admin-app .pipeline-card:hover { transform: none; }
+}
+
+/* ── Ficha do contato (diálogo fora de #admin-app) ─────────────── */
+:is(.ops-dialog, .ws-dialog) .eyebrow {
+  color: var(--ap-tertiary) !important; font-size: 12px !important; font-weight: 600; letter-spacing: 0 !important; text-transform: none !important;
+}
+.ops-dialog :is(.ops-subtitle, .ops-muted, #ops-detail-subtitle) { color: var(--ap-secondary) !important; font-size: 13px; }
+.ops-detail-actions > * {
+  display: inline-flex; align-items: center; min-height: 34px; padding: 7px 14px !important;
+  border: 0 !important; border-radius: 10px !important; background: var(--ap-fill) !important; color: var(--ap-label) !important;
+  font-size: 13px !important; font-weight: 600; text-decoration: none;
+}
+.ops-detail-actions > *:first-child { background: var(--ap-green) !important; color: #fff !important; }
+.ops-detail-actions > *:hover { filter: brightness(.96); }
+.ops-contact-panel {
+  border: 0 !important; border-radius: var(--ap-radius) !important; background: var(--ap-surface) !important; box-shadow: var(--ap-shadow) !important;
+}
+/* Dados no estilo de lista agrupada: rótulo acima, valor abaixo, separadores finos. */
+.ops-dialog .ops-data-grid { gap: 0 !important; border-radius: 12px; background: rgba(118, 118, 128, .06); overflow: hidden; }
+.ops-dialog .ops-data-grid > div {
+  gap: 2px !important; padding: 11px 14px !important; border: 0 !important; border-radius: 0 !important;
+  background: transparent !important; box-shadow: inset 0 -.5px 0 var(--ap-separator);
+}
+.ops-dialog .ops-data-grid small { color: var(--ap-tertiary) !important; font-size: 12px !important; }
+.ops-dialog .ops-data-grid strong { color: var(--ap-label); font-size: 14px !important; font-weight: 500; }
+.ops-dialog :is(.ops-timeline, .ws-timeline) { border-left-color: var(--ap-separator) !important; }
+.ops-dialog .ops-empty, .ops-dialog .ws-empty { border: 0 !important; border-radius: 12px !important; background: rgba(118, 118, 128, .06) !important; }
+.ops-dialog label { color: var(--ap-secondary) !important; font-size: 13px !important; font-weight: 500; }
