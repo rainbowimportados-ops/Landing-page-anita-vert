@@ -1,9 +1,22 @@
 BEGIN:VCARD
 VERSION:3.0
+N:;Instituto Vert;;;
 FN:Instituto Vert
 ORG:Instituto Vert
 TEL;TYPE=CELL,WORK:+5516999657667
 URL:https://institutovert.app/cartao
-X-SOCIALPROFILE;TYPE=instagram:https://www.instagram.com/institutovert.br
-NOTE:Odontologia estética em Franca e Ribeirão Preto.
+X-SOCIALPROFILE;TYPE=instagram:https://www.instagram.com/institutovert.br/
+X-SOCIALPROFILE;TYPE=instagram:https://www.instagram.com/dra.anitaalmeida/
+item1.ADR;TYPE=WORK:;;Rua Capitão Urias Batista de Avelar\, 3736 — Vila 
+ Chico Júlio\, Franca/SP\, CEP 14405-217;;;;
+item1.X-ABLabel:Franca / SP
+item2.ADR;TYPE=WORK:;;Av. Presidente Vargas\, 2001\, Sala 98 — Jardim San
+ ta Ângela\, Ribeirão Preto/SP\, CEP 14020-525;;;;
+item2.X-ABLabel:Ribeirão Preto / SP
+NOTE:Instagram Instituto Vert: https://www.instagram.com/institutovert.br/\
+ nInstagram Dra. Anita: https://www.instagram.com/dra.anitaalmeida/\nFranca
+  / SP: Rua Capitão Urias Batista de Avelar\, 3736 — Vila Chico Júlio\,
+  Franca/SP\, CEP 14405-217\nRibeirão Preto / SP: Av. Presidente Vargas\, 
+ 2001\, Sala 98 — Jardim Santa Ângela\, Ribeirão Preto/SP\, CEP 14020-5
+ 25
 END:VCARD
